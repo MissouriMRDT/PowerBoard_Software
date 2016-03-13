@@ -1,5 +1,6 @@
-// The IC
+/* The IC
 // http://www.allegromicro.com/en/Products/Current-Sensor-ICs/Zero-To-Fifty-Amp-Integrated-Conductor-Sensor-ICs/ACS722.aspx
+*/
 
 // Standard C integers of specific size (such as int16_t)
 #include <stdint.h>
@@ -46,32 +47,34 @@ float map_floats(float x, float in_min, float in_max, float out_min, float out_m
 
 
 // Sensor Volts/Amps Readings Pins
-const uint8_t BUS_5V_AMPS_PE_2     = 25
-const uint8_t BUS_12V_AMPS_PD_7    = 27
+const uint8_t BUS_5V_AMPS_PE_2     = 25;
+const uint8_t BUS_12V_AMPS_PD_7    = 27;
 //Todo const uint8_t BATTERYPACK_VOLTS_PE3?
 
-const uint8_t M1_AMPS_PK_3     = 68
-const uint8_t M2_AMPS_PK_2     = 67 
-const uint8_t M3_AMPS_PK_1     = 66 
-const uint8_t M4_AMPS_PD_4     = 45
-const uint8_t M5_AMPS_PK_0     = 65
-const uint8_t M6_AMPS_PB_5     = 64
-const uint8_t M7_AMPS_PB_4     = 63
-const uint8_t M8_AMPS_PD_2     = 42
+const uint8_t M1_AMPS_PK_3     = 68;
+const uint8_t M2_AMPS_PK_2     = 67 ;
+const uint8_t M3_AMPS_PK_1     = 66; 
+const uint8_t M4_AMPS_PD_4     = 45;
+const uint8_t M5_AMPS_PK_0     = 65;
+const uint8_t M6_AMPS_PB_5     = 64;
+const uint8_t M7_AMPS_PB_4     = 63;
+const uint8_t M8_AMPS_PD_2     = 42;
+
+
 
 // Control Pins
-const uint8_t BUS_5V_CNTRL_PP_2    = 11
-const uint8_t BUS_12V_CNTRL_PN_3   = 12
+const uint8_t BUS_5V_CNTRL_PP_2  = 11;
+const uint8_t BUS_12V_CNTRL_PN_3 = 12;
 //Todo const uint8_t BATTERYPACK_CNTRL?
 
-const uint8_t M1_CNTRL_PK_7    = 71
-const uint8_t M2_CNTRL_PQ_1    = 52
-const uint8_t M3_CNTRL_PK_6    = 72
-const uint8_t M4_CNTRL_PP_3    = 53
-const uint8_t M5_CNTRL_PH_1    = 73
-const uint8_t M6_CNTRL_PH_0    = 74
-const uint8_t M7_CNTRL_PA_7    = 57
-const uint8_t M8_CNTRL_PP_5    = 58
+const uint8_t M1_CNTRL_PK_7    = 71;
+const uint8_t M2_CNTRL_PQ_1    = 52;
+const uint8_t M3_CNTRL_PK_6    = 72;
+const uint8_t M4_CNTRL_PP_3    = 53;
+const uint8_t M5_CNTRL_PH_1    = 73;
+const uint8_t M6_CNTRL_PH_0    = 74;
+const uint8_t M7_CNTRL_PA_7    = 57;
+const uint8_t M8_CNTRL_PP_5    = 58;
 
 // the setup routine runs once when you press reset
 void setup() 
@@ -182,6 +185,7 @@ void loop()
   
   
   
+  /*
   if(SOFTWARE_FUSES_DEBUG)
   {
     //debounce
@@ -190,8 +194,6 @@ void loop()
   if(RED_COMMS_DEBUG)
   {
     //rovecomm
-  }//end if
-  
-
+  }//end if*/
 
 }//end loop
