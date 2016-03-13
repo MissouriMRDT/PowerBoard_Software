@@ -15,10 +15,10 @@
 #include "RoveComm.h"
 
 // Debugging test Flags
-const float DELAY_MILLISECONDS_DEBUG = 100;
-const float ECHO_SERIAL_MONITOR_DEBUG = 1;
-const float SOFTWARE_FUSES_DEBUG = 0;
-const float RED_COMMS_DEBUG = 0;
+const uint8_t DELAY_MILLISECONDS_DEBUG = 100;
+const uint8_t ECHO_SERIAL_MONITOR_DEBUG = 1;
+const uint8_t SOFTWARE_FUSES_DEBUG = 0;
+const uint8_t RED_COMMS_DEBUG = 0;
 
 
 
