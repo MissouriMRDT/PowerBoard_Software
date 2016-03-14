@@ -51,7 +51,7 @@ const int ANALOG_TRY_COUNT = 250;
 
 const int ANALOG_ACCEPTABLE_DRIFT = 250;
 
-const int DIGTAL_DEBOUNCE_TIME_MICROS = 250;
+const int DIGITAL_DEBOUNCE_TIME_MICROS = 250;
 const int DIGITAL_TRY_COUNT = 250; 
 
 const int PIN_TOO_NOISY = -1;
@@ -238,7 +238,7 @@ int digitalDebounce(int bouncing_pin)
 {    
   // Count the bounces
   int digital_trend_count = 0;
-  bool digital_reading = LOW;  
+  bool digital_reading = digitalRead(bouncing_pin);  
   
   // Read a bouncing pin and save the state
   bool last_digital_reading = digital_reading;   
@@ -247,7 +247,7 @@ int digitalDebounce(int bouncing_pin)
   unsigned long system_time_micros = micros(); 
  
  // Spin for a max of millisec
-  while(system_time_micros != ( micros()  + DIGTAL_DEBOUNCE_TIME_MICROS) )
+  while(system_time_micros != ( micros()  + DIGITAL_DEBOUNCE_TIME_MICROS) )
   {
     digital_reading = digitalRead(bouncing_pin);
     
@@ -283,7 +283,7 @@ int analogDebounce(int bouncing_pin)
 {    
   // Count the bounces
   int analog_trend_count = 0;
-  bool analog_reading = LOW;  
+  bool analog_reading = analogRead(bouncing_pin);  
   
   // Read a bouncing pin and save the state
   bool last_analog_reading = analog_reading;   
