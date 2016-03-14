@@ -70,10 +70,11 @@ const int PIN_TOO_NOISY = -1;
 #include "RoveComm.h"
 
 // RED udp device id by fourth octet
-const int POWERBOARD_IP_DEVICE_ID = 51;
+const int POWERBOARD_IP_DEVICE_ID   = 51;
 
 // RED can toggle the bus by bool
-const bool BUS_5V_ON_OFF = 207;
+const uint16_t NO_ROVECOMM_MESSAGE   = 0;
+const uint16_t BUS_5V_ON_OFF         = 207;
 
 //Rovecomm :: RED packet :: data_id and data_value with number of data bytes size
 uint16_t data_id       = 0;
@@ -200,7 +201,7 @@ void loop()
     switch (data_id) 
     {   
       //Don't do anything for data_id zero 
-      case 0:
+      case NO_ROVECOMM_MESSAGE:
         break;
       
       case BUS_5V_ON_OFF:
