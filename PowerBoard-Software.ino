@@ -119,7 +119,6 @@ const int M8_AMPS_PD_2       = 42;
 // Todo: Connor/Reed Edit
 //
 // Checks the pin for bouncing voltages to avoid false positives
-int digitalDebounce(int bouncing_pin);
 int analogDebounce(int bouncing_pin);
 
 //////////////////////////////////////////////User Display
@@ -233,51 +232,6 @@ void loop()
   }//end if
   
 }//end loop
-
-
-
-//Developing
-///////////////////////////////////////////////Implementation
-int digitalDebounce(int bouncing_pin)
-{    
-  // Count the bounces
-  int digital_trend_count = 0;
-  bool digital_reading = digitalRead(bouncing_pin);  
-  
-  // Read a bouncing pin and save the state
-  bool last_digital_reading = digital_reading;   
-  
-  // Get timestamp from the system clock counter
-  unsigned long system_time_micros = micros(); 
- 
- // Spin for a max of millisec
-  while(system_time_micros != ( micros()  + DIGITAL_DEBOUNCE_TIME_MICROS) )
-  {
-    digital_reading = digitalRead(bouncing_pin);
-    
-    if(digital_reading == last_digital_reading)
-    {
-      digital_trend_count++;
-    }//end if
-    
-    if( (digital_reading != last_digital_reading) && (digital_trend_count > 0) )
-    {
-       digital_trend_count--; 
-       last_digital_reading = digital_reading;
-    }//end if
-  
-    if(digital_trend_count > DIGITAL_TRY_COUNT)
-    {   
-      
-      return digital_reading;   
-    }else{         
-      
-      last_digital_reading = digital_reading;
-    }//end else
-  }//end while
-  
-  return PIN_TOO_NOISY;
-}//end functn
 
 
 
