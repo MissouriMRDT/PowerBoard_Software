@@ -1,81 +1,124 @@
-/* The IC
-// http://www.allegromicro.com/en/Products/Current-Sensor-ICs/Zero-To-Fifty-Amp-Integrated-Conductor-Sensor-ICs/ACS722.aspx
-*/
-
-// Standard C integers of specific size (such as int16_t)
+//RoveWare Powerboard ACS_722 Interface
+//
+// Judah jrs6w7
+//
+// Using http://www.allegromicro.com/en/Products/Current-Sensor-ICs/Zero-To-Fifty-Amp-Integrated-Conductor-Sensor-ICs/ACS722.aspx
+//
+// Standard C
+#include <stdbool.h>
+#include <stddef.h>
 #include <stdint.h>
 
+
+
+//Platform
+//////////////////////////////////////////////Energia
 // Energia libraries used by RoveWare itself
 #include <SPI.h>
 #include <Ethernet.h>
 #include <EthernetUdp.h>
 
-// RoveWare 
+//////////////////////////////////////////////Roveware
 #include "RoveEthernet.h"
 #include "RoveComm.h"
 
-// Debugging test Flags
-const uint8_t DELAY_MILLISECONDS_DEBUG = 100;
-const uint8_t ECHO_SERIAL_MONITOR_DEBUG = 1;
-const uint8_t SOFTWARE_FUSES_DEBUG = 0;
-const uint8_t RED_COMMS_DEBUG = 0;
+// RED udp device id by fourth octet
+const int POWERBOARD_IP_DEVICE_ID = 51;
+
+// RED can toggle the bus by bool
+const bool BUS_5V_ON = 207;
+
+//Rovecomm :: RED packet :: data_id and data_value with number of data bytes size
+uint16_t data_id       = 0;
+size_t   data_size     = 0; 
+uint16_t data_value    = 0;
 
 
 
+//Testing
+//
+//////////////////////////////////////////////Debug
+const int SOFTWARE_FUSES_DEBUG =          0;
+const int RED_COMMS_DEBUG =               0;
+
+const int ECHO_SERIAL_MONITOR_DEBUG =     1;
+const int DELAY_SERIAL_MILLIS_DEBUG =     100;
+
+//////////////////////////////////////////////Debouncing 
+const int DEBOUNCE_TIME_MICROS = 1;
+const int DIGITAL_TRIES = 10; 
+const int PIN_TOO_NOISY = -1;
+
+//Hardware
+//
+// Todo Mike and Cameron sign off
+//
+//////////////////////////////////////////////RoveBoard
 // Tiva1294C RoveBoard Specs
-const float VCC = 3.3;
-const float ADC_MIN = 0;
-const float ADC_MAX = 4096;
+const float VCC                 = 3.3;       //volts
+const float ADC_MAX             = 4096;      //bits
+const float ADC_MIN             = 0;         //bits
+
 float adc_reading = 0;
 
+//////////////////////////////////////////////Sensor
 // ACS_722 IC Sensor Specs 
-const float SENSOR_SCALE = 0.1; // Volts per Amp
-const float SENSOR_SENSITIVITY = 0.132;
-const float SENSOR_BIAS = VCC * SENSOR_SCALE;
-float current_reading = 0;
+const float SENSOR_SENSITIVITY   = 0.132;    //volts/amp
+const float SENSOR_SCALE         = 0.1;      //volts/amp
+const float SENSOR_BIAS          = VCC * SENSOR_SCALE;
 
-// RED Display Value Bounds
-const float CURRENT_MIN =  - SENSOR_BIAS / SENSOR_SENSITIVITY;
 const float CURRENT_MAX = (VCC - SENSOR_BIAS) / SENSOR_SENSITIVITY;
+const float CURRENT_MIN = -SENSOR_BIAS / SENSOR_SENSITIVITY;
 
-// Map analog read voltage value from the ACS_722 to a human readable RED display current value
-float map_floats(float x, float in_min, float in_max, float out_min, float out_max)
-{
-  return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
-}//end fnctn
+float current_reading             = 0;
 
 
+
+//////////////////////////////////////////////Pinmap
+// Control Pins
+//Todo const int BATTERYPACK_CNTRL?
+const int BUS_5V_CNTRL_PP_2  = 11;
+const int BUS_12V_CNTRL_PN_3 = 12;
+const int M1_CNTRL_PK_7      = 71;
+const int M2_CNTRL_PQ_1      = 52;
+const int M3_CNTRL_PK_6      = 72;
+const int M4_CNTRL_PP_3      = 53;
+const int M5_CNTRL_PH_1      = 73;
+const int M6_CNTRL_PH_0      = 74;
+const int M7_CNTRL_PA_7      = 57;
+const int M8_CNTRL_PP_5      = 58;
 
 // Sensor Volts/Amps Readings Pins
-const uint8_t BUS_5V_AMPS_PE_2     = 25;
-const uint8_t BUS_12V_AMPS_PD_7    = 27;
-//Todo const uint8_t BATTERYPACK_VOLTS_PE3?
+//Todo const int BATTERYPACK_VOLTS_PE3?
+const int BUS_5V_AMPS_PE_2   = 25;
+const int BUS_12V_AMPS_PD_7  = 27;
+const int M1_AMPS_PK_3       = 68;
+const int M2_AMPS_PK_2       = 67 ;
+const int M3_AMPS_PK_1       = 66; 
+const int M4_AMPS_PD_4       = 45;
+const int M5_AMPS_PK_0       = 65;
+const int M6_AMPS_PB_5       = 64;
+const int M7_AMPS_PB_4       = 63;
+const int M8_AMPS_PD_2       = 42;
 
-const uint8_t M1_AMPS_PK_3     = 68;
-const uint8_t M2_AMPS_PK_2     = 67 ;
-const uint8_t M3_AMPS_PK_1     = 66; 
-const uint8_t M4_AMPS_PD_4     = 45;
-const uint8_t M5_AMPS_PK_0     = 65;
-const uint8_t M6_AMPS_PB_5     = 64;
-const uint8_t M7_AMPS_PB_4     = 63;
-const uint8_t M8_AMPS_PD_2     = 42;
+//Developing 
+//
+// Todo: Connor/Reed Edit
+//
+// Checks the pin for bouncing voltages to avoid false positives
+int digitalDebounce(int bouncing_pin);
+
+//////////////////////////////////////////////User Display
+// Map analog read voltage value from the ACS_722 to a human readable RED display current value
+float mapFloats(float x, float in_min, float in_max, float out_min, float out_max);
 
 
 
-// Control Pins
-const uint8_t BUS_5V_CNTRL_PP_2  = 11;
-const uint8_t BUS_12V_CNTRL_PN_3 = 12;
-//Todo const uint8_t BATTERYPACK_CNTRL?
-
-const uint8_t M1_CNTRL_PK_7    = 71;
-const uint8_t M2_CNTRL_PQ_1    = 52;
-const uint8_t M3_CNTRL_PK_6    = 72;
-const uint8_t M4_CNTRL_PP_3    = 53;
-const uint8_t M5_CNTRL_PH_1    = 73;
-const uint8_t M6_CNTRL_PH_0    = 74;
-const uint8_t M7_CNTRL_PA_7    = 57;
-const uint8_t M8_CNTRL_PP_5    = 58;
-
+//Begin
+//
+// Todo Mike and Cameron sign off
+//
+//////////////////////////////////////////////Powerboard Begin
 // the setup routine runs once when you press reset
 void setup() 
 {  
@@ -111,30 +154,132 @@ void setup()
     Serial.begin(9600);
   }//end if
   
+  if(RED_COMMS_DEBUG)
+  { 
+    roveComm_Begin(192, 168, 1, POWERBOARD_IP_DEVICE_ID);
+  }// end if
 }//end setup
 
 
 
-// the loop routine runs over and over again forever:
+//Loop
+//
+// Todo Reed and Connor sign off
+//
+/////////////////////////////////////////////Powerboard Loop Forever
 void loop() 
 {
   
+  /////////////////////////////////////////////Software Fuse
+  if(SOFTWARE_FUSES_DEBUG)
+  {
+    bool bus_5V_software_fuse = digitalDebounce(BUS_5V_AMPS_PE_2);
+    
+    if(bus_5V_software_fuse) 
+    {
+      digitalWrite(BUS_5V_CNTRL_PP_2, HIGH);
+    }//end if
+    
+  }//end if
+   
+  /////////////////////////////////////////////RED Control and Telem RoveComm
+  if(RED_COMMS_DEBUG)
+  {
+    //If there is no message data_id gets set to zero
+    roveComm_GetMsg(&data_id, &data_size, &data_value);
+    
+    switch (data_id) 
+    {   
+      //Don't do anything for data_id zero 
+      case 0:
+        break;
+      
+      case BUS_5V_TOGGLE:
+        digitalWrite(BUS_5V_CNTRL_PP_2, (bool)data_value);
+        break;
+        
+      default:
+        //Serial.print("Unrecognized data_id :");
+        //Serial.println(data_id);
+        break; 
+    }//endswitch 
+    
+  }//end if
+  
+  /////////////////////////////////////////////Serial Monitor
   if(ECHO_SERIAL_MONITOR_DEBUG)
   {
     adc_reading = analogRead(BUS_5V_AMPS_PE_2);
-    current_reading = map_floats(adc_reading, ADC_MIN, ADC_MAX, CURRENT_MIN, CURRENT_MAX);
+    current_reading = mapFloats(adc_reading, ADC_MIN, ADC_MAX, CURRENT_MIN, CURRENT_MAX);
+    
     Serial.print("5V_BUS_AMPS: "); 
     Serial.println(current_reading, DEC);
-    delay(DELAY_MILLISECONDS_DEBUG);
     
+    delay(DELAY_MILLISECONDS_DEBUG);
+  }//end if
+  
+}//end loop
+
+
+
+//Developing
+///////////////////////////////////////////////Implementation
+int digitalDebounce(int bouncing_pin)
+{    
+  // Count the bounces
+  int digital_trends = 0;
+  bool digital_reading = LOW;  
+  
+  // Read a bouncing pin and save the state
+  bool last_digital_reading = digital_reading;   
+  
+  // Get timestamp from the system clock counter
+  unsigned long system_time_micros = micros(); 
+ 
+ // Spin for a max of millisec
+  while(system_time_micros != ( micros()  + DEBOUNCE_TIME_MICROS) )
+  {
+    digital_reading = digitalRead(bouncing_pin);
+    
+    if( (digital_reading != last_digital_reading) && (digital_trends_count > 0) )
+    {
+       digital_trends_count--; 
+       last_digital_reading = digital_reading;
+    }//end if
+    
+    if(digital_reading == last_digital_reading)
+    {
+      digital_trends_count++;
+    }//end if
+  
+    if(digital_trends_count > DIGITAL_TRIES_COUNT)
+    {   
+      
+      return digital_reading;   
+    }else{         
+      
+      last_digital_reading = digital_reading;
+    }//end else
+  }//end while
+  
+  return PIN_TOO_NOISY;
+}//end functn
+
+///////////////////////////////////////////////Implementation
+float mapFloats(float x, float in_min, float in_max, float out_min, float out_max)
+{
+  return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+}//end fnctn
+
+/*  TODO : debug array loop: Serial Super Debug 
     adc_reading = analogRead(BUS_12V_CNTRL_PN_3);
-    current_reading = map_floats(adc_reading, ADC_MIN, ADC_MAX, CURRENT_MIN, CURRENT_MAX);
+    current_reading = mapFloats(adc_reading, ADC_MIN, ADC_MAX, CURRENT_MIN, CURRENT_MAX);
     Serial.print("1V_BUS_AMPS: "); 
     Serial.println(current_reading, DEC);
     delay(DELAY_MILLISECONDS_DEBUG);
     
     adc_reading = analogRead(M1_AMPS_PK_3);
-    current_reading = map_floats(adc_reading, ADC_MIN, ADC_MAX, CURRENT_MIN, CURRENT_MAX);
+    current_reading = mapFloats(adc_reading, ADC_MIN, ADC_MAX, CURRENT_MIN, CURRENT_MAX);
     Serial.print("M1_BUS_AMPS: "); 
     Serial.println(current_reading, DEC);
     delay(DELAY_MILLISECONDS_DEBUG);
@@ -146,54 +291,37 @@ void loop()
     delay(DELAY_MILLISECONDS_DEBUG);
     
     adc_reading = analogRead(M3_AMPS_PK_1);
-    current_reading = map_floats(adc_reading, ADC_MIN, ADC_MAX, CURRENT_MIN, CURRENT_MAX);
+    current_reading = mapFloats(adc_reading, ADC_MIN, ADC_MAX, CURRENT_MIN, CURRENT_MAX);
     Serial.print("M3_BUS_AMPS: "); 
     Serial.println(current_reading, DEC);
     delay(DELAY_MILLISECONDS_DEBUG);
     
     adc_reading = analogRead(M4_AMPS_PD_4);
-    current_reading = map_floats(adc_reading, ADC_MIN, ADC_MAX, CURRENT_MIN, CURRENT_MAX);
+    current_reading = mapFloats(adc_reading, ADC_MIN, ADC_MAX, CURRENT_MIN, CURRENT_MAX);
     Serial.print("M4_BUS_AMPS: "); 
     Serial.println(current_reading, DEC);
     delay(DELAY_MILLISECONDS_DEBUG);
     
     adc_reading = analogRead(M5_AMPS_PK_0);
-    current_reading = map_floats(adc_reading, ADC_MIN, ADC_MAX, CURRENT_MIN, CURRENT_MAX);
+    current_reading = mapFloats(adc_reading, ADC_MIN, ADC_MAX, CURRENT_MIN, CURRENT_MAX);
     Serial.print("M5_BUS_AMPS: "); 
     Serial.println(current_reading, DEC);
     delay(DELAY_MILLISECONDS_DEBUG);
     
     adc_reading = analogRead(M6_AMPS_PB_5);
-    current_reading = map_floats(adc_reading, ADC_MIN, ADC_MAX, CURRENT_MIN, CURRENT_MAX);
+    current_reading = mapFloats(adc_reading, ADC_MIN, ADC_MAX, CURRENT_MIN, CURRENT_MAX);
     Serial.print("M6_BUS_AMPS: "); 
     Serial.println(current_reading, DEC);
     delay(DELAY_MILLISECONDS_DEBUG);
     
     adc_reading = analogRead(M7_AMPS_PB_4);
-    current_reading = map_floats(adc_reading, ADC_MIN, ADC_MAX, CURRENT_MIN, CURRENT_MAX);
+    current_reading = mapFloats(adc_reading, ADC_MIN, ADC_MAX, CURRENT_MIN, CURRENT_MAX);
     Serial.print("M7_BUS_AMPS: "); 
     Serial.println(current_reading, DEC);
     delay(DELAY_MILLISECONDS_DEBUG);
     
     adc_reading = analogRead(M8_AMPS_PD_2);
-    current_reading = map_floats(adc_reading, ADC_MIN, ADC_MAX, CURRENT_MIN, CURRENT_MAX);
+    current_reading = mapFloats(adc_reading, ADC_MIN, ADC_MAX, CURRENT_MIN, CURRENT_MAX);
     Serial.print("M8_BUS_AMPS: "); 
     Serial.println(current_reading, DEC);
-    delay(DELAY_MILLISECONDS_DEBUG);
-    
-  }//end if
-  
-  
-  
-  /*
-  if(SOFTWARE_FUSES_DEBUG)
-  {
-    //debounce
-  }//end if
-  
-  if(RED_COMMS_DEBUG)
-  {
-    //rovecomm
-  }//end if*/
-
-}//end loop
+    delay(DELAY_MILLISECONDS_DEBUG);*/
