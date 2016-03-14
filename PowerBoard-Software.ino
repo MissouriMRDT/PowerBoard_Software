@@ -11,46 +11,6 @@
 
 
 
-//Testing
-//
-//////////////////////////////////////////////Debug
-const int SOFTWARE_FUSES_DEBUG =          0;
-const int RED_COMMS_DEBUG =               0;
-
-const int ECHO_SERIAL_MONITOR_DEBUG =     1;
-const int DELAY_SERIAL_MILLIS_DEBUG =     100;
-
-//////////////////////////////////////////////Debouncing 
-const int DEBOUNCE_TIME_MICROS = 1;
-const int DIGITAL_TRIES = 10; 
-const int PIN_TOO_NOISY = -1;
-
-
-
-//Platform
-//////////////////////////////////////////////Energia
-// Energia libraries used by RoveWare itself
-#include <SPI.h>
-#include <Ethernet.h>
-#include <EthernetUdp.h>
-
-//////////////////////////////////////////////Roveware
-#include "RoveEthernet.h"
-#include "RoveComm.h"
-
-// RED udp device id by fourth octet
-const int POWERBOARD_IP_DEVICE_ID = 51;
-
-// RED can toggle the bus by bool
-const bool BUS_5V_ON = 207;
-
-//Rovecomm :: RED packet :: data_id and data_value with number of data bytes size
-uint16_t data_id       = 0;
-size_t   data_size     = 0; 
-uint16_t data_value    = 0;
-
-
-
 //Hardware
 //
 // Todo Mike and Cameron sign off
@@ -73,6 +33,52 @@ const float CURRENT_MAX = (VCC - SENSOR_BIAS) / SENSOR_SENSITIVITY;
 const float CURRENT_MIN = -SENSOR_BIAS / SENSOR_SENSITIVITY;
 
 float current_reading             = 0;
+
+
+
+//Testing
+//
+//////////////////////////////////////////////Debug Flags
+const int SOFTWARE_FUSES_DEBUG =          0;
+const int RED_COMMS_DEBUG =               0;
+
+const int ECHO_SERIAL_MONITOR_DEBUG =     1;
+const int DELAY_SERIAL_MILLIS_DEBUG =     100;
+
+//////////////////////////////////////////////Debouncing Calibration
+const int ANALOG_DEBOUNCE_TIME_MICROS = 250;
+const int ANALOG_TRY_COUNT = 250;
+
+const int ANALOG_ACCEPTABLE_DRIFT = 250;
+
+const int DIGTAL_DEBOUNCE_TIME_MICROS = 250;
+const int DIGITAL_TRY_COUNT = 250; 
+
+const int PIN_TOO_NOISY = -1;
+
+
+
+//Platform
+//////////////////////////////////////////////Energia
+// Energia libraries used by RoveWare itself
+#include <SPI.h>
+#include <Ethernet.h>
+#include <EthernetUdp.h>
+
+//////////////////////////////////////////////Roveware
+#include "RoveEthernet.h"
+#include "RoveComm.h"
+
+// RED udp device id by fourth octet
+const int POWERBOARD_IP_DEVICE_ID = 51;
+
+// RED can toggle the bus by bool
+const bool BUS_5V_ON_OFF = 207;
+
+//Rovecomm :: RED packet :: data_id and data_value with number of data bytes size
+uint16_t data_id       = 0;
+size_t   data_size     = 0; 
+uint16_t data_value    = 0;
 
 
 
@@ -176,7 +182,7 @@ void loop()
   /////////////////////////////////////////////Software Fuse
   if(SOFTWARE_FUSES_DEBUG)
   {
-    bool bus_5V_software_fuse = digitalDebounce(BUS_5V_AMPS_PE_2);
+    bool bus_5V_software_fuse = analogDebounce(BUS_5V_AMPS_PE_2);
     
     if(bus_5V_software_fuse) 
     {
@@ -197,7 +203,7 @@ void loop()
       case 0:
         break;
       
-      case BUS_5V_TOGGLE:
+      case BUS_5V_ON_OFF:
         digitalWrite(BUS_5V_CNTRL_PP_2, (bool)data_value);
         break;
         
@@ -218,7 +224,7 @@ void loop()
     Serial.print("5V_BUS_AMPS: "); 
     Serial.println(current_reading, DEC);
     
-    delay(DELAY_MILLISECONDS_DEBUG);
+    delay(DELAY_SERIAL_MILLIS_DEBUG);
   }//end if
   
 }//end loop
@@ -230,7 +236,7 @@ void loop()
 int digitalDebounce(int bouncing_pin)
 {    
   // Count the bounces
-  int digital_trends = 0;
+  int digital_trend_count = 0;
   bool digital_reading = LOW;  
   
   // Read a bouncing pin and save the state
@@ -240,22 +246,22 @@ int digitalDebounce(int bouncing_pin)
   unsigned long system_time_micros = micros(); 
  
  // Spin for a max of millisec
-  while(system_time_micros != ( micros()  + DEBOUNCE_TIME_MICROS) )
+  while(system_time_micros != ( micros()  + DIGTAL_DEBOUNCE_TIME_MICROS) )
   {
     digital_reading = digitalRead(bouncing_pin);
     
     if(digital_reading == last_digital_reading)
     {
-      digital_trends_count++;
+      digital_trend_count++;
     }//end if
     
-    if( (digital_reading != last_digital_reading) && (digital_trends_count > 0) )
+    if( (digital_reading != last_digital_reading) && (digital_trend_count > 0) )
     {
-       digital_trends_count--; 
+       digital_trend_count--; 
        last_digital_reading = digital_reading;
     }//end if
   
-    if(digital_trends_count > DIGITAL_TRIES_COUNT)
+    if(digital_trend_count > DIGITAL_TRY_COUNT)
     {   
       
       return digital_reading;   
@@ -275,7 +281,7 @@ int digitalDebounce(int bouncing_pin)
 int analogDebounce(int bouncing_pin)
 {    
   // Count the bounces
-  int analog_trends_count = 0;
+  int analog_trend_count = 0;
   bool analog_reading = LOW;  
   
   // Read a bouncing pin and save the state
@@ -285,22 +291,22 @@ int analogDebounce(int bouncing_pin)
   unsigned long system_time_micros = micros(); 
  
  // Spin for a max of millisec
-  while(system_time_micros != ( micros()  + DEBOUNCE_TIME_MICROS) )
+  while(system_time_micros != ( micros()  + ANALOG_DEBOUNCE_TIME_MICROS) )
   {
     analog_reading = analogRead(bouncing_pin);
     
-    if( analog_trends_count && (abs(analog_reading - last_analog_reading) < ADC_ACCEPTABLE_DRIFT)  )    
+    if( analog_trend_count && (abs(analog_reading - last_analog_reading) < ANALOG_ACCEPTABLE_DRIFT)  )    
     {
-      analog_trends_count++;
+      analog_trend_count++;
     }//end if
     
-    if( analog_trends_count && (abs(analog_reading - last_analog_reading) > ADC_ACCEPTABLE_DRIFT)  )    
+    if( analog_trend_count && (abs(analog_reading - last_analog_reading) > ANALOG_ACCEPTABLE_DRIFT)  )    
     {
-       analog_trends_count--; 
+       analog_trend_count--; 
        last_analog_reading = last_analog_reading;
     }//end if
   
-    if(analog_trends_count > ANALOG_TRIES_COUNT)
+    if(analog_trend_count > ANALOG_TRY_COUNT)
     {   
       
       return analog_reading;   
