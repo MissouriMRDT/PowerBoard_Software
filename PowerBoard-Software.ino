@@ -11,6 +11,22 @@
 
 
 
+//Testing
+//
+//////////////////////////////////////////////Debug
+const int SOFTWARE_FUSES_DEBUG =          0;
+const int RED_COMMS_DEBUG =               0;
+
+const int ECHO_SERIAL_MONITOR_DEBUG =     1;
+const int DELAY_SERIAL_MILLIS_DEBUG =     100;
+
+//////////////////////////////////////////////Debouncing 
+const int DEBOUNCE_TIME_MICROS = 1;
+const int DIGITAL_TRIES = 10; 
+const int PIN_TOO_NOISY = -1;
+
+
+
 //Platform
 //////////////////////////////////////////////Energia
 // Energia libraries used by RoveWare itself
@@ -34,20 +50,6 @@ size_t   data_size     = 0;
 uint16_t data_value    = 0;
 
 
-
-//Testing
-//
-//////////////////////////////////////////////Debug
-const int SOFTWARE_FUSES_DEBUG =          0;
-const int RED_COMMS_DEBUG =               0;
-
-const int ECHO_SERIAL_MONITOR_DEBUG =     1;
-const int DELAY_SERIAL_MILLIS_DEBUG =     100;
-
-//////////////////////////////////////////////Debouncing 
-const int DEBOUNCE_TIME_MICROS = 1;
-const int DIGITAL_TRIES = 10; 
-const int PIN_TOO_NOISY = -1;
 
 //Hardware
 //
@@ -107,6 +109,7 @@ const int M8_AMPS_PD_2       = 42;
 //
 // Checks the pin for bouncing voltages to avoid false positives
 int digitalDebounce(int bouncing_pin);
+int analogDebounce(int bouncing_pin);
 
 //////////////////////////////////////////////User Display
 // Map analog read voltage value from the ACS_722 to a human readable RED display current value
@@ -241,15 +244,15 @@ int digitalDebounce(int bouncing_pin)
   {
     digital_reading = digitalRead(bouncing_pin);
     
+    if(digital_reading == last_digital_reading)
+    {
+      digital_trends_count++;
+    }//end if
+    
     if( (digital_reading != last_digital_reading) && (digital_trends_count > 0) )
     {
        digital_trends_count--; 
        last_digital_reading = digital_reading;
-    }//end if
-    
-    if(digital_reading == last_digital_reading)
-    {
-      digital_trends_count++;
     }//end if
   
     if(digital_trends_count > DIGITAL_TRIES_COUNT)
@@ -264,6 +267,54 @@ int digitalDebounce(int bouncing_pin)
   
   return PIN_TOO_NOISY;
 }//end functn
+
+
+
+//Developing
+///////////////////////////////////////////////Implementation
+int analogDebounce(int bouncing_pin)
+{    
+  // Count the bounces
+  int analog_trends_count = 0;
+  bool analog_reading = LOW;  
+  
+  // Read a bouncing pin and save the state
+  bool last_analog_reading = analog_reading;   
+  
+  // Get timestamp from the system clock counter
+  unsigned long system_time_micros = micros(); 
+ 
+ // Spin for a max of millisec
+  while(system_time_micros != ( micros()  + DEBOUNCE_TIME_MICROS) )
+  {
+    analog_reading = analogRead(bouncing_pin);
+    
+    if( analog_trends_count && (abs(analog_reading - last_analog_reading) < ADC_ACCEPTABLE_DRIFT)  )    
+    {
+      analog_trends_count++;
+    }//end if
+    
+    if( analog_trends_count && (abs(analog_reading - last_analog_reading) > ADC_ACCEPTABLE_DRIFT)  )    
+    {
+       analog_trends_count--; 
+       last_analog_reading = last_analog_reading;
+    }//end if
+  
+    if(analog_trends_count > ANALOG_TRIES_COUNT)
+    {   
+      
+      return analog_reading;   
+    }else{         
+      
+      last_analog_reading = analog_reading;
+    }//end else
+  }//end while
+  
+  return PIN_TOO_NOISY;
+}//end functn
+
+
+
 
 ///////////////////////////////////////////////Implementation
 float mapFloats(float x, float in_min, float in_max, float out_min, float out_max)
