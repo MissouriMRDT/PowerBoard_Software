@@ -45,7 +45,8 @@ const int RED_COMMS_DEBUG =               0;
 const int ECHO_SERIAL_MONITOR_DEBUG =     1;
 const int DELAY_SERIAL_MILLIS_DEBUG =     100;
 
-//////////////////////////////////////////////Debouncing Calibration
+//Todo Cameron and Mike 
+//////////////////////////////////////////////Hardware Calibration
 const int ANALOG_DEBOUNCE_TIME_MICROS = 250;
 const int ANALOG_TRY_COUNT = 250;
 
@@ -55,6 +56,9 @@ const int DIGITAL_DEBOUNCE_TIME_MICROS = 250;
 const int DIGITAL_TRY_COUNT = 250; 
 
 const int PIN_TOO_NOISY = -1;
+
+//Safest Test pin
+const int ESTOP_5V_BUS_MAX_CURRENT_THRESHOLD = 1;
 
 
 
@@ -183,9 +187,9 @@ void loop()
   /////////////////////////////////////////////Software Fuse
   if(SOFTWARE_FUSES_DEBUG)
   {
-    bool bus_5V_software_fuse = analogDebounce(BUS_5V_AMPS_PE_2);
+    int bus_5V_software_fuse_volts = analogDebounce(BUS_5V_AMPS_PE_2);
     
-    if(bus_5V_software_fuse) 
+    if(bus_5V_software_fuse_volts > ESTOP_5V_BUS_MAX_CURRENT_THRESHOLD) 
     {
       digitalWrite(BUS_5V_CNTRL_PP_2, HIGH);
     }//end if
