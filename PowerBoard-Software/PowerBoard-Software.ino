@@ -25,7 +25,7 @@ float adc_reading = 0;
 
 //////////////////////////////////////////////Sensor
 // ACS_722 IC Sensor Specs 
-const float SENSOR_SENSITIVITY   = 0.132;    //volts/amp
+const float SENSOR_SENSITIVITY   = 0.125;    //volts/amp
 const float SENSOR_SCALE         = 0.1;      //volts/amp
 const float SENSOR_BIAS          = VCC * SENSOR_SCALE;
 
@@ -40,7 +40,7 @@ float current_reading             = 0;
 //
 //////////////////////////////////////////////Debug Flags
 const int SOFTWARE_FUSES_DEBUG =          0;
-const int RED_COMMS_DEBUG =               0;
+const int RED_COMMS_DEBUG =               1;
 
 const int ECHO_SERIAL_MONITOR_DEBUG =     1;
 const int DELAY_SERIAL_MILLIS_DEBUG =     100;
@@ -59,6 +59,8 @@ const int PIN_TOO_NOISY = -1;
 
 //Safest Test pin
 const int ESTOP_5V_BUS_MAX_AMPS_THRESHOLD = 1;
+const int ESTOP_12V_BUS_MAX_AMPS_THRESHOLD = 1;
+const int ESTOP_MOT_BUS_MAX_AMPS_THRESHOLD = 1;
 
 
 
@@ -78,7 +80,16 @@ const int POWERBOARD_IP_DEVICE_ID   = 51;
 
 // RED can toggle the bus by bool
 const uint16_t NO_ROVECOMM_MESSAGE   = 0;
-const uint16_t BUS_5V_ON_OFF         = 207;
+const uint16_t BUS_12V_ON_OFF        = 170;
+const uint16_t BUS_5V_ON_OFF         = 180;
+const uint16_t BUS_M1_ON_OFF         = 190;
+const uint16_t BUS_M2_ON_OFF         = 200;
+const uint16_t BUS_M3_ON_OFF         = 210;
+const uint16_t BUS_M4_ON_OFF         = 220;
+const uint16_t BUS_M5_ON_OFF         = 230;
+const uint16_t BUS_M6_ON_OFF         = 240;
+const uint16_t BUS_M7_ON_OFF         = 250;
+const uint16_t BUS_M8_ON_OFF         = 260;
 
 //Rovecomm :: RED packet :: data_id and data_value with number of data bytes size
 uint16_t data_id       = 0;
@@ -187,13 +198,67 @@ void loop()
   if(SOFTWARE_FUSES_DEBUG)
   {
     int bus_5V_software_fuse_amps = analogDebounce(BUS_5V_AMPS_PE_2);
-    
     if(bus_5V_software_fuse_amps > ESTOP_5V_BUS_MAX_AMPS_THRESHOLD) 
     {
-      digitalWrite(BUS_5V_CNTRL_PP_2, HIGH);
+      digitalWrite(BUS_5V_CNTRL_PP_2, LOW);
     }//end if
     
-  }//end if
+    int bus_12V_software_fuse_amps = analogDebounce(BUS_12V_AMPS_PD_7);
+    if(bus_12V_software_fuse_amps > ESTOP_12V_BUS_MAX_AMPS_THRESHOLD) 
+    {
+      digitalWrite(BUS_5V_CNTRL_PP_2, LOW);
+    }//end if
+    
+    int bus_M1_software_fuse_amps = analogDebounce(M1_AMPS_PK_3);
+    if(bus_M1_software_fuse_amps > ESTOP_MOT_BUS_MAX_AMPS_THRESHOLD) 
+    {
+      digitalWrite(M1_CNTRL_PK_7, LOW);
+    }//end if
+    
+    int bus_M2_software_fuse_amps = analogDebounce(M2_AMPS_PK_2);
+    if(bus_M2_software_fuse_amps > ESTOP_MOT_BUS_MAX_AMPS_THRESHOLD) 
+    {
+      digitalWrite(M2_CNTRL_PQ_1, LOW);
+    }//end if
+    
+    int bus_M3_software_fuse_amps = analogDebounce(M3_AMPS_PK_1);
+    if(bus_M3_software_fuse_amps > ESTOP_MOT_BUS_MAX_AMPS_THRESHOLD) 
+    {
+      digitalWrite(M3_AMPS_PK_1, LOW);
+    }//end if
+    
+    int bus_M4_software_fuse_amps = analogDebounce(M4_AMPS_PD_4);
+    if(bus_M4_software_fuse_amps > ESTOP_MOT_BUS_MAX_AMPS_THRESHOLD) 
+    {
+      digitalWrite(M4_CNTRL_PP_3, LOW);
+    }//end if
+    
+    int bus_M5_software_fuse_amps = analogDebounce(M5_AMPS_PK_0);
+    if(bus_M5_software_fuse_amps > ESTOP_MOT_BUS_MAX_AMPS_THRESHOLD) 
+    {
+      digitalWrite(M5_CNTRL_PH_1, LOW);
+    }//end if
+    
+    int bus_M6_software_fuse_amps = analogDebounce(M6_AMPS_PB_5);
+    if(bus_M6_software_fuse_amps > ESTOP_MOT_BUS_MAX_AMPS_THRESHOLD) 
+    {
+      digitalWrite(M6_CNTRL_PH_0, LOW);
+    }//end if
+    
+    int bus_M7_software_fuse_amps = analogDebounce(M7_AMPS_PB_4);
+    if(bus_M7_software_fuse_amps > ESTOP_MOT_BUS_MAX_AMPS_THRESHOLD) 
+    {
+      digitalWrite(M7_CNTRL_PA_7, LOW);
+    }//end if
+    
+    int bus_M8_software_fuse_amps = analogDebounce(M8_AMPS_PD_2);
+    if(bus_M8_software_fuse_amps > ESTOP_MOT_BUS_MAX_AMPS_THRESHOLD) 
+    {
+      digitalWrite(M8_CNTRL_PP_5, LOW);
+    }//end if
+    
+}//end if
+  
    
   /////////////////////////////////////////////RED Control and Telem RoveComm
   if(RED_COMMS_DEBUG)
@@ -206,9 +271,36 @@ void loop()
       //Don't do anything for data_id zero 
       case NO_ROVECOMM_MESSAGE:
         break;
-      
+        
       case BUS_5V_ON_OFF:
         digitalWrite(BUS_5V_CNTRL_PP_2, (bool)data_value);
+        break;
+      case BUS_12V_ON_OFF:
+        digitalWrite(BUS_12V_CNTRL_PN_3, (bool)data_value);
+        break;
+      case BUS_M1_ON_OFF:
+        digitalWrite(M1_CNTRL_PK_7, (bool)data_value);
+        break;
+      case BUS_M2_ON_OFF:
+        digitalWrite(M2_CNTRL_PQ_1, (bool)data_value);
+        break;
+      case BUS_M3_ON_OFF:
+        digitalWrite(M3_CNTRL_PK_6, (bool)data_value);
+        break;
+      case BUS_M4_ON_OFF:
+        digitalWrite(M4_CNTRL_PP_3, (bool)data_value);
+        break;
+      case BUS_M5_ON_OFF:
+        digitalWrite(M5_CNTRL_PH_1, (bool)data_value);
+        break;
+      case BUS_M6_ON_OFF:
+        digitalWrite(M6_CNTRL_PH_0, (bool)data_value);
+        break;
+      case BUS_M7_ON_OFF:
+        digitalWrite(M7_CNTRL_PA_7, (bool)data_value);
+        break;
+      case BUS_M8_ON_OFF:
+        digitalWrite(M8_CNTRL_PP_5, (bool)data_value);
         break;
         
       default:
@@ -224,15 +316,66 @@ void loop()
   {
     adc_reading = analogRead(BUS_5V_AMPS_PE_2);
     current_reading = mapFloats(adc_reading, ADC_MIN, ADC_MAX, CURRENT_MIN, CURRENT_MAX);
-    
     Serial.print("5V_BUS_AMPS: "); 
     Serial.println(current_reading, DEC);
+    delay(DELAY_SERIAL_MILLIS_DEBUG);
     
+    adc_reading = analogRead(BUS_12V_AMPS_PD_7);
+    current_reading = mapFloats(adc_reading, ADC_MIN, ADC_MAX, CURRENT_MIN, CURRENT_MAX);
+    Serial.print("12V_BUS_AMPS: "); 
+    Serial.println(current_reading, DEC);
+    delay(DELAY_SERIAL_MILLIS_DEBUG);
+    
+    adc_reading = analogRead(M1_AMPS_PK_3);
+    current_reading = mapFloats(adc_reading, ADC_MIN, ADC_MAX, CURRENT_MIN, CURRENT_MAX);
+    Serial.print("M1_BUS_AMPS: "); 
+    Serial.println(current_reading, DEC);
+    delay(DELAY_SERIAL_MILLIS_DEBUG);
+    
+    adc_reading = analogRead(M2_AMPS_PK_2);
+    current_reading = mapFloats(adc_reading, ADC_MIN, ADC_MAX, CURRENT_MIN, CURRENT_MAX);
+    Serial.print("M2_BUS_AMPS: "); 
+    Serial.println(current_reading, DEC);
+    delay(DELAY_SERIAL_MILLIS_DEBUG);
+    
+    adc_reading = analogRead(M3_AMPS_PK_1);
+    current_reading = mapFloats(adc_reading, ADC_MIN, ADC_MAX, CURRENT_MIN, CURRENT_MAX);
+    Serial.print("M3_BUS_AMPS: "); 
+    Serial.println(current_reading, DEC);
+    delay(DELAY_SERIAL_MILLIS_DEBUG);
+    
+    adc_reading = analogRead(M4_AMPS_PD_4);
+    current_reading = mapFloats(adc_reading, ADC_MIN, ADC_MAX, CURRENT_MIN, CURRENT_MAX);
+    Serial.print("M4_BUS_AMPS: "); 
+    Serial.println(current_reading, DEC);
+    delay(DELAY_SERIAL_MILLIS_DEBUG);
+    
+    adc_reading = analogRead(M5_AMPS_PK_0);
+    current_reading = mapFloats(adc_reading, ADC_MIN, ADC_MAX, CURRENT_MIN, CURRENT_MAX);
+    Serial.print("M5_BUS_AMPS: "); 
+    Serial.println(current_reading, DEC);
+    delay(DELAY_SERIAL_MILLIS_DEBUG);
+    
+    adc_reading = analogRead(M6_AMPS_PB_5);
+    current_reading = mapFloats(adc_reading, ADC_MIN, ADC_MAX, CURRENT_MIN, CURRENT_MAX);
+    Serial.print("M6_BUS_AMPS: "); 
+    Serial.println(current_reading, DEC);
+    delay(DELAY_SERIAL_MILLIS_DEBUG);
+    
+    adc_reading = analogRead(M7_AMPS_PB_4);
+    current_reading = mapFloats(adc_reading, ADC_MIN, ADC_MAX, CURRENT_MIN, CURRENT_MAX);
+    Serial.print("M7_BUS_AMPS: "); 
+    Serial.println(current_reading, DEC);
+    delay(DELAY_SERIAL_MILLIS_DEBUG);
+    
+    adc_reading = analogRead(M8_AMPS_PD_2);
+    current_reading = mapFloats(adc_reading, ADC_MIN, ADC_MAX, CURRENT_MIN, CURRENT_MAX);
+    Serial.print("M8_BUS_AMPS: "); 
+    Serial.println(current_reading, DEC);
     delay(DELAY_SERIAL_MILLIS_DEBUG);
   }//end if
   
 }//end loop
-
 
 
 //Developing
