@@ -36,9 +36,9 @@ const uint16_t M8_CURRENT_READING        = 1111;
 const uint16_t BUS_5V_CURRENT_READING    = 1112;
 const uint16_t BUS_12V_CURRENT_READING   = 1113;
 
-const uint16_t POWER_BUS_ENABLE      = 1088;
-const uint16_t POWER_BUS_DISABLE     = 1089;
-const uint16_t POWER_BUS_DISABLE     = 1090;
+const uint16_t POWER_BUS_ENABLE          = 1088;
+const uint16_t POWER_BUS_DISABLE         = 1089;
+const uint16_t POWER_BUS_OVER_CURRENT    = 1090;
 
 const uint8_t BUS_M1_ON_OFF         = 0;
 const uint8_t BUS_M2_ON_OFF         = 1;
@@ -112,16 +112,15 @@ const int ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD = 1;
 // Checks the pin for bouncing voltages to avoid false positives
 bool singleDebounce(int bouncing_pin, int max_threshold)
 {
-  int bouncing_reading = analogRead(bouncing_pin);
-  if(bouncing_reading > max_threshold)
-  }
-    bouncing_reading = analogRead(bouncing_pin);
-    if(bouncing_reading > max_threshold)
+  if( analogRead(bouncing_pin))
+  {  
+    if( analogRead(bouncing_pin))
+    {
        return true;
-    }//
-  }//  
+    }//end if
+  }// end if 
   return false;
-}//end if
+}//end fntcn
 
 
 ///////////////////////////////////////////////Implementation
@@ -172,70 +171,70 @@ void setup()
 /////////////////////////////////////////////Powerboard Loop Forever
 void loop() 
 { 
-  if( singleDebounce(BUS_5V_AMPS_PE_2, ESTOP_5V_BUS_MAX_AMPS_THRESHOLD)) 
+  if( singleDebounce(BUS_5V_AMPS_PE_2, ESTOP_5V_BUS_MAX_AMPS_THRESHOLD) ) 
   {
     digitalWrite(BUS_5V_CNTRL_PP_2, LOW);
     roveComm_SendMsg(POWER_BUS_OVER_CURRENT, sizeof(BUS_5V_ON_OFF), &BUS_5V_ON_OFF);
     delay(ROVECOMM_DELAY);
   }//end if
   
-  if( singleDebounce(BUS_12V_AMPS_PD_7, ESTOP_12V_BUS_MAX_AMPS_THRESHOLD))
+  if( singleDebounce(BUS_12V_AMPS_PD_7, ESTOP_12V_BUS_MAX_AMPS_THRESHOLD) )
   {
     digitalWrite(BUS_5V_CNTRL_PP_2, LOW);
     roveComm_SendMsg(POWER_BUS_OVER_CURRENT, sizeof(BUS_12V_ON_OFF), &BUS_12V_ON_OFF);
     delay(ROVECOMM_DELAY);
   }//end if
   
-  if( singleDebounce(M1_AMPS_PK_3), ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD) 
+  if( singleDebounce(M1_AMPS_PK_3, ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD) ) 
   {
     digitalWrite(M1_CNTRL_PK_7, LOW);
     roveComm_SendMsg(POWER_BUS_OVER_CURRENT, sizeof(BUS_M1_ON_OFF), &BUS_M1_ON_OFF);
     delay(ROVECOMM_DELAY);
   }//end if
   
-  if( singleDebounce(M2_AMPS_PK_2, ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD) 
+  if( singleDebounce(M2_AMPS_PK_2, ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD) )
   {
     digitalWrite(M2_CNTRL_PQ_1, LOW);
     roveComm_SendMsg(POWER_BUS_OVER_CURRENT, sizeof(BUS_M2_ON_OFF), &BUS_M2_ON_OFF);
     delay(ROVECOMM_DELAY);
   }//end if
   
-   if(singleDebounce(M3_AMPS_PK_1, ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD) 
+   if(singleDebounce(M3_AMPS_PK_1, ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD) )
   {
     digitalWrite(M3_AMPS_PK_1, LOW);
     roveComm_SendMsg(POWER_BUS_OVER_CURRENT, sizeof(BUS_M3_ON_OFF), &BUS_M3_ON_OFF);
     delay(ROVECOMM_DELAY);
   }//end if
   
-  if(singleDebounce(M4_AMPS_PD_4, ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD) 
+  if(singleDebounce(M4_AMPS_PD_4, ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD) )
   {
     digitalWrite(M4_CNTRL_PP_3, LOW);
     roveComm_SendMsg(POWER_BUS_OVER_CURRENT, sizeof(BUS_M4_ON_OFF), &BUS_M4_ON_OFF);
     delay(ROVECOMM_DELAY);
   }//end if
   
-  if( singleDebounce(M5_AMPS_PK_0, ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD))
+  if( singleDebounce(M5_AMPS_PK_0, ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD) )
   {
     digitalWrite(M5_CNTRL_PH_1, LOW);
     roveComm_SendMsg(POWER_BUS_OVER_CURRENT, sizeof(BUS_M5_ON_OFF), &BUS_M5_ON_OFF);
     delay(ROVECOMM_DELAY);
   }//end if
   
-  if( singleDebounce(M6_AMPS_PB_5, ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD) 
+  if( singleDebounce(M6_AMPS_PB_5, ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD) )
   {
     digitalWrite(M6_CNTRL_PH_0, LOW);
     roveComm_SendMsg(POWER_BUS_OVER_CURRENT, sizeof(BUS_M6_ON_OFF), &BUS_M6_ON_OFF);
     delay(ROVECOMM_DELAY);
   }//end if
   
-  if(singleDebounce(M7_AMPS_PB_4, ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD))
+  if(singleDebounce(M7_AMPS_PB_4, ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD) )
   {
     digitalWrite(M7_CNTRL_PA_7, LOW);
     roveComm_SendMsg(POWER_BUS_OVER_CURRENT, sizeof(BUS_M7_ON_OFF), &BUS_M7_ON_OFF);
     delay(ROVECOMM_DELAY);
   }//end if
   
-  if(singleDebounce(M8_AMPS_PD_2, ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD))
+  if(singleDebounce(M8_AMPS_PD_2, ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD) )
   {
     digitalWrite(M8_CNTRL_PP_5, LOW);
     roveComm_SendMsg(POWER_BUS_OVER_CURRENT, sizeof(BUS_M8_ON_OFF), &BUS_M8_ON_OFF);
@@ -253,37 +252,46 @@ void loop()
     case NO_ROVECOMM_MESSAGE:
       break;
       
-    case BUS_5V_ON_OFF:
-      digitalWrite(BUS_5V_CNTRL_PP_2, (bool)data_value);
-      break;
-    case BUS_12V_ON_OFF:
-      digitalWrite(BUS_12V_CNTRL_PN_3, (bool)data_value);
-      break;
-    case BUS_M1_ON_OFF:
-      digitalWrite(M1_CNTRL_PK_7, (bool)data_value);
-      break;
-    case BUS_M2_ON_OFF:
-      digitalWrite(M2_CNTRL_PQ_1, (bool)data_value);
-      break;
-    case BUS_M3_ON_OFF:
-      digitalWrite(M3_CNTRL_PK_6, (bool)data_value);
-      break;
-    case BUS_M4_ON_OFF:
-      digitalWrite(M4_CNTRL_PP_3, (bool)data_value);
-      break;
-    case BUS_M5_ON_OFF:
-      digitalWrite(M5_CNTRL_PH_1, (bool)data_value);
-      break;
-    case BUS_M6_ON_OFF:
-      digitalWrite(M6_CNTRL_PH_0, (bool)data_value);
-      break;
-    case BUS_M7_ON_OFF:
-      digitalWrite(M7_CNTRL_PA_7, (bool)data_value);
-      break;
-    case BUS_M8_ON_OFF:
-      digitalWrite(M8_CNTRL_PP_5, (bool)data_value);
-      break;
+    case POWER_BUS_ENABLE:
       
+      switch ( (bool)data_value )
+      { 
+        case BUS_5V_ON_OFF:
+          digitalWrite(BUS_5V_CNTRL_PP_2, (bool)data_value);
+          break;
+        case BUS_12V_ON_OFF:
+          digitalWrite(BUS_12V_CNTRL_PN_3, (bool)data_value);
+          break;
+        case BUS_M1_ON_OFF:
+          digitalWrite(M1_CNTRL_PK_7, (bool)data_value);
+          break;
+        case BUS_M2_ON_OFF:
+          digitalWrite(M2_CNTRL_PQ_1, (bool)data_value);
+          break;
+        case BUS_M3_ON_OFF:
+          digitalWrite(M3_CNTRL_PK_6, (bool)data_value);
+          break;
+        case BUS_M4_ON_OFF:
+          digitalWrite(M4_CNTRL_PP_3, (bool)data_value);
+          break;
+        case BUS_M5_ON_OFF:
+          digitalWrite(M5_CNTRL_PH_1, (bool)data_value);
+          break;
+        case BUS_M6_ON_OFF:
+          digitalWrite(M6_CNTRL_PH_0, (bool)data_value);
+          break;
+        case BUS_M7_ON_OFF:
+          digitalWrite(M7_CNTRL_PA_7, (bool)data_value);
+          break;
+        case BUS_M8_ON_OFF:
+          digitalWrite(M8_CNTRL_PP_5, (bool)data_value);
+          break;
+        default:
+          //Serial.print("Unrecognized data :");
+          //Serial.println(data);
+          break; 
+       }//endswitch
+       
     default:
       //Serial.print("Unrecognized data_id :");
       //Serial.println(data_id);
@@ -292,12 +300,12 @@ void loop()
  
   adc_reading = analogRead(BUS_5V_AMPS_PE_2);
   current_reading = mapFloats(adc_reading, ADC_MIN, ADC_MAX, CURRENT_MIN, CURRENT_MAX); 
-  roveComm_SendMsg(GPS_LAT_LON_DATA_ID, sizeof(current_reading), &current_reading);
+  roveComm_SendMsg(BUS_5V_CURRENT_READING, sizeof(current_reading), &current_reading);
   delay(ROVECOMM_DELAY);
   
   adc_reading = analogRead(BUS_12V_AMPS_PD_7);
   current_reading = mapFloats(adc_reading, ADC_MIN, ADC_MAX, CURRENT_MIN, CURRENT_MAX);
-  roveComm_SendMsg(GPS_LAT_LON_DATA_ID, sizeof(current_reading), &current_reading);
+  roveComm_SendMsg(BUS_12V_CURRENT_READING, sizeof(current_reading), &current_reading);
   delay(ROVECOMM_DELAY);
   
   adc_reading = analogRead(M1_AMPS_PK_3);
@@ -306,37 +314,37 @@ void loop()
   
   adc_reading = analogRead(M2_AMPS_PK_2);
   current_reading = mapFloats(adc_reading, ADC_MIN, ADC_MAX, CURRENT_MIN, CURRENT_MAX);
-  roveComm_SendMsg(M1_CURRENT_READING, sizeof(current_reading), &current_reading);
+  roveComm_SendMsg(M2_CURRENT_READING, sizeof(current_reading), &current_reading);
   delay(ROVECOMM_DELAY);
   
   adc_reading = analogRead(M3_AMPS_PK_1);
   current_reading = mapFloats(adc_reading, ADC_MIN, ADC_MAX, CURRENT_MIN, CURRENT_MAX);
-  roveComm_SendMsg(M1_CURRENT_READING, sizeof(current_reading), &current_reading);
+  roveComm_SendMsg(M3_CURRENT_READING, sizeof(current_reading), &current_reading);
   delay(ROVECOMM_DELAY);
   
   adc_reading = analogRead(M4_AMPS_PD_4);
   current_reading = mapFloats(adc_reading, ADC_MIN, ADC_MAX, CURRENT_MIN, CURRENT_MAX);
-  roveComm_SendMsg(M1_CURRENT_READING, sizeof(current_reading), &current_reading);
+  roveComm_SendMsg(M4_CURRENT_READING, sizeof(current_reading), &current_reading);
   delay(ROVECOMM_DELAY);
   
   adc_reading = analogRead(M5_AMPS_PK_0);
   current_reading = mapFloats(adc_reading, ADC_MIN, ADC_MAX, CURRENT_MIN, CURRENT_MAX);
-  roveComm_SendMsg(M1_CURRENT_READING, sizeof(current_reading), &current_reading);
+  roveComm_SendMsg(M5_CURRENT_READING, sizeof(current_reading), &current_reading);
   delay(ROVECOMM_DELAY);
   
   adc_reading = analogRead(M6_AMPS_PB_5);
   current_reading = mapFloats(adc_reading, ADC_MIN, ADC_MAX, CURRENT_MIN, CURRENT_MAX);
-  roveComm_SendMsg(M1_CURRENT_READING, sizeof(current_reading), &current_reading);
+  roveComm_SendMsg(M6_CURRENT_READING, sizeof(current_reading), &current_reading);
   delay(ROVECOMM_DELAY);
   
   adc_reading = analogRead(M7_AMPS_PB_4);
   current_reading = mapFloats(adc_reading, ADC_MIN, ADC_MAX, CURRENT_MIN, CURRENT_MAX);
-  roveComm_SendMsg(M1_CURRENT_READING, sizeof(current_reading), &current_reading);
+  roveComm_SendMsg(M7_CURRENT_READING, sizeof(current_reading), &current_reading);
   delay(ROVECOMM_DELAY);
   
   adc_reading = analogRead(M8_AMPS_PD_2);
   current_reading = mapFloats(adc_reading, ADC_MIN, ADC_MAX, CURRENT_MIN, CURRENT_MAX);
-  roveComm_SendMsg(M1_CURRENT_READING, sizeof(current_reading), &current_reading);
+  roveComm_SendMsg(M8_CURRENT_READING, sizeof(current_reading), &current_reading);
   delay(ROVECOMM_DELAY);
   
   
