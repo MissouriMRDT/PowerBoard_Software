@@ -134,7 +134,7 @@ const int DEBOUNCE_DELAY = 10;
 //Safest Test pin
 const int ESTOP_5V_BUS_MAX_AMPS_THRESHOLD = 18;
 const int ESTOP_12V_BUS_MAX_AMPS_THRESHOLD = 35;    
-const int ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD = 14;
+const int ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD = 20;
 
 // Checks the pin for bouncing voltages to avoid false positives
 bool singleDebounce(int bouncing_pin, int max_amps_threshold)
@@ -207,15 +207,17 @@ void loop()
 { 
   if( singleDebounce(BUS_5V_AMPS_PE_2, ESTOP_5V_BUS_MAX_AMPS_THRESHOLD) ) 
   {
-    digitalWrite(BUS_5V_CNTRL_PP_2, LOW);
     roveComm_SendMsg(POWER_BUS_OVER_CURRENT, sizeof(BUS_5V_ON_OFF), &BUS_5V_ON_OFF);
+    delay(500);
+    digitalWrite(BUS_5V_CNTRL_PP_2, LOW);   
     delay(ROVECOMM_DELAY);
   }//end if
   
   if( singleDebounce(BUS_12V_AMPS_PD_7, ESTOP_12V_BUS_MAX_AMPS_THRESHOLD) )
   {
-    digitalWrite(BUS_5V_CNTRL_PP_2, LOW);
     roveComm_SendMsg(POWER_BUS_OVER_CURRENT, sizeof(BUS_12V_ON_OFF), &BUS_12V_ON_OFF);
+    delay(500);
+    digitalWrite(BUS_12V_AMPS_PD_7, LOW);
     delay(ROVECOMM_DELAY);
   }//end if
   
@@ -288,49 +290,58 @@ void loop()
       
     case POWER_BUS_ENABLE:
       
-      switch ( (bool)data_value )
+      switch ( data_value )
       { 
         case BUS_5V_ON_OFF:
-          digitalWrite(BUS_5V_CNTRL_PP_2, (bool)data_value);
+          digitalWrite(BUS_5V_CNTRL_PP_2, data_value);
           break;
+          
         case BUS_12V_ON_OFF:
-          digitalWrite(BUS_12V_CNTRL_PN_3, (bool)data_value);
+          digitalWrite(BUS_12V_CNTRL_PN_3, data_value);
           break;
+          
         case BUS_M1_ON_OFF:
-          digitalWrite(M1_CNTRL_PK_7, (bool)data_value);
+          digitalWrite(M1_CNTRL_PK_7, data_value);
           break;
+          
         case BUS_M2_ON_OFF:
-          digitalWrite(M2_CNTRL_PQ_1, (bool)data_value);
+          digitalWrite(M2_CNTRL_PQ_1, data_value);
           break;
+          
         case BUS_M3_ON_OFF:
-          digitalWrite(M3_CNTRL_PK_6, (bool)data_value);
+          digitalWrite(M3_CNTRL_PK_6, data_value);
           break;
+          
         case BUS_M4_ON_OFF:
-          digitalWrite(M4_CNTRL_PP_3, (bool)data_value);
+          digitalWrite(M4_CNTRL_PP_3, data_value);
           break;
+          
         case BUS_M5_ON_OFF:
-          digitalWrite(M5_CNTRL_PH_1, (bool)data_value);
+          digitalWrite(M5_CNTRL_PH_1, data_value);
           break;
+          
         case BUS_M6_ON_OFF:
-          digitalWrite(M6_CNTRL_PH_0, (bool)data_value);
+          digitalWrite(M6_CNTRL_PH_0, data_value);
           break;
+          
         case BUS_M7_ON_OFF:
-          digitalWrite(M7_CNTRL_PA_7, (bool)data_value);
+          digitalWrite(M7_CNTRL_PA_7, data_value);
           break;
+          
         case BUS_M8_ON_OFF:
-          digitalWrite(M8_CNTRL_PP_5, (bool)data_value);
+          digitalWrite(M8_CNTRL_PP_5, data_value);
           break;
+          
         default:
           //Serial.print("Unrecognized data :");
           //Serial.println(data);
           break; 
-       }//endswitch
-       
+       }//endswitch     
     case BMS_BATTERY_PACK_ON_OFF:
         send_bms_command.data_id = BMS_BATTERY_PACK_ON_OFF;
         ToBMS.sendData();
         send_bms_command.data_id = 0;
-        break;
+        break;   
         
     case BMS_BATTERY_PACK_ON_OFF_REBOOT:
         send_bms_command.data_id = BMS_BATTERY_PACK_ON_OFF;
