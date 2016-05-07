@@ -13,6 +13,7 @@
 #include <SPI.h>
 #include <Ethernet.h>
 #include <EthernetUdp.h>
+#include <EasyTransfer.h>
 
 //RoveWare
 #include <RoveBoard.h>
@@ -20,7 +21,7 @@
 #include <RoveComm.h>
 
 // RED udp device id by fourth octet
-const int POWERBOARD_IP_DEVICE_ID   = 51;
+const int POWERBOARD_IP_DEVICE_ID   = 132;
 
 // RED can toggle the bus by bool
 const uint16_t NO_ROVECOMM_MESSAGE   = 0;
@@ -51,6 +52,13 @@ const uint8_t BUS_M8_ON_OFF         = 7;
 const uint8_t BUS_5V_ON_OFF         = 8;
 const uint8_t BUS_12V_ON_OFF        = 9;
 
+//From the MSP 432 Serial
+const uint8_t BMS_BATTERY_PACK_ON_OFF          = 1040;
+const uint8_t BMS_BATTERY_PACK_ON_OFF_REBOOT   = 1041;
+
+const uint8_t BMS_BATTERY_PACK_VOLTAGE         = 1072;
+const uint8_t BMS_BATTERY_PACK_CURRENT         = 1073;
+
 //Rovecomm :: RED packet :: data_id and data_value with number of data bytes size
 uint16_t data_id       = 0;
 size_t   data_size     = 0; 
@@ -58,9 +66,28 @@ uint16_t data_value    = 0;
 
 const int ROVECOMM_DELAY = 10;
 
+EasyTransfer FromBMS, ToBMS;
+
+typedef struct 
+{
+  int16_t data_id;
+  float pack_voltage;
+  float pack_current;
+} recieve_data;
+
+typedef struct 
+{
+  int16_t data_id; 
+} send_data;
+
+recieve_data receive_bms_telem;
+send_data    send_bms_command;
+
 //////////////////////////////////////////////Pinmap
 // Control Pins
-//Todo const int BATTERYPACK_CNTRL?
+
+//0 MIN VOLT    3.036 MAX_VOLT  RESISTOR DIVIDER = 11;
+//const int BATTERYPACK_CNTRL  = 11;
 const int BUS_5V_CNTRL_PP_2  = 11;
 const int BUS_12V_CNTRL_PN_3 = 12;
 const int M1_CNTRL_PK_7      = 71;
@@ -85,8 +112,6 @@ const int M6_AMPS_PB_5       = 64;
 const int M7_AMPS_PB_4       = 63;
 const int M8_AMPS_PD_2       = 42;
 
-
-
 //////////////////////////////////////////////RoveBoard
 // Tiva1294C RoveBoard Specs
 const float VCC                 = 3.3;       //volts
@@ -104,17 +129,23 @@ const float CURRENT_MAX          = (VCC - SENSOR_BIAS) / SENSOR_SENSITIVITY;
 const float CURRENT_MIN          = -SENSOR_BIAS / SENSOR_SENSITIVITY;
 float current_reading            = 0;
 
+const int DEBOUNCE_DELAY = 10;
+
 //Safest Test pin
-const int ESTOP_5V_BUS_MAX_AMPS_THRESHOLD = 1;
-const int ESTOP_12V_BUS_MAX_AMPS_THRESHOLD = 1;
-const int ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD = 1;
+const int ESTOP_5V_BUS_MAX_AMPS_THRESHOLD = 18;
+const int ESTOP_12V_BUS_MAX_AMPS_THRESHOLD = 35;    
+const int ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD = 14;
 
 // Checks the pin for bouncing voltages to avoid false positives
-bool singleDebounce(int bouncing_pin, int max_threshold)
+bool singleDebounce(int bouncing_pin, int max_amps_threshold)
 {
-  if( analogRead(bouncing_pin))
+  int adc_threshhold = map(max_amps_threshold, CURRENT_MIN, CURRENT_MAX, ADC_MIN, ADC_MAX);
+  
+  if( analogRead(bouncing_pin) > adc_threshhold)
   {  
-    if( analogRead(bouncing_pin))
+    delay(DEBOUNCE_DELAY);
+    
+    if( analogRead(bouncing_pin) > adc_threshhold)
     {
        return true;
     }//end if
@@ -161,6 +192,9 @@ void setup()
   digitalWrite(M8_CNTRL_PP_5, HIGH);
   
   Serial.begin(9600);
+
+  FromBMS.begin(details(receive_bms_telem), &Serial6);   // TODO :  pick Serial line. Check pins.
+  ToBMS.begin(details(send_bms_command), &Serial6);
  
   roveComm_Begin(192, 168, 1, POWERBOARD_IP_DEVICE_ID);
   
@@ -292,6 +326,18 @@ void loop()
           break; 
        }//endswitch
        
+    case BMS_BATTERY_PACK_ON_OFF:
+        send_bms_command.data_id = BMS_BATTERY_PACK_ON_OFF;
+        ToBMS.sendData();
+        send_bms_command.data_id = 0;
+        break;
+        
+    case BMS_BATTERY_PACK_ON_OFF_REBOOT:
+        send_bms_command.data_id = BMS_BATTERY_PACK_ON_OFF;
+        ToBMS.sendData();
+        send_bms_command.data_id = 0;
+        break;
+       
     default:
       //Serial.print("Unrecognized data_id :");
       //Serial.println(data_id);
@@ -347,61 +393,37 @@ void loop()
   roveComm_SendMsg(M8_CURRENT_READING, sizeof(current_reading), &current_reading);
   delay(ROVECOMM_DELAY);
   
+  if(FromBMS.receiveData())
+  {
+    switch ( receive_bms_telem.data_id )
+      { 
+      case 0:
+        break;
+        
+      case BMS_BATTERY_PACK_ON_OFF:
+ //TODO? Gbenga/Reed?
+        //roveComm_SendMsg(BMS_BATTERY_PACK_ON_OFF, sizeof(receive_bms_telem.no_data), &receive_bms_telem.no_data);
+        break;
+        
+      case BMS_BATTERY_PACK_ON_OFF_REBOOT:
+        //roveComm_SendMsg(BMS_BATTERY_PACK_ON_OFF_REBOOT, sizeof(receive_bms_telem.no_data), &receive_bms_telem.no_data);
+        break;
+        
+      case BMS_BATTERY_PACK_VOLTAGE:
+        roveComm_SendMsg(BMS_BATTERY_PACK_VOLTAGE, sizeof(receive_bms_telem.pack_voltage), &receive_bms_telem.pack_voltage);
+        break;
+        
+      case BMS_BATTERY_PACK_CURRENT:
+      
+        //roveComm_SendMsg(BMS_BATTERY_PACK_CURRENT, sizeof(receive_bms_telem.pack_current), &receive_bms_telem.pack_current);
+        break;
+        
+      default:
+          //Serial.print("Unrecognized data :");
+          //Serial.println(data);
+          break; 
+       }//endswitch
+  }//end if
   
 }//end loop
 
-
-/*Developing
-//Todo Cameron and Mike 
-//////////////////////////////////////////////Hardware Calibration
-const int ANALOG_DEBOUNCE_TIME_MICROS = 250;
-const int ANALOG_TRY_COUNT = 250;
-
-const int ANALOG_ACCEPTABLE_DRIFT = 250;
-
-const int DIGITAL_DEBOUNCE_TIME_MICROS = 250;
-const int DIGITAL_TRY_COUNT = 250; 
-
-const int PIN_TOO_NOISY = -1;
-
-///////////////////////////////////////////////Implementation
-int analogDebounce(int bouncing_pin)
-{    
-  // Count the bounces
-  int analog_trend_count = 0;
-  bool analog_reading = analogRead(bouncing_pin);  
-  
-  // Read a bouncing pin and save the state
-  bool last_analog_reading = analog_reading;   
-  
-  // Get timestamp from the system clock counter
-  unsigned long system_time_micros = micros(); 
- 
- // Spin for a max of millisec
-  while(system_time_micros != ( micros()  + ANALOG_DEBOUNCE_TIME_MICROS) )
-  {
-    analog_reading = analogRead(bouncing_pin);
-    
-    if( analog_trend_count && (abs(analog_reading - last_analog_reading) < ANALOG_ACCEPTABLE_DRIFT)  )    
-    {
-      analog_trend_count++;
-    }//end if
-    
-    if( analog_trend_count && (abs(analog_reading - last_analog_reading) > ANALOG_ACCEPTABLE_DRIFT)  )    
-    {
-       analog_trend_count--; 
-       last_analog_reading = last_analog_reading;
-    }//end if
-  
-    if(analog_trend_count > ANALOG_TRY_COUNT)
-    {   
-      
-      return analog_reading;   
-    }else{         
-      
-      last_analog_reading = analog_reading;
-    }//end else
-  }//end while
-  
-  return PIN_TOO_NOISY;
-}//end functn*/
