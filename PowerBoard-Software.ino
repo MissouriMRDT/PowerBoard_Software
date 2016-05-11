@@ -121,6 +121,8 @@ float adc_reading = 0;
 
 //////////////////////////////////////////////Sensor
 // ACS_722 IC Sensor Specs 
+//const float SENSOR_SENSITIVITY   = 0.033;    //volts/amp
+//const float SENSOR_SCALE         = 0.5;      //volts/amp
 const float SENSOR_SENSITIVITY   = 0.125;    //volts/amp
 const float SENSOR_SCALE         = 0.1;      //volts/amp
 const float SENSOR_BIAS          = VCC * SENSOR_SCALE;
@@ -191,7 +193,7 @@ void setup()
   digitalWrite(M7_CNTRL_PA_7, HIGH);
   digitalWrite(M8_CNTRL_PP_5, HIGH);
   
-  Serial.begin(9600);
+  Serial6.begin(9600);
 
   FromBMS.begin(details(receive_bms_telem), &Serial6);   // TODO :  pick Serial line. Check pins.
   ToBMS.begin(details(send_bms_command), &Serial6);
@@ -411,22 +413,12 @@ void loop()
       case 0:
         break;
         
-      case BMS_BATTERY_PACK_ON_OFF:
- //TODO? Gbenga/Reed?
-        //roveComm_SendMsg(BMS_BATTERY_PACK_ON_OFF, sizeof(receive_bms_telem.no_data), &receive_bms_telem.no_data);
-        break;
-        
-      case BMS_BATTERY_PACK_ON_OFF_REBOOT:
-        //roveComm_SendMsg(BMS_BATTERY_PACK_ON_OFF_REBOOT, sizeof(receive_bms_telem.no_data), &receive_bms_telem.no_data);
-        break;
-        
       case BMS_BATTERY_PACK_VOLTAGE:
         roveComm_SendMsg(BMS_BATTERY_PACK_VOLTAGE, sizeof(receive_bms_telem.pack_voltage), &receive_bms_telem.pack_voltage);
         break;
         
-      case BMS_BATTERY_PACK_CURRENT:
-      
-        //roveComm_SendMsg(BMS_BATTERY_PACK_CURRENT, sizeof(receive_bms_telem.pack_current), &receive_bms_telem.pack_current);
+      case BMS_BATTERY_PACK_CURRENT:      
+        roveComm_SendMsg(BMS_BATTERY_PACK_CURRENT, sizeof(receive_bms_telem.pack_current), &receive_bms_telem.pack_current);
         break;
         
       default:
