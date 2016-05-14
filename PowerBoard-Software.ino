@@ -13,7 +13,6 @@
 #include <SPI.h>
 #include <Ethernet.h>
 #include <EthernetUdp.h>
-#include <EasyTransfer.h>
 
 //RoveWare
 #include <RoveBoard.h>
@@ -52,36 +51,12 @@ const uint8_t BUS_M8_ON_OFF         = 7;
 const uint8_t BUS_5V_ON_OFF         = 8;
 const uint8_t BUS_12V_ON_OFF        = 9;
 
-//From the MSP 432 Serial
-const uint8_t BMS_BATTERY_PACK_ON_OFF          = 1040;
-const uint8_t BMS_BATTERY_PACK_ON_OFF_REBOOT   = 1041;
-
-const uint8_t BMS_BATTERY_PACK_VOLTAGE         = 1072;
-const uint8_t BMS_BATTERY_PACK_CURRENT         = 1073;
-
 //Rovecomm :: RED packet :: data_id and data_value with number of data bytes size
 uint16_t data_id       = 0;
 size_t   data_size     = 0; 
 uint8_t  data_value    = 0;
 
 const int ROVECOMM_DELAY = 10;
-
-EasyTransfer FromBMS, ToBMS;
-
-typedef struct 
-{
-  int16_t data_id;
-  float pack_voltage;
-  float pack_current;
-} recieve_data;
-
-typedef struct 
-{
-  int16_t data_id; 
-} send_data;
-
-recieve_data receive_bms_telem;
-send_data    send_bms_command;
 
 //////////////////////////////////////////////Pinmap
 // Control Pins
@@ -121,10 +96,10 @@ float adc_reading = 0;
 
 //////////////////////////////////////////////Sensor
 // ACS_722 IC Sensor Specs 
-//const float SENSOR_SENSITIVITY   = 0.033;    //volts/amp
-//const float SENSOR_SCALE         = 0.5;      //volts/amp
-const float SENSOR_SENSITIVITY   = 0.125;    //volts/amp
-const float SENSOR_SCALE         = 0.1;      //volts/amp
+const float SENSOR_SENSITIVITY   = 0.033;    //volts/amp
+const float SENSOR_SCALE         = 0.5;      //volts/amp
+//const float SENSOR_SENSITIVITY   = 0.125;    //volts/amp
+//const float SENSOR_SCALE         = 0.1;      //volts/amp
 const float SENSOR_BIAS          = VCC * SENSOR_SCALE;
 
 const float CURRENT_MAX          = (VCC - SENSOR_BIAS) / SENSOR_SENSITIVITY;
@@ -192,11 +167,6 @@ void setup()
   digitalWrite(M6_CNTRL_PH_0, HIGH);
   digitalWrite(M7_CNTRL_PA_7, HIGH);
   digitalWrite(M8_CNTRL_PP_5, HIGH);
-  
-  Serial6.begin(9600);
-
-  FromBMS.begin(details(receive_bms_telem), &Serial6);   // TODO :  pick Serial line. Check pins.
-  ToBMS.begin(details(send_bms_command), &Serial6);
  
   roveComm_Begin(192, 168, 1, POWERBOARD_IP_DEVICE_ID);
   
@@ -267,7 +237,7 @@ void loop()
   
   if(singleDebounce(M7_AMPS_PB_4, ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD) )
   {
-    digitalWrite(M7_CNTRL_PA_7, LOW);
+   // digitalWrite(M7_CNTRL_PA_7, LOW);
     roveComm_SendMsg(POWER_BUS_OVER_CURRENT, sizeof(BUS_M7_ON_OFF), &BUS_M7_ON_OFF);
     delay(ROVECOMM_DELAY);
   }//end if
@@ -392,18 +362,6 @@ void loop()
          }//endswitch 
          break;
          
-    case BMS_BATTERY_PACK_ON_OFF:
-        send_bms_command.data_id = BMS_BATTERY_PACK_ON_OFF;
-        ToBMS.sendData();
-        send_bms_command.data_id = 0;
-        break;   
-        
-    case BMS_BATTERY_PACK_ON_OFF_REBOOT:
-        send_bms_command.data_id = BMS_BATTERY_PACK_ON_OFF;
-        ToBMS.sendData();
-        send_bms_command.data_id = 0;
-        break;
-       
     default:
       //Serial.print("Unrecognized data_id :");
       //Serial.println(data_id);
@@ -411,7 +369,7 @@ void loop()
   }//endswitch 
  
   adc_reading = analogRead(BUS_5V_AMPS_PE_2);
-  current_reading = mapFloats(adc_reading, ADC_MIN, ADC_MAX, CURRENT_MIN, CURRENT_MAX); 
+  current_reading = mapFloats(adc_reading, ADC_MIN, ADC_MAX, CURRENT_MIN, CURRENT_MAX);
   roveComm_SendMsg(BUS_5V_CURRENT_READING, sizeof(current_reading), &current_reading);
   delay(ROVECOMM_DELAY);
   
@@ -458,28 +416,5 @@ void loop()
   current_reading = mapFloats(adc_reading, ADC_MIN, ADC_MAX, CURRENT_MIN, CURRENT_MAX);
   roveComm_SendMsg(M8_CURRENT_READING, sizeof(current_reading), &current_reading);
   delay(ROVECOMM_DELAY);
-  
-  if(FromBMS.receiveData())
-  {
-    switch ( receive_bms_telem.data_id )
-      { 
-      case 0:
-        break;
-        
-      case BMS_BATTERY_PACK_VOLTAGE:
-        roveComm_SendMsg(BMS_BATTERY_PACK_VOLTAGE, sizeof(receive_bms_telem.pack_voltage), &receive_bms_telem.pack_voltage);
-        break;
-        
-      case BMS_BATTERY_PACK_CURRENT:      
-        roveComm_SendMsg(BMS_BATTERY_PACK_CURRENT, sizeof(receive_bms_telem.pack_current), &receive_bms_telem.pack_current);
-        break;
-        
-      default:
-          //Serial.print("Unrecognized data :");
-          //Serial.println(data);
-          break; 
-       }//endswitch
-  }//end if
-  
 }//end loop
 
