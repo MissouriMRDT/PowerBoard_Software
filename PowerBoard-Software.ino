@@ -165,7 +165,10 @@ void setup()
   digitalWrite(M4_CNTRL_PP_3, HIGH);
   digitalWrite(M5_CNTRL_PH_1, HIGH);
   digitalWrite(M6_CNTRL_PH_0, HIGH);
-  digitalWrite(M7_CNTRL_PA_7, HIGH);
+  
+  //Hardware Error on M7
+  digitalWrite(M7_CNTRL_PA_7, LOW);
+  
   digitalWrite(M8_CNTRL_PP_5, HIGH);
  
   roveComm_Begin(192, 168, 1, POWERBOARD_IP_DEVICE_ID);
