@@ -19,9 +19,6 @@
 #include <RoveEthernet.h>
 #include <RoveComm.h>
 
-// RED udp device id by fourth octet
-const int POWERBOARD_IP_DEVICE_ID   = 132;
-
 // RED can toggle the bus by bool
 const uint16_t NO_ROVECOMM_MESSAGE   = 0;
 
@@ -165,15 +162,10 @@ void setup()
   digitalWrite(M4_CNTRL_PP_3, HIGH);
   digitalWrite(M5_CNTRL_PH_1, HIGH);
   digitalWrite(M6_CNTRL_PH_0, HIGH);
-  
-  //Hardware Error on M7
-  digitalWrite(M7_CNTRL_PA_7, HIGH);
-  
+  digitalWrite(M7_CNTRL_PA_7, HIGH);  
   digitalWrite(M8_CNTRL_PP_5, HIGH);
  
-  roveComm_Begin(192, 168, 1, POWERBOARD_IP_DEVICE_ID);
-  
-  Serial.begin(9600);
+  roveComm_Begin(192, 168, 1, 132);
   
 }//end setup
 
@@ -414,13 +406,11 @@ void loop()
   
   adc_reading = analogRead(M7_AMPS_PB_4);
   current_reading = mapFloats(adc_reading, ADC_MIN, ADC_MAX, CURRENT_MIN, CURRENT_MAX);
-  Serial.print("M7: "); Serial.println(current_reading); Serial.println(adc_reading);
   roveComm_SendMsg(M7_CURRENT_READING, sizeof(current_reading), &current_reading);
   delay(ROVECOMM_DELAY);
   
   adc_reading = analogRead(M8_AMPS_PD_2);
   current_reading = mapFloats(adc_reading, ADC_MIN, ADC_MAX, CURRENT_MIN, CURRENT_MAX);
-  Serial.print("M8: "); Serial.println(current_reading); Serial.println(adc_reading);
   roveComm_SendMsg(M8_CURRENT_READING, sizeof(current_reading), &current_reading);
   delay(ROVECOMM_DELAY);
 }//end loop
