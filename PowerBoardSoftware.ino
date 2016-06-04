@@ -33,6 +33,8 @@ const uint16_t M8_CURRENT_READING        = 1111;
 const uint16_t BUS_5V_CURRENT_READING    = 1112;
 const uint16_t BUS_12V_CURRENT_READING   = 1113;
 
+const uint16_t ZENITH_POWER_RESET        = 1041;
+
 const uint16_t POWER_BUS_ENABLE          = 1088;
 const uint16_t POWER_BUS_DISABLE         = 1089;
 const uint16_t POWER_BUS_OVER_CURRENT    = 1090;
@@ -47,6 +49,10 @@ const uint8_t BUS_M7_ON_OFF         = 6;
 const uint8_t BUS_M8_ON_OFF         = 7;
 const uint8_t BUS_5V_ON_OFF         = 8;
 const uint8_t BUS_12V_ON_OFF        = 9;
+
+const int ZENITH_POWER_RESET_DELAY = 3000;
+
+const int ` = 2000;
 
 //Rovecomm :: RED packet :: data_id and data_value with number of data bytes size
 uint16_t data_id       = 0;
@@ -154,6 +160,9 @@ void setup()
   
   // Turn on everything when we begin
   digitalWrite(BUS_5V_CNTRL_PP_2, HIGH);
+  
+  delay(ZENITH_POWER_5V_RESET_DELAY);
+  
   digitalWrite(BUS_12V_CNTRL_PN_3, HIGH);
   
   digitalWrite(M1_CNTRL_PK_7, HIGH);
@@ -308,56 +317,90 @@ void loop()
        }//endswitch 
        break;  
      
-      case POWER_BUS_DISABLE:
+    case POWER_BUS_DISABLE:
+    
+      switch ( data_value )
+      { 
+        case BUS_5V_ON_OFF:
+          digitalWrite(BUS_5V_CNTRL_PP_2, LOW);
+          break;
+          
+        case BUS_12V_ON_OFF:
+          digitalWrite(BUS_12V_CNTRL_PN_3, LOW);
+          break;
+          
+        case BUS_M1_ON_OFF:
+          digitalWrite(M1_CNTRL_PK_7, LOW);
+          break;
+          
+        case BUS_M2_ON_OFF:
+          digitalWrite(M2_CNTRL_PQ_1, LOW);
+          break;
+          
+        case BUS_M3_ON_OFF:
+          digitalWrite(M3_CNTRL_PK_6, LOW);
+          break;
+          
+        case BUS_M4_ON_OFF:
+          digitalWrite(M4_CNTRL_PP_3, LOW);
+          break;
+          
+        case BUS_M5_ON_OFF:
+          digitalWrite(M5_CNTRL_PH_1, LOW);
+          break;
+          
+        case BUS_M6_ON_OFF:
+          digitalWrite(M6_CNTRL_PH_0, LOW);
+          break;
+          
+        case BUS_M7_ON_OFF:
+          digitalWrite(M7_CNTRL_PA_7, LOW);
+          break;
+          
+        case BUS_M8_ON_OFF:
+          digitalWrite(M8_CNTRL_PP_5, LOW);
+          break;
+          
+        default:
+          //Serial.print("Unrecognized data :");
+          //Serial.println(data);
+          break; 
+       }//endswitch 
+       break;
+       
+    case ZENITH_POWER_RESET:
       
-        switch ( data_value )
-        { 
-          case BUS_5V_ON_OFF:
-            digitalWrite(BUS_5V_CNTRL_PP_2, LOW);
-            break;
+      digitalWrite(M1_CNTRL_PK_7, LOW);
+      digitalWrite(M2_CNTRL_PQ_1, LOW);
+      digitalWrite(M3_CNTRL_PK_6, LOW);
+      digitalWrite(M4_CNTRL_PP_3, LOW);
+      digitalWrite(M5_CNTRL_PH_1, LOW);
+      digitalWrite(M6_CNTRL_PH_0, LOW);
+      digitalWrite(M7_CNTRL_PA_7, LOW);  
+      digitalWrite(M8_CNTRL_PP_5, LOW);
             
-          case BUS_12V_ON_OFF:
-            digitalWrite(BUS_12V_CNTRL_PN_3, LOW);
-            break;
-            
-          case BUS_M1_ON_OFF:
-            digitalWrite(M1_CNTRL_PK_7, LOW);
-            break;
-            
-          case BUS_M2_ON_OFF:
-            digitalWrite(M2_CNTRL_PQ_1, LOW);
-            break;
-            
-          case BUS_M3_ON_OFF:
-            digitalWrite(M3_CNTRL_PK_6, LOW);
-            break;
-            
-          case BUS_M4_ON_OFF:
-            digitalWrite(M4_CNTRL_PP_3, LOW);
-            break;
-            
-          case BUS_M5_ON_OFF:
-            digitalWrite(M5_CNTRL_PH_1, LOW);
-            break;
-            
-          case BUS_M6_ON_OFF:
-            digitalWrite(M6_CNTRL_PH_0, LOW);
-            break;
-            
-          case BUS_M7_ON_OFF:
-            digitalWrite(M7_CNTRL_PA_7, LOW);
-            break;
-            
-          case BUS_M8_ON_OFF:
-            digitalWrite(M8_CNTRL_PP_5, LOW);
-            break;
-            
-          default:
-            //Serial.print("Unrecognized data :");
-            //Serial.println(data);
-            break; 
-         }//endswitch 
-         break;
+      digitalWrite(BUS_12V_CNTRL_PN_3, LOW);      
+      digitalWrite(BUS_5V_CNTRL_PP_2, LOW);
+      
+      delay(ZENITH_POWER_RESET_DELAY);
+      
+    // Turn on everything back on begin
+    digitalWrite(BUS_5V_CNTRL_PP_2, HIGH);
+     
+    delay(ZENITH_POWER_5V_RESET_DELAY);
+     
+    digitalWrite(BUS_12V_CNTRL_PN_3, HIGH);
+    
+    digitalWrite(M1_CNTRL_PK_7, HIGH);
+    digitalWrite(M2_CNTRL_PQ_1, HIGH);
+    digitalWrite(M3_CNTRL_PK_6, HIGH);
+    digitalWrite(M4_CNTRL_PP_3, HIGH);
+    digitalWrite(M5_CNTRL_PH_1, HIGH);
+    digitalWrite(M6_CNTRL_PH_0, HIGH);
+    digitalWrite(M7_CNTRL_PA_7, HIGH);  
+    digitalWrite(M8_CNTRL_PP_5, HIGH);
+      
+     break;
          
     default:
       //Serial.print("Unrecognized data_id :");
