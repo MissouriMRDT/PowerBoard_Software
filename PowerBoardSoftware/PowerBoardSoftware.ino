@@ -83,7 +83,7 @@ const int M4_CNTRL            = 53;
 const int M5_CNTRL            = 73;
 const int M6_CNTRL            = 72;
 const int M7_CNTRL            = 71;
-const int FAN_CNTRL           = 42;
+const int FAN_CNTRL           = 2;
 
 
 // Sensor Volts/Amps Readings Pins
@@ -122,7 +122,7 @@ const float CURRENT_MIN          = -SENSOR_BIAS / SENSOR_SENSITIVITY;
 float current_reading            = 0;
 
 const float VOLTS_MIN            = 0;
-const float VOLTS_MAX            = 33.6;
+const float VOLTS_MAX            = 40;
 float voltage_reading            = 0;
 
 const int DEBOUNCE_DELAY = 10;
@@ -156,6 +156,11 @@ float mapFloats(float x, float in_min, float in_max, float out_min, float out_ma
   return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }//end fnctn
 
+///scales the input value x from analog input range (0 to 3.3) to actual values (Pack voltage or current)
+float scale(float x, float in_min, float in_max, float out_min, float out_max)
+{
+  return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+}
 
 //////////////////////////////////////////////Powerboard Begin
 // the setup routine runs once when you press reset
@@ -177,6 +182,8 @@ void setup()
   pinMode(M5_CNTRL, OUTPUT);
   pinMode(M6_CNTRL, OUTPUT);
   pinMode(M7_CNTRL, OUTPUT);
+
+  pinMode(FAN_CNTRL, OUTPUT);
   
   // Turn on everything when we begin
   delay(ROVER_POWER_RESET_DELAY);
@@ -614,7 +621,9 @@ void loop()
 
             case 'd':
               adc_reading = analogRead(PACK_VOLTAGE);
-              voltage_reading = mapFloats(adc_reading, ADC_MIN, ADC_MAX, VOLTS_MIN, VOLTS_MAX);
+              Serial.print("ADC Reading: ");
+              Serial.println(adc_reading);
+              voltage_reading = scale(adc_reading, ADC_MIN, ADC_MAX, VOLTS_MIN, VOLTS_MAX);
               ///roveComm_SendMsg(PACK_VOLTAGE_READING, sizeof(voltage_reading), &voltage_reading);
               Serial.print("Pack Voltage Reading: ");
               Serial.println(voltage_reading);
@@ -703,9 +712,9 @@ void loop()
   delay(ROVECOMM_DELAY);
 
   adc_reading = analogRead(PACK_VOLTAGE);
-  voltage_reading = mapFloats(adc_reading, ADC_MIN, ADC_MAX, VOLTS_MIN, VOLTS_MAX);
+  voltage_reading = scale(adc_reading, ADC_MIN, ADC_MAX, VOLTS_MIN, VOLTS_MAX);
   ///roveComm_SendMsg(PACK_VOLTAGE_READING, sizeof(voltage_reading), &voltage_reading);
-  Serial.println(PACK_VOLTAGE_READING);
+  Serial.println(voltage_reading);
   delay(ROVECOMM_DELAY);*/
 }//end loop
 
