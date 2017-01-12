@@ -83,7 +83,7 @@ const int M4_CNTRL            = 53;
 const int M5_CNTRL            = 73;
 const int M6_CNTRL            = 72;
 const int M7_CNTRL            = 71;
-const int FAN_CNTRL           = 2;
+const int FAN_CNTRL           = 42;
 
 
 // Sensor Volts/Amps Readings Pins
