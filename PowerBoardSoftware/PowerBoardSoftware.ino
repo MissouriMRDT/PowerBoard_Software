@@ -1,7 +1,7 @@
 //RoveWare Powerboard ACS_722 Interface
 //
 // Created for Zenith by: Judah Schad, jrs6w7
-// Altered for 2017 Rover by: Jacob Lipina, jrlwd5
+// Altered for Gryphon by: Jacob Lipina, jrlwd5
 //
 // Using http://www.digikey.com/product-detail/en/allegro-microsystems-llc/ACS722LLCTR-40AU-T/620-1640-1-ND/4948876
 //
@@ -225,8 +225,8 @@ void loop()
   if( singleDebounce(LOGIC_AMPS, ESTOP_12V_COM_LOGIC_MAX_AMPS_THRESHOLD) )
   {
     (POWER_BUS_OVER_CURRENT, sizeof(BUS_12V_LOGIC_ON_OFF), &BUS_12V_LOGIC_ON_OFF);         //12V-5A converter is switched off since com
-    delay(500);                                                                            //and logic cannot be individually disabled.
-    digitalWrite(COM_LOGIC_CNTRL, LOW);                                                    //For Rev2 add back the functionality for
+    delay(500);                                                                            //and logic cannot be individually disabled.      DONE
+    digitalWrite(LOGIC_CNTRL, LOW);                                                        //For Rev2 add back the functionality for
     delay(ROVECOMM_DELAY);                                                                 //com and logic truning off individualy.
   }//end if
 
@@ -234,7 +234,7 @@ void loop()
   {
     (POWER_BUS_OVER_CURRENT, sizeof(BUS_12V_COM_ON_OFF), &BUS_12V_COM_ON_OFF);
     delay(500);
-    digitalWrite(COM_LOGIC_CNTRL, LOW);
+    digitalWrite(COM_CNTRL, LOW);
     delay(ROVECOMM_DELAY);
   }//end if
   
@@ -312,13 +312,13 @@ void loop()
           digitalWrite(COM_LOGIC_CNTRL, HIGH);
           break;
           
-        /*case BUS_12V_LOGIC_ON_OFF:
+        case BUS_12V_LOGIC_ON_OFF:
           digitalWrite(LOGIC_CNTRL, HIGH); 
-          break;                                     It is not possible to switch these busses individually
-                                                     until Rev 2 since an error was made in the board layout
+          break;                                     
+
         case BUS_12V_COM_ON_OFF:
           digitalWrite(COM_CNTRL, HIGH);
-          break;*/
+          break;
           
         case BUS_M1_ON_OFF:
           digitalWrite(M1_CNTRL, HIGH);
@@ -372,13 +372,13 @@ void loop()
               digitalWrite(COM_LOGIC_CNTRL, LOW);
               break;
               
-            /*case BUS_12V_LOGIC_ON_OFF:
+            case BUS_12V_LOGIC_ON_OFF:
               digitalWrite(LOGIC_CNTRL, LOW);
-              break;                                 It is not possible to switch these busses individually
-                                                     until Rev 2 since an error was made in the board layout
+              break;                                 
+              
             case BUS_12V_COM_ON_OFF:
               digitalWrite(COM_CNTRL, LOW);
-              break;*/
+              break;
               
             case BUS_M1_ON_OFF:
               digitalWrite(M1_CNTRL, LOW);
