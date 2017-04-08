@@ -53,12 +53,13 @@ const uint8_t BUS_12V_ACT_ON_OFF            = 8;
 const uint8_t BUS_12V_LOGIC_ON_OFF          = 9;
 const uint8_t BUS_12V_COM_ON_OFF            = 10;
 const uint8_t BUS_12V_COM_LOGIC_ON_OFF      = 11;
-const uint8_t FAN_ON_OFF                    = 12;
+const uint8_t FAN_ON_OFF                    = 12; //power board fan
 
 const uint16_t BMS_PACK_CURRENT             = 1072;
 const uint16_t BMS_PACK_OVER_CURRENT        = 1076;  //notification sent if pack overcurrents and shuts down
-const uint16_t BMS_V_CHECK_ARRAY            = ID;
-const uint16_t BMS_V_CHECK_OUT              = ID;
+const uint16_t BMS_V_CHECK_ARRAY            = 1073;  //Total pack voltage
+const uint16_t BMS_TEMP1                    = 1074;  
+//const uint16_t BMS_TEMP2                    = 1075; //Not yet recieveing 2nd temp sensing from BMS
 const uint16_t BMS_UNDER_VOLTAGE            = 1077;  //notification sent if a cell drops below a specified voltage. Value indicates cell
 const uint16_t CELL_1_VOLTAGE               = 1056;
 const uint16_t CELL_2_VOLTAGE               = 1057;
@@ -70,11 +71,10 @@ const uint16_t CELL_7_VOLTAGE               = 1062;
 const uint16_t CELL_8_VOLTAGE               = 1063;
 
 const uint16_t BMS_COMMAND                  = 1042;
-const uint8_t BATT_PACK_OFF                 = 13;
-const uint8_t BATT_PACK_RESET               = 14;
-const uint8_t BATT_FANS_ON                  = 15;
-const uint8_t BATT_FANS_OFF                 = 16;
-const uint8_t BMS_SOUND_BUZZER              = 17;
+const uint16_t BATT_PACK_OFF                = 1040;
+const uint16_t BATT_PACK_RESET              = 1041;
+const uint16_t BATT_FANS_ON_OFF             = 1078;
+//const uint16_t SOUND_BUZZER                 = 1079; //Might be needed if we want to honk at other rovers.
 
 const int ROVER_POWER_RESET_DELAY           = 3000;
 
@@ -150,28 +150,6 @@ const int ESTOP_12V_COM_LOGIC_MAX_AMPS_THRESHOLD = 5;
 const int ESTOP_12V_EXTRA_ACT_MAX_AMPS_THRESHOLD = 15;   
 const int ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD = 22;
 
-/////////////////////////////////////////Data from BMS
-
-uint8_t cell_voltages_byte[12];
-float cell_voltages[8]; //each space in the array is a cell voltage
-
-union txable_float {        
-    float f;
-    unsigned char ch[4];
-};
-
-union txable_float v_check_array;
-union txable_float v_check_out;
-union txable_float pack_current;
-
-//uint8_t pack_current_byte[4];                          delete after com functionality is verified.
-//uint8_t v_check_array_byte[4];
-//uint8_t v_check_out_byte[4];
-//float pack_current = -1;
-//float v_check_array = -1; //pack voltage at 
-//float v_check_out = -1;
-
-
 // Checks the pin for bouncing voltages to avoid false positives
 bool singleDebounce(int bouncing_pin, int max_amps_threshold)
 {
@@ -189,6 +167,20 @@ bool singleDebounce(int bouncing_pin, int max_amps_threshold)
   return false;
 }//end fntcn
 
+/////////////////////////////////////////Data from BMS
+uint8_t cell_voltages_byte[12];
+float cell_voltages[8]; //each space in the array is a cell voltage
+
+union txable_float {        
+    float f;
+    unsigned char ch[4];
+};
+
+union txable_float v_check_array;
+union txable_float bms_temp;      //may need to add another temp variable if we use two temp sensors.
+union txable_float pack_current;
+
+int num_loops = 0; //used to track number of times the main loop has completed a cycle.
 
 ///////////////////////////////////////////////Implementation
 float mapFloats(float x, float in_min, float in_max, float out_min, float out_max)
@@ -253,7 +245,8 @@ void setup()
   digitalWrite(FAN_CNTRL, HIGH);
   
   roveComm_Begin(192, 168, 1, 132);
-  Serial7.begin(115200);
+  Serial7.begin(115200); //corresponds to pair of Rx and Tx pins on the Tiva that pb uses to communicate with bms.
+  Serial.begin(9600);
 }//end setup
 
 //Loop
@@ -520,36 +513,39 @@ void loop()
 
       digitalWrite(FAN_CNTRL, HIGH);
       break;
-      
-    case BMS_COMMAND: //data_id is 1042
+
+    case BATT_PACK_OFF: //data_id is 1040
+        Serial7.write(1);
+        //Serial.println("BMS shutdown");
+        break;
+
+    case BATT_PACK_RESET: //data_id is 1041
+        Serial7.write(2);
+        break;
+
+    case BATT_FANS_ON_OFF: //data_id is 1078
           switch (data_value)
           {
-            case BATT_PACK_OFF:
-              Serial7.write(1);
+            case '1':
+              Serial7.write(3); //fans on
               break;
 
-            case BATT_PACK_RESET:
-              Serial7.write(2);
+            case '0':
+              Serial7.write(4); //fans off
+              break;
+          }
+
+    /*case SOUND_BUZZER: //data_id is 1079            //here in case base station wants to honk at other rovers. May not end up using this case.
+        switch (data_value)
+          {
+            case '1':
+              Serial7.write(number); //buzzer on
               break;
 
-            case BATT_FANS_ON:
-              Serial7.write(3);
+            case '0':
+              Serial7.write(number); //buzzer off
               break;
-
-            case BATT_FANS_OFF:
-              Serial7.write(4);
-              break;
-
-            case BMS_SOUND_BUZZER:
-              Serial7.write(5);
-              break;
-
-            default:
-              break;
-          }//endswitch
-          break
-
-    
+          }*/
 
     default:
       //Serial.println("Unrecognized data_id: 5");
@@ -618,6 +614,12 @@ void loop()
   delay(ROVECOMM_DELAY);
 
   ////////////// BMS Communication /////////////////////////////////////////////////////////
+  
+  if (num_loops > 18 ) 
+  {
+    num_loops = 0;    //resets loops to zero to start count to 18 over again
+    Serial7.write(5); //tells bms that I am ready to recieve data
+  }
 
   if (Serial7.available() >= 24) //number of bytes I expect to recieve from bms
   { 
@@ -626,54 +628,45 @@ void loop()
       pack_current.ch[i] = Serial7.read(); 
     }
 
-    /*for (int i=0; i < 4; i++)
-    {
-      Serial.write(pack_current.ch[i]);
-    }*/
-
+    /*Serial.println(pack_current.ch[0]);           //used when testing to check if i recieve the correct bytes in the right order
+    Serial.println(pack_current.ch[1],);
+    Serial.println(pack_current.ch[2], HEX);
+    Serial.println(pack_current.ch[3], HEX);*/
+    
             //assuming least significant byte first
-    pack_current = ((pack_current_byte[0]) | (pack_current_byte[1] << 8) | (pack_current_byte[2] << 16) | (pack_current_byte[3] <<24));
-    roveComm_SendMsg(BMS_PACK_CURRENT, sizeof(pack_current), &pack_current);
+    //pack_current = ((pack_current_byte[0]) | (pack_current_byte[1] << 8) | (pack_current_byte[2] << 16) | (pack_current_byte[3] <<24));
+    roveComm_SendMsg(BMS_PACK_CURRENT, sizeof(pack_current.f), &pack_current.f);
     delay(ROVECOMM_DELAY);
 
-    for (int i=0; i < 4; i++)
+    for (int i=0; i < 4; i++)           
     {
       v_check_array.ch[i] = Serial7.read();
     }       
     
-    /*for (int i=0; i < 4; i++)
-    {
-      Serial.write(v_check_array.ch[i]);
-    }*/
-    
-    v_check_array = ((v_check_array_byte[0]) | (v_check_array_byte[1] << 8) | (v_check_array_byte[2] << 16) | (v_check_array_byte[3] <<24));
-    roveComm_SendMsg(BMS_V_CHECK_ARRAY, sizeof(v_check_array), &v_check_array);
+    //v_check_array = ((v_check_array_byte[0]) | (v_check_array_byte[1] << 8) | (v_check_array_byte[2] << 16) | (v_check_array_byte[3] <<24));
+    roveComm_SendMsg(BMS_V_CHECK_ARRAY, sizeof(v_check_array.f), &v_check_array.f);
     delay(ROVECOMM_DELAY);
 
     for (int i=0; i < 4; i++)
     {
-      v_check_out.ch[i] = Serial7.read();
-    }       
-    
-    /*for (int i=0; i < 4; i++)
-    {
-      Serial.write(v_check_out.ch[i]);
-    }*/  
-    
-    v_check_out = ((v_check_out_byte[0]) | (v_check_out_byte[1] << 8) | (v_check_out_byte[2] << 16) | (v_check_out_byte[3] <<24));
-    roveComm_SendMsg(BMS_V_CHECK_OUT, sizeof(v_check_out), &v_check_out);
+      bms_temp.ch[i] = Serial7.read();
+    }  
+
+    roveComm_SendMsg(BMS_TEMP1, sizeof(bms_temp.f), &bms_temp.f);
     delay(ROVECOMM_DELAY);
+
+       
+    /*Serial.println(pack_current.f);         //used when testing
+    Serial.println(pack_current.ch[0], HEX);
+    Serial.println(v_check_array.f);
+    Serial.println(bms_temp.f);*/
+     
   
     for (int i=0; i < 12; i++)
     {
       cell_voltages_byte[i] = Serial7.read();
     }   
 
-    /*for (int i=0; i < 3; i++)
-    {
-      Serial.write(cell_voltages_byte[i]);
-    }*/  
-  
     //The CVR0x registers, as read in from SPI, are 8 bits, but the actual voltages are 12-bit floats
     // spread out across multiple registers. Consult the LTC6803 datasheet (table 8, p. 23)
     //
@@ -716,9 +709,11 @@ void loop()
       {
         cell_voltages[k] -= 512;
         cell_voltages[k] *= 1.5 * .001;//I don't yet know if this is correct; taken wholesale from solar car*/
-      }   
-  }
+      } 
 
+    
+  }
+  num_loops++;
 }//end loop
 
 
