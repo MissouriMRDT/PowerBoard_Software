@@ -36,9 +36,9 @@ const uint16_t LOGIC_12V_CURRENT_READING    = 1116;
 const uint16_t COM_12V_CURRENT_READING      = 1117;
 const uint16_t PACK_VOLTAGE_READING         = 1120;
 
-const uint16_t ROVER_POWER_RESET            = 1041;
+//const uint16_t ROVER_POWER_RESET            = 1041; //reset on power board buses no longer necessary since id 1041 now tells bms to turn off all power to rover. This accomplishes the same thing.
 const uint16_t POWER_BUS_ENABLE             = 1088;
-const uint16_t POWER_BUS_DISABLE            = 1089;
+const uint16_t POWER_BUS_DISABLE            = 1089; 
 const uint16_t POWER_BUS_OVER_CURRENT       = 1090;   
 
 const uint8_t BUS_M1_ON_OFF                 = 0;
@@ -247,6 +247,8 @@ void setup()
   roveComm_Begin(192, 168, 1, 132);
   Serial7.begin(115200); //corresponds to pair of Rx and Tx pins on the Tiva that pb uses to communicate with bms.
   Serial.begin(9600);
+  delay(2000);
+  Serial.println("Monitor Running");
 }//end setup
 
 //Loop
@@ -477,7 +479,7 @@ void loop()
          }//endswitch 
          break;
 
-    case ROVER_POWER_RESET: //data_id is 1041
+    /*case ROVER_POWER_RESET: //data_id is 1041
       
       digitalWrite(M1_CNTRL, LOW);
       digitalWrite(M2_CNTRL, LOW);
@@ -512,7 +514,7 @@ void loop()
       digitalWrite(M7_CNTRL, HIGH);
 
       digitalWrite(FAN_CNTRL, HIGH);
-      break;
+      break;*/
 
     case BATT_PACK_OFF: //data_id is 1040
         Serial7.write(1);
@@ -703,6 +705,7 @@ void loop()
     roveComm_SendMsg(CELL_8_VOLTAGE, sizeof(cell_voltages[7]), &cell_voltages[7]);
     delay(ROVECOMM_DELAY);
 
+    
 
     //These still aren't normal voltages after putting them in floats; you need to do some extra processing.
     for(int k = 0; k < 8; k++)
@@ -711,8 +714,43 @@ void loop()
         cell_voltages[k] *= 1.5 * .001;//I don't yet know if this is correct; taken wholesale from solar car*/
       } 
 
+    /*Serial.println(cell_voltages[0]);
+    Serial.println(cell_voltages[1]);
+    Serial.println(cell_voltages[2]);
+    Serial.println(cell_voltages[3]);
+    Serial.println(cell_voltages[4]);
+    Serial.println(cell_voltages[5]);
+    Serial.println(cell_voltages[6]);
+    Serial.println(cell_voltages[7]);
+
     
+    
+
   }
+  char incomingByte;
+    if(Serial.available() > 0)
+    {
+      incomingByte = Serial.read();
+      Serial.print(incomingByte);
+      switch (incomingByte)                
+      {   
+        case '1':
+          Serial7.write(3); //fans on
+          Serial.println("fans on");
+          break; 
+
+        case '2':
+          Serial7.write(4); //fans off
+          Serial.println("fans off");
+          break;
+
+        case '3':
+          digitalWrite(M7_CNTRL, LOW);
+          delay(2000);
+          digitalWrite(M7_CNTRL, HIGH);
+          break;
+      }
+    }*/
   num_loops++;
 }//end loop
 
