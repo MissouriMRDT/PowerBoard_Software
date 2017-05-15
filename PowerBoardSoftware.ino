@@ -1,4 +1,4 @@
-//RoveWare Powerboard ACS_722 Interface
+//RoveWare Spare Powerboard ACS_722 Interface
 //
 // Created for Zenith by: Judah Schad, jrs6w7
 // Altered for Gryphon by: Jacob Lipina, jrlwd5
@@ -36,7 +36,6 @@ const uint16_t LOGIC_12V_CURRENT_READING    = 1116;
 const uint16_t COM_12V_CURRENT_READING      = 1117;
 const uint16_t PACK_VOLTAGE_READING         = 1120;
 
-//const uint16_t ROVER_POWER_RESET            = 1041; //reset on power board buses no longer necessary since id 1041 now tells bms to turn off all power to rover. This accomplishes the same thing.
 const uint16_t POWER_BUS_ENABLE             = 1088;
 const uint16_t POWER_BUS_DISABLE            = 1089; 
 const uint16_t POWER_BUS_OVER_CURRENT       = 1090;   
@@ -93,9 +92,9 @@ const int ROVECOMM_DELAY = 10;
 //const int BATTERYPACK_CNTRL  = 11;
 const int EXTRA_CNTRL         = 17;   
 const int ACT_CNTRL           = 13;
-const int LOGIC_CNTRL         = 18; //created new
-const int COM_CNTRL           = 34; //created new
-const int COM_LOGIC_CNTRL     = 11; //created new
+const int LOGIC_CNTRL         = 18;
+const int COM_CNTRL           = 34;
+const int COM_LOGIC_CNTRL     = 11; 
 const int M1_CNTRL            = 58;
 const int M2_CNTRL            = 57;
 const int M3_CNTRL            = 74;
@@ -212,6 +211,19 @@ void setup()
   pinMode(M6_CNTRL, OUTPUT);
   pinMode(M7_CNTRL, OUTPUT);
   pinMode(FAN_CNTRL, OUTPUT);
+
+  pinMode(EXTRA_AMPS, INPUT);
+  pinMode(ACT_AMPS, INPUT);
+  pinMode(COM_AMPS, INPUT);
+  pinMode(LOGIC_AMPS, INPUT);
+  pinMode(M1_AMPS, INPUT);
+  pinMode(M2_AMPS, INPUT);
+  pinMode(M3_AMPS, INPUT);
+  pinMode(M4_AMPS, INPUT);
+  pinMode(M5_AMPS, INPUT);
+  pinMode(M6_AMPS, INPUT);
+  pinMode(M7_AMPS, INPUT);
+  pinMode(PACK_VOLTAGE, INPUT);
   
   digitalWrite(EXTRA_CNTRL, LOW);
   digitalWrite(ACT_CNTRL, LOW);
@@ -248,7 +260,6 @@ void setup()
   Serial7.begin(115200); //corresponds to pair of Rx and Tx pins on the Tiva that pb uses to communicate with bms.
   Serial.begin(9600);
   delay(2000);
-  Serial.println("Monitor Running");
 }//end setup
 
 //Loop
@@ -256,95 +267,84 @@ void setup()
 /////////////////////////////////////////////Powerboard Loop Forever
 void loop() 
 { 
-  if( singleDebounce(EXTRA_AMPS, ESTOP_12V_EXTRA_ACT_MAX_AMPS_THRESHOLD) ) //checks current reading and if too high, sends error msg to base
-  {                                                                        //station then turns off the bus.      
-    (POWER_BUS_OVER_CURRENT, sizeof(BUS_12V_EXTRA_ON_OFF), &BUS_12V_EXTRA_ON_OFF);
-    delay(500);
-    digitalWrite(EXTRA_CNTRL, LOW);
+  /*If any 12V bus experiences overcurrent, the spare board must send a command to BMS to 
+  shut off power to entire rover. This is due to the abnormal behavior of the 12V regulators
+  that is possibly due to reusing the regulators on a second board.*/
+
+  if( singleDebounce(EXTRA_AMPS, ESTOP_12V_EXTRA_ACT_MAX_AMPS_THRESHOLD) )
+  {                                                                           
+    (POWER_BUS_OVER_CURRENT, sizeof(BUS_12V_EXTRA_ON_OFF), &BUS_12V_EXTRA_ON_OFF); //send message to base station first.
+    Serial7.write(1); //then cut off power from the batt pack.
     delay(ROVECOMM_DELAY);
   }//end if
   
   if( singleDebounce(ACT_AMPS, ESTOP_12V_EXTRA_ACT_MAX_AMPS_THRESHOLD) )
   {
     (POWER_BUS_OVER_CURRENT, sizeof(BUS_12V_ACT_ON_OFF), &BUS_12V_ACT_ON_OFF);
-    delay(500);
-    Serial7.write(1); //If actuation overcurrents on spare Rev2 board, entire rover is shut off since the individual regulator can't be shut off.
+    Serial7.write(1);
     delay(ROVECOMM_DELAY);
   }//end if
 
   if( singleDebounce(LOGIC_AMPS, ESTOP_12V_COM_LOGIC_MAX_AMPS_THRESHOLD) )
   {
-    (POWER_BUS_OVER_CURRENT, sizeof(BUS_12V_LOGIC_ON_OFF), &BUS_12V_LOGIC_ON_OFF);
-    delay(500);                                                                            
-    digitalWrite(LOGIC_CNTRL, LOW);                                            
+    (POWER_BUS_OVER_CURRENT, sizeof(BUS_12V_LOGIC_ON_OFF), &BUS_12V_LOGIC_ON_OFF);  
+    Serial7.write(1);                                                                                                                      
     delay(ROVECOMM_DELAY);                                                    
   }//end if
 
   if( singleDebounce(COM_AMPS, ESTOP_12V_COM_LOGIC_MAX_AMPS_THRESHOLD) )
   {
     (POWER_BUS_OVER_CURRENT, sizeof(BUS_12V_COM_ON_OFF), &BUS_12V_COM_ON_OFF);
-    delay(500);
-    digitalWrite(COM_CNTRL, LOW);
-    time1 = millis();
-    com_over_current = 1; //sets com_over_current to true
+    Serial7.write(1);
     delay(ROVECOMM_DELAY);
-  }//end if
-  
-  if(com_over_current = 1)                 //When the communication bus overcurrents, the bus is turned off and our communication with the rover is severed. We would not
-  {                                        //be able to control the rover from base station in any way. This if statement is here to turn the com bus back on 10seconds after 
-    if(millis()>=(time1+10000))            //it is turned off in case the overcurrent was just a random spike. If there actually is a short in the bus, the bus will turn itself 
-      {                                    //off again.
-        digitalWrite(COM_CNTRL,HIGH);
-        com_over_current = 0;
-      }
   }//end if
 
   if( singleDebounce(M1_AMPS, ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD) ) 
   {
-    digitalWrite(M1_CNTRL, LOW);
     (POWER_BUS_OVER_CURRENT, sizeof(BUS_M1_ON_OFF), &BUS_M1_ON_OFF);
+    digitalWrite(M1_CNTRL, LOW);
     delay(ROVECOMM_DELAY);
   }//end if
   
   if( singleDebounce(M2_AMPS, ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD) )
   {
-    digitalWrite(M2_CNTRL, LOW);
     (POWER_BUS_OVER_CURRENT, sizeof(BUS_M2_ON_OFF), &BUS_M2_ON_OFF);
+    digitalWrite(M2_CNTRL, LOW);
     delay(ROVECOMM_DELAY);
   }//end if
   
    if(singleDebounce(M3_AMPS, ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD) )
   {
-    digitalWrite(M3_CNTRL, LOW);
     (POWER_BUS_OVER_CURRENT, sizeof(BUS_M3_ON_OFF), &BUS_M3_ON_OFF);
+    digitalWrite(M3_CNTRL, LOW);
     delay(ROVECOMM_DELAY);
   }//end if
   
   if(singleDebounce(M4_AMPS, ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD) )
   {
-    digitalWrite(M4_CNTRL, LOW);
     (POWER_BUS_OVER_CURRENT, sizeof(BUS_M4_ON_OFF), &BUS_M4_ON_OFF);
+    digitalWrite(M4_CNTRL, LOW);
     delay(ROVECOMM_DELAY);
   }//end if
   
   if( singleDebounce(M5_AMPS, ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD) )
   {
-    digitalWrite(M5_CNTRL, LOW);
     (POWER_BUS_OVER_CURRENT, sizeof(BUS_M5_ON_OFF), &BUS_M5_ON_OFF);
+    digitalWrite(M5_CNTRL, LOW);
     delay(ROVECOMM_DELAY);
   }//end if
   
   if( singleDebounce(M6_AMPS, ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD) )
   {
-    digitalWrite(M6_CNTRL, LOW);
     (POWER_BUS_OVER_CURRENT, sizeof(BUS_M6_ON_OFF), &BUS_M6_ON_OFF);
+    digitalWrite(M6_CNTRL, LOW);
     delay(ROVECOMM_DELAY);
   }//end if
   
   if(singleDebounce(M7_AMPS, ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD) )
   {
-    digitalWrite(M7_CNTRL, LOW);
     (POWER_BUS_OVER_CURRENT, sizeof(BUS_M7_ON_OFF), &BUS_M7_ON_OFF);
+    digitalWrite(M7_CNTRL, LOW);
     delay(ROVECOMM_DELAY);
   }//end if
   
@@ -416,7 +416,7 @@ void loop()
           //Serial.println("Unrecognized data : 2");
           //Serial.println(data);
           break; 
-     }//endswitch 
+      }//endswitch 
      break;  
  
     case POWER_BUS_DISABLE: //data_id id 1089
@@ -518,7 +518,6 @@ void loop()
 
     case BATT_PACK_OFF: //data_id is 1040
         Serial7.write(1);
-        //Serial.println("BMS shutdown");
         break;
 
     case BATT_PACK_RESET: //data_id is 1041
@@ -621,6 +620,7 @@ void loop()
   {
     num_loops = 0;    //resets loops to zero to start count to 18 over again
     Serial7.write(5); //tells bms that I am ready to recieve data
+    Serial.println("Ask for data");
   }
 
   if (Serial7.available() >= 24) //number of bytes I expect to recieve from bms
@@ -629,7 +629,7 @@ void loop()
     {
       pack_current.ch[i] = Serial7.read(); 
     }
-
+    Serial.println("Recieving data...");
     /*Serial.println(pack_current.ch[0]);           //used when testing to check if i recieve the correct bytes in the right order
     Serial.println(pack_current.ch[1],);
     Serial.println(pack_current.ch[2], HEX);
@@ -657,7 +657,9 @@ void loop()
     roveComm_SendMsg(BMS_TEMP1, sizeof(bms_temp.f), &bms_temp.f);
     delay(ROVECOMM_DELAY);
 
-       
+    Serial.println(pack_current.f);
+    Serial.println(v_check_array.f);
+    Serial.println(bms_temp.f);  
     /*Serial.println(pack_current.f);         //used when testing
     Serial.println(pack_current.ch[0], HEX);
     Serial.println(v_check_array.f);
@@ -721,37 +723,45 @@ void loop()
     Serial.println(cell_voltages[4]);
     Serial.println(cell_voltages[5]);
     Serial.println(cell_voltages[6]);
-    Serial.println(cell_voltages[7]);
+    Serial.println(cell_voltages[7]);*/
 
     
     
 
   }
-  char incomingByte;
-    if(Serial.available() > 0)
-    {
-      incomingByte = Serial.read();
-      Serial.print(incomingByte);
-      switch (incomingByte)                
-      {   
-        case '1':
-          Serial7.write(3); //fans on
-          Serial.println("fans on");
-          break; 
+  /*char incomingByte;             //used to test BMS-PB communication
+  if(Serial.available() > 0)
+  {
+    incomingByte = Serial.read();
+    Serial.print(incomingByte);
+    switch (incomingByte)                
+    {   
+      case '1':
+        Serial7.write(3); //fans on
+        Serial.println("fans on");
+        break; 
 
-        case '2':
-          Serial7.write(4); //fans off
-          Serial.println("fans off");
-          break;
+      case '2':
+        Serial7.write(4); //fans off
+        Serial.println("fans off");
+        break;
 
-        case '3':
-          digitalWrite(M7_CNTRL, LOW);
-          delay(2000);
-          digitalWrite(M7_CNTRL, HIGH);
-          break;
-      }
-    }*/
-  num_loops++;
+      case '3':
+        digitalWrite(M7_CNTRL, LOW);
+        delay(2000);
+        digitalWrite(M7_CNTRL, HIGH);
+        break;
+      case '4':
+        Serial7.write(1);
+        Serial.println("Pack Off");
+        break;
+      case '5': 
+        Serial7.write(2);
+        Serial.println("Pack Reset");
+        break;
+    }
+  }*/
+    num_loops++;
 }//end loop
 
 
