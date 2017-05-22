@@ -212,6 +212,19 @@ void setup()
   pinMode(M6_CNTRL, OUTPUT);
   pinMode(M7_CNTRL, OUTPUT);
   pinMode(FAN_CNTRL, OUTPUT);
+
+  pinMode(EXTRA_AMPS, INPUT);
+  pinMode(ACT_AMPS, INPUT);
+  pinMode(COM_AMPS, INPUT);
+  pinMode(LOGIC_AMPS, INPUT);
+  pinMode(M1_AMPS, INPUT);
+  pinMode(M2_AMPS, INPUT);
+  pinMode(M3_AMPS, INPUT);
+  pinMode(M4_AMPS, INPUT);
+  pinMode(M5_AMPS, INPUT);
+  pinMode(M6_AMPS, INPUT);
+  pinMode(M7_AMPS, INPUT);
+  pinMode(PACK_VOLTAGE, INPUT);
   
   digitalWrite(EXTRA_CNTRL, LOW);
   digitalWrite(ACT_CNTRL, LOW);
@@ -248,7 +261,6 @@ void setup()
   Serial7.begin(115200); //corresponds to pair of Rx and Tx pins on the Tiva that pb uses to communicate with bms.
   Serial.begin(9600);
   delay(2000);
-  Serial.println("Monitor Running");
 }//end setup
 
 //Loop
@@ -259,7 +271,6 @@ void loop()
   if( singleDebounce(EXTRA_AMPS, ESTOP_12V_EXTRA_ACT_MAX_AMPS_THRESHOLD) ) //checks current reading and if too high, sends error msg to base
   {                                                                        //station then turns off the bus.      
     (POWER_BUS_OVER_CURRENT, sizeof(BUS_12V_EXTRA_ON_OFF), &BUS_12V_EXTRA_ON_OFF);
-    delay(500);
     digitalWrite(EXTRA_CNTRL, LOW);
     delay(ROVECOMM_DELAY);
   }//end if
@@ -267,15 +278,13 @@ void loop()
   if( singleDebounce(ACT_AMPS, ESTOP_12V_EXTRA_ACT_MAX_AMPS_THRESHOLD) )
   {
     (POWER_BUS_OVER_CURRENT, sizeof(BUS_12V_ACT_ON_OFF), &BUS_12V_ACT_ON_OFF);
-    delay(500);
     digitalWrite(ACT_CNTRL, LOW);
     delay(ROVECOMM_DELAY);
   }//end if
 
   if( singleDebounce(LOGIC_AMPS, ESTOP_12V_COM_LOGIC_MAX_AMPS_THRESHOLD) )
   {
-    (POWER_BUS_OVER_CURRENT, sizeof(BUS_12V_LOGIC_ON_OFF), &BUS_12V_LOGIC_ON_OFF);
-    delay(500);                                                                            
+    (POWER_BUS_OVER_CURRENT, sizeof(BUS_12V_LOGIC_ON_OFF), &BUS_12V_LOGIC_ON_OFF);                                                                         
     digitalWrite(LOGIC_CNTRL, LOW);                                            
     delay(ROVECOMM_DELAY);                                                    
   }//end if
@@ -283,7 +292,6 @@ void loop()
   if( singleDebounce(COM_AMPS, ESTOP_12V_COM_LOGIC_MAX_AMPS_THRESHOLD) )
   {
     (POWER_BUS_OVER_CURRENT, sizeof(BUS_12V_COM_ON_OFF), &BUS_12V_COM_ON_OFF);
-    delay(500);
     digitalWrite(COM_CNTRL, LOW);
     time1 = millis();
     com_over_current = 1; //sets com_over_current to true
@@ -301,50 +309,50 @@ void loop()
 
   if( singleDebounce(M1_AMPS, ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD) ) 
   {
-    digitalWrite(M1_CNTRL, LOW);
     (POWER_BUS_OVER_CURRENT, sizeof(BUS_M1_ON_OFF), &BUS_M1_ON_OFF);
+    digitalWrite(M1_CNTRL, LOW);
     delay(ROVECOMM_DELAY);
   }//end if
   
   if( singleDebounce(M2_AMPS, ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD) )
   {
-    digitalWrite(M2_CNTRL, LOW);
     (POWER_BUS_OVER_CURRENT, sizeof(BUS_M2_ON_OFF), &BUS_M2_ON_OFF);
+    digitalWrite(M2_CNTRL, LOW);
     delay(ROVECOMM_DELAY);
   }//end if
   
    if(singleDebounce(M3_AMPS, ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD) )
   {
-    digitalWrite(M3_CNTRL, LOW);
     (POWER_BUS_OVER_CURRENT, sizeof(BUS_M3_ON_OFF), &BUS_M3_ON_OFF);
+    digitalWrite(M3_CNTRL, LOW);
     delay(ROVECOMM_DELAY);
   }//end if
   
   if(singleDebounce(M4_AMPS, ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD) )
   {
-    digitalWrite(M4_CNTRL, LOW);
     (POWER_BUS_OVER_CURRENT, sizeof(BUS_M4_ON_OFF), &BUS_M4_ON_OFF);
+    digitalWrite(M4_CNTRL, LOW);
     delay(ROVECOMM_DELAY);
   }//end if
   
   if( singleDebounce(M5_AMPS, ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD) )
   {
-    digitalWrite(M5_CNTRL, LOW);
     (POWER_BUS_OVER_CURRENT, sizeof(BUS_M5_ON_OFF), &BUS_M5_ON_OFF);
+    digitalWrite(M5_CNTRL, LOW);
     delay(ROVECOMM_DELAY);
   }//end if
   
   if( singleDebounce(M6_AMPS, ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD) )
   {
-    digitalWrite(M6_CNTRL, LOW);
     (POWER_BUS_OVER_CURRENT, sizeof(BUS_M6_ON_OFF), &BUS_M6_ON_OFF);
+    digitalWrite(M6_CNTRL, LOW);
     delay(ROVECOMM_DELAY);
   }//end if
   
   if(singleDebounce(M7_AMPS, ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD) )
   {
-    digitalWrite(M7_CNTRL, LOW);
     (POWER_BUS_OVER_CURRENT, sizeof(BUS_M7_ON_OFF), &BUS_M7_ON_OFF);
+    digitalWrite(M7_CNTRL, LOW);
     delay(ROVECOMM_DELAY);
   }//end if
   
@@ -479,8 +487,8 @@ void loop()
          }//endswitch 
          break;
 
-    /*case ROVER_POWER_RESET: //data_id is 1041
-      
+    /*case ROVER_POWER_RESET: //data_id is 1041                 Reset not needed since BMS command to reset pack accomplishes the same thing.
+                                                                This would be necessary if BMS communication was not implemented.
       digitalWrite(M1_CNTRL, LOW);
       digitalWrite(M2_CNTRL, LOW);
       digitalWrite(M3_CNTRL, LOW);
@@ -713,7 +721,7 @@ void loop()
         cell_voltages[k] -= 512;
         cell_voltages[k] *= 1.5 * .001;//I don't yet know if this is correct; taken wholesale from solar car*/
       } 
-
+  }
     /*Serial.println(cell_voltages[0]);
     Serial.println(cell_voltages[1]);
     Serial.println(cell_voltages[2]);
