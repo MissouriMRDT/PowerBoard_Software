@@ -74,7 +74,7 @@ const uint16_t BMS_COMMAND                  = 1042;
 const uint16_t BATT_PACK_OFF                = 1040;
 const uint16_t BATT_PACK_RESET              = 1041;
 const uint16_t BATT_FANS_ON_OFF             = 1078;
-//const uint16_t SOUND_BUZZER                 = 1079; //Might be needed if we want to honk at other rovers.
+const uint16_t SOUND_BUZZER                 = 1079; //Might be needed if we want to honk at other rovers.
 
 const int ROVER_POWER_RESET_DELAY           = 3000;
 
@@ -260,7 +260,7 @@ void setup()
   roveComm_Begin(192, 168, 1, 132);
   Serial7.begin(115200); //corresponds to pair of Rx and Tx pins on the Tiva that pb uses to communicate with bms.
   Serial.begin(9600);
-  delay(2000);
+  delay(500);
 }//end setup
 
 //Loop
@@ -545,17 +545,17 @@ void loop()
               break;
           }
 
-    /*case SOUND_BUZZER: //data_id is 1079            //here in case base station wants to honk at other rovers. May not end up using this case.
+    case SOUND_BUZZER: //data_id is 1079            //here in case base station wants to honk at other rovers. May not end up using this case.
         switch (data_value)
           {
             case '1':
-              Serial7.write(number); //buzzer on
+              Serial7.write(6); //buzzer on
               break;
 
             case '0':
-              Serial7.write(number); //buzzer off
+              Serial7.write(7); //buzzer off
               break;
-          }*/
+          }
 
     default:
       //Serial.println("Unrecognized data_id: 5");
