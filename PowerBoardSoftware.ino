@@ -23,18 +23,18 @@
 //RED can toggle the bus by bool
 const uint16_t NO_ROVECOMM_MESSAGE          = 0;
 
-const uint16_t M1_CURRENT_READING           = 1104; //These data IDs can be found on ROVESODRIVE called Rovecomm DataID Allocations
-const uint16_t M2_CURRENT_READING           = 1105;
-const uint16_t M3_CURRENT_READING           = 1106;
-const uint16_t M4_CURRENT_READING           = 1107;
-const uint16_t M5_CURRENT_READING           = 1108;
-const uint16_t M6_CURRENT_READING           = 1109;
-const uint16_t M7_CURRENT_READING           = 1110;
-const uint16_t ARM_12V_CURRENT_READING      = 1114; 
-const uint16_t ACT_12V_CURRENT_READING      = 1115; 
-const uint16_t LOGIC_12V_CURRENT_READING    = 1116; 
-const uint16_t COM_12V_CURRENT_READING      = 1117;
-const uint16_t PACK_VOLTAGE_READING         = 1120;
+const uint16_t M1_CURRENT_READING              = 1104; //These data IDs can be found on ROVESODRIVE called Rovecomm DataID Allocations
+const uint16_t M2_CURRENT_READING              = 1105;
+const uint16_t M3_CURRENT_READING              = 1106;
+const uint16_t M4_CURRENT_READING              = 1107;
+const uint16_t M5_CURRENT_READING              = 1108;
+const uint16_t M6_CURRENT_READING              = 1109;
+const uint16_t M7_CURRENT_READING              = 1110;
+const uint16_t 12V_40A_GENERAL_CURRENT_READING = 1114; 
+const uint16_t ACT_12V_CURRENT_READING         = 1115; 
+const uint16_t LOGIC_12V_CURRENT_READING       = 1116; 
+const uint16_t COM_12V_CURRENT_READING         = 1117;
+const uint16_t PACK_VOLTAGE_READING            = 1120;
 
 //const uint16_t ROVER_POWER_RESET            = 1041; //reset on power board buses no longer necessary since id 1041 now tells bms to turn off all power to rover. This accomplishes the same thing.
 const uint16_t POWER_BUS_ENABLE             = 1088;
@@ -48,7 +48,7 @@ const uint8_t BUS_M4_ON_OFF                 = 3;
 const uint8_t BUS_M5_ON_OFF                 = 4;
 const uint8_t BUS_M6_ON_OFF                 = 5;
 const uint8_t BUS_M7_ON_OFF                 = 6;
-const uint8_t BUS_12V_ARM_ON_OFF            = 7;
+const uint8_t BUS_12V_40A_GENERAL_ON_OFF    = 7;
 const uint8_t BUS_12V_ACT_ON_OFF            = 8;
 const uint8_t BUS_12V_LOGIC_ON_OFF          = 9;
 const uint8_t BUS_12V_COM_ON_OFF            = 10;
@@ -59,7 +59,7 @@ const uint16_t BMS_PACK_CURRENT             = 1072;
 const uint16_t BMS_PACK_OVER_CURRENT        = 1076;  //notification sent if pack overcurrents and shuts down
 const uint16_t BMS_V_CHECK_ARRAY            = 1073;  //Total pack voltage
 const uint16_t BMS_TEMP1                    = 1074;  
-//const uint16_t BMS_TEMP2                    = 1075; //Not yet recieveing 2nd temp sensing from BMS
+//const uint16_t BMS_TEMP2                    = 1075; //Not yet receiving 2nd temp sensing from BMS
 const uint16_t BMS_UNDER_VOLTAGE            = 1077;  //notification sent if a cell drops below a specified voltage. Value indicates cell
 const uint16_t CELL_1_VOLTAGE               = 1056;
 const uint16_t CELL_2_VOLTAGE               = 1057;
@@ -90,34 +90,34 @@ const int ROVECOMM_DELAY = 10;
 // Control Pins
 
 //0 MIN VOLT    3.036 MAX_VOLT  RESISTOR DIVIDER = 11;
-const int ACT_CNTRL           = PN_3;
-const int LOGIC_CNTRL         = PH_2;
-const int COM_CNTRL           = PD_1;
-const int COM_LOGIC_CNTRL     = PP_2;
-const int ARM_CNTRL           = PK_5;
-const int M1_CNTRL            = PK_7;
-const int M2_CNTRL            = PK_6;
-const int M3_CNTRL            = PH_1;
-const int M4_CNTRL            = PH_0;
-const int M5_CNTRL            = PM_2;
-const int M6_CNTRL            = PM_1;
-const int M7_CNTRL            = PM_0;
-const int FAN_CNTRL           = PM_3;
+const int ACT_CNTRL             = PN_3;
+const int LOGIC_CNTRL           = PH_2;
+const int COM_CNTRL             = PD_1;
+const int COM_LOGIC_CNTRL       = PP_2;
+const int 12V_40A_GENERAL_CNTRL = PK_5;
+const int M1_CNTRL              = PK_7;
+const int M2_CNTRL              = PK_6;
+const int M3_CNTRL              = PH_1;
+const int M4_CNTRL              = PH_0;
+const int M5_CNTRL              = PM_2;
+const int M6_CNTRL              = PM_1;
+const int M7_CNTRL              = PM_0;
+const int FAN_CNTRL             = PM_3;
 
 
 // Sensor Volts/Amps Readings Pins
-const int ACT_AMPS            = PE_2;
-const int LOGIC_AMPS          = PE_0;
-const int COM_AMPS            = PE_1;
-const int ARM_AMPS            = PD_0;
-const int M1_AMPS             = PK_3;
-const int M2_AMPS             = PK_2;
-const int M3_AMPS             = PK_1; 
-const int M4_AMPS             = PK_0;
-const int M5_AMPS             = PB_5;
-const int M6_AMPS             = PB_4;
-const int M7_AMPS             = PE_3;
-const int PACK_VOLTAGE        = PE_5;
+const int ACT_AMPS              = PE_2;
+const int LOGIC_AMPS            = PE_0;
+const int COM_AMPS              = PE_1;
+const int 12V_40A_GENERAL_AMPS  = PD_0;
+const int M1_AMPS               = PK_3;
+const int M2_AMPS               = PK_2;
+const int M3_AMPS               = PK_1; 
+const int M4_AMPS               = PK_0;
+const int M5_AMPS               = PB_5;
+const int M6_AMPS               = PB_4;
+const int M7_AMPS               = PE_3;
+const int PACK_VOLTAGE          = PE_5;
 
 //////////////////////////////////////////////RoveBoard
 // Tiva1294C RoveBoard Specs
@@ -204,7 +204,7 @@ void setup()
   pinMode(COM_LOGIC_CNTRL, OUTPUT);
   pinMode(COM_CNTRL, OUTPUT);
   pinMode(LOGIC_CNTRL, OUTPUT);
-  pinMode(ARM_CNTRL, OUTPUT);
+  pinMode(12V_40A_GENERAL_CNTRL, OUTPUT);
   pinMode(M1_CNTRL, OUTPUT);
   pinMode(M2_CNTRL, OUTPUT);
   pinMode(M3_CNTRL, OUTPUT); 
@@ -217,7 +217,7 @@ void setup()
   pinMode(ACT_AMPS, INPUT);
   pinMode(COM_AMPS, INPUT);
   pinMode(LOGIC_AMPS, INPUT);
-  pinMode(ARM_AMPS, INPUT);
+  pinMode(12V_40A_GENERAL_AMPS, INPUT);
   pinMode(M1_AMPS, INPUT);
   pinMode(M2_AMPS, INPUT);
   pinMode(M3_AMPS, INPUT);
@@ -231,7 +231,7 @@ void setup()
   digitalWrite(COM_LOGIC_CNTRL, LOW);
   digitalWrite(COM_CNTRL, LOW);
   digitalWrite(LOGIC_CNTRL, LOW);
-  digitalWrite(ARM_CNTRL, LOW);
+  digitalWrite(12V_40A_GENERAL_CNTRL, LOW);
   digitalWrite(M1_CNTRL, LOW);
   digitalWrite(M2_CNTRL, LOW);
   digitalWrite(M3_CNTRL, LOW);
@@ -248,7 +248,7 @@ void setup()
   digitalWrite(COM_LOGIC_CNTRL, HIGH);
   digitalWrite(COM_CNTRL, HIGH);
   digitalWrite(LOGIC_CNTRL, HIGH);
-  digitalWrite(ARM_CNTRL, HIGH);
+  digitalWrite(12V_40A_GENERAL_CNTRL, HIGH);
   digitalWrite(M1_CNTRL, HIGH);
   digitalWrite(M2_CNTRL, HIGH);
   digitalWrite(M3_CNTRL, HIGH);
@@ -300,10 +300,10 @@ void loop()
       }
   }//end if
   
-  if( singleDebounce(ARM_AMPS, ESTOP_12V_ARM_MAX_AMPS_THRESHOLD) )
+  if( singleDebounce(12V_40A_GENERAL_AMPS, ESTOP_12V_40A_GENERAL_MAX_AMPS_THRESHOLD) )
   {
-    (POWER_BUS_OVER_CURRENT, sizeof(BUS_12V_ARM_ON_OFF), &BUS_12V_ARM_ON_OFF);
-	digitalWrite(ARM_CNTRL, LOW);
+    (POWER_BUS_OVER_CURRENT, sizeof(BUS_12V_40A_GENERAL_ON_OFF), &BUS_12V_40A_GENERAL_ON_OFF);
+	digitalWrite(12V_40A_GENERAL_CNTRL, LOW);
 	delay(ROVECOMM_DELAY);
   }//end if
 
@@ -384,8 +384,8 @@ void loop()
           digitalWrite(COM_CNTRL, HIGH);
           break;
 		
-		    case BUS_12V_ARM_ON_OFF:
-		      digitalWrite(ARM_CNTRL, HIGH);
+		    case BUS_12V_40A_GENERAL_ON_OFF:
+		      digitalWrite(12V_40A_GENERAL_CNTRL, HIGH);
 		      break;
           
         case BUS_M1_ON_OFF:
@@ -446,8 +446,8 @@ void loop()
               digitalWrite(COM_CNTRL, LOW);
               break;
 			  
-			     case BUS_12V_ARM_ON_OFF:
-			       digitalWrite(ARM_CNTRL, LOW);
+			     case BUS_12V_40A_GENERAL_ON_OFF:
+			       digitalWrite(12V_40A_GENERAL_CNTRL, LOW);
 			       break;
               
             case BUS_M1_ON_OFF:
@@ -503,7 +503,7 @@ void loop()
       digitalWrite(LOGIC_CNTRL, LOW);
       digitalWrite(COM_CNTRL, LOW);
       digitalWrite(COM_LOGIC_CNTRL, LOW);
-	  digitalWrite(ARM_CNTRL, LOW);
+	  digitalWrite(12V_40A_GENERAL_CNTRL, LOW);
       
       digitalWrite(FAN_CNTRL, LOW);
      
@@ -513,7 +513,7 @@ void loop()
       digitalWrite(COM_LOGIC_CNTRL, HIGH);
       digitalWrite(COM_CNTRL, HIGH);
       digitalWrite(LOGIC_CNTRL, HIGH);
-	  digitalWrite(ARM_CNTRL, HIGH);
+	  digitalWrite(12V_40A_GENERAL_CNTRL, HIGH);
     
       digitalWrite(M1_CNTRL, HIGH);
       digitalWrite(M2_CNTRL, HIGH);
@@ -580,9 +580,9 @@ void loop()
   roveComm_SendMsg(COM_12V_CURRENT_READING, sizeof(current_reading), &current_reading);
   delay(ROVECOMM_DELAY);
   
-  adc_reading = analogRead(ARM_AMPS);
+  adc_reading = analogRead(12V_40A_GENERAL_AMPS);
   current_reading = mapFloats(adc_reading, ADC_MIN, ADC_MAX, CURRENT_MIN, CURRENT_MAX);
-  roveComm_SendMsg(ARM_12V_CURRENT_READING, sizeof(current_reading), &current_reading);
+  roveComm_SendMsg(12V_40A_GENERAL_CURRENT_READING, sizeof(current_reading), &current_reading);
   delay(ROVECOMM_DELAY);
   
   adc_reading = analogRead(M1_AMPS); 
