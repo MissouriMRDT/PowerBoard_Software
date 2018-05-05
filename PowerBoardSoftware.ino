@@ -270,21 +270,21 @@ void loop()
 { 
   if( singleDebounce(ACT_AMPS, ESTOP_12V_ACT_MAX_AMPS_THRESHOLD) )
   {
-    (POWER_BUS_OVER_CURRENT, sizeof(BUS_12V_ACT_ON_OFF), &BUS_12V_ACT_ON_OFF);
+    roveComm_SendMsg(POWER_BUS_OVER_CURRENT, sizeof(BUS_12V_ACT_ON_OFF), &BUS_12V_ACT_ON_OFF);
     digitalWrite(ACT_CNTRL, LOW);
     delay(ROVECOMM_DELAY);
   }//end if
 
   if( singleDebounce(LOGIC_AMPS, ESTOP_12V_COM_LOGIC_MAX_AMPS_THRESHOLD) )
   {
-    (POWER_BUS_OVER_CURRENT, sizeof(BUS_12V_LOGIC_ON_OFF), &BUS_12V_LOGIC_ON_OFF);                                                                         
-    digitalWrite(LOGIC_CNTRL, LOW);                                            
+    digitalWrite(LOGIC_CNTRL, LOW);       
+    roveComm_SendMsg(POWER_BUS_OVER_CURRENT, sizeof(BUS_12V_LOGIC_ON_OFF), &BUS_12V_LOGIC_ON_OFF);                                                                         	
     delay(ROVECOMM_DELAY);                                                    
   }//end if
 
   if( singleDebounce(COM_AMPS, ESTOP_12V_COM_LOGIC_MAX_AMPS_THRESHOLD) )
   {
-    (POWER_BUS_OVER_CURRENT, sizeof(BUS_12V_COM_ON_OFF), &BUS_12V_COM_ON_OFF);
+    roveComm_SendMsg(POWER_BUS_OVER_CURRENT, sizeof(BUS_12V_COM_ON_OFF), &BUS_12V_COM_ON_OFF);
     digitalWrite(COM_CNTRL, LOW);
     time1 = millis();
     com_over_current = 1; //sets com_over_current to true
@@ -302,57 +302,57 @@ void loop()
   
   if( singleDebounce(12V_40A_GENERAL_AMPS, ESTOP_12V_40A_GENERAL_MAX_AMPS_THRESHOLD) )
   {
-    (POWER_BUS_OVER_CURRENT, sizeof(BUS_12V_40A_GENERAL_ON_OFF), &BUS_12V_40A_GENERAL_ON_OFF);
 	digitalWrite(12V_40A_GENERAL_CNTRL, LOW);
+	roveComm_SendMsg(POWER_BUS_OVER_CURRENT, sizeof(BUS_12V_40A_GENERAL_ON_OFF), &BUS_12V_40A_GENERAL_ON_OFF);
 	delay(ROVECOMM_DELAY);
   }//end if
 
   if( singleDebounce(M1_AMPS, ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD) ) 
   {
-    (POWER_BUS_OVER_CURRENT, sizeof(BUS_M1_ON_OFF), &BUS_M1_ON_OFF);
     digitalWrite(M1_CNTRL, LOW);
+	roveComm_SendMsg(POWER_BUS_OVER_CURRENT, sizeof(BUS_M1_ON_OFF), &BUS_M1_ON_OFF);
     delay(ROVECOMM_DELAY);
   }//end if
   
   if( singleDebounce(M2_AMPS, ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD) )
   {
-    (POWER_BUS_OVER_CURRENT, sizeof(BUS_M2_ON_OFF), &BUS_M2_ON_OFF);
     digitalWrite(M2_CNTRL, LOW);
+	roveComm_SendMsg(POWER_BUS_OVER_CURRENT, sizeof(BUS_M2_ON_OFF), &BUS_M2_ON_OFF);
     delay(ROVECOMM_DELAY);
   }//end if
   
    if(singleDebounce(M3_AMPS, ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD) )
   {
-    (POWER_BUS_OVER_CURRENT, sizeof(BUS_M3_ON_OFF), &BUS_M3_ON_OFF);
     digitalWrite(M3_CNTRL, LOW);
+	roveComm_SendMsg(POWER_BUS_OVER_CURRENT, sizeof(BUS_M3_ON_OFF), &BUS_M3_ON_OFF);
     delay(ROVECOMM_DELAY);
   }//end if
   
   if(singleDebounce(M4_AMPS, ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD) )
   {
-    (POWER_BUS_OVER_CURRENT, sizeof(BUS_M4_ON_OFF), &BUS_M4_ON_OFF);
     digitalWrite(M4_CNTRL, LOW);
+	roveComm_SendMsg(POWER_BUS_OVER_CURRENT, sizeof(BUS_M4_ON_OFF), &BUS_M4_ON_OFF);
     delay(ROVECOMM_DELAY);
   }//end if
   
   if( singleDebounce(M5_AMPS, ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD) )
   {
-    (POWER_BUS_OVER_CURRENT, sizeof(BUS_M5_ON_OFF), &BUS_M5_ON_OFF);
     digitalWrite(M5_CNTRL, LOW);
+	roveComm_SendMsg(POWER_BUS_OVER_CURRENT, sizeof(BUS_M5_ON_OFF), &BUS_M5_ON_OFF);
     delay(ROVECOMM_DELAY);
   }//end if
   
   if( singleDebounce(M6_AMPS, ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD) )
   {
-    (POWER_BUS_OVER_CURRENT, sizeof(BUS_M6_ON_OFF), &BUS_M6_ON_OFF);
     digitalWrite(M6_CNTRL, LOW);
+	roveComm_SendMsg(POWER_BUS_OVER_CURRENT, sizeof(BUS_M6_ON_OFF), &BUS_M6_ON_OFF);
     delay(ROVECOMM_DELAY);
   }//end if
   
   if(singleDebounce(M7_AMPS, ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD) )
   {
-    (POWER_BUS_OVER_CURRENT, sizeof(BUS_M7_ON_OFF), &BUS_M7_ON_OFF);
     digitalWrite(M7_CNTRL, LOW);
+	roveComm_SendMsg(POWER_BUS_OVER_CURRENT, sizeof(BUS_M7_ON_OFF), &BUS_M7_ON_OFF);
     delay(ROVECOMM_DELAY);
   }//end if
   
