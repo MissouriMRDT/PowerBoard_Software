@@ -30,7 +30,7 @@ const uint16_t M4_CURRENT_READING              = 1107;
 const uint16_t M5_CURRENT_READING              = 1108;
 const uint16_t M6_CURRENT_READING              = 1109;
 const uint16_t M7_CURRENT_READING              = 1110;
-const uint16_t 12V_40A_GENERAL_CURRENT_READING = 1114; 
+const uint16_t GENERAL_12V_40A_CURRENT_READING = 1114; 
 const uint16_t ACT_12V_CURRENT_READING         = 1115; 
 const uint16_t LOGIC_12V_CURRENT_READING       = 1116; 
 const uint16_t COM_12V_CURRENT_READING         = 1117;
@@ -53,7 +53,7 @@ const uint8_t BUS_12V_ACT_ON_OFF            = 8;
 const uint8_t BUS_12V_LOGIC_ON_OFF          = 9;
 const uint8_t BUS_12V_COM_ON_OFF            = 10;
 const uint8_t BUS_12V_COM_LOGIC_ON_OFF      = 11;
-const uint8_t FANS_ON_OFF                    = 12; //power board fans
+const uint8_t FANS_ON_OFF                   = 12; //power board fans
 
 const uint16_t BMS_PACK_CURRENT             = 1072;
 const uint16_t BMS_PACK_OVER_CURRENT        = 1076;  //notification sent if pack overcurrents and shuts down
@@ -94,7 +94,7 @@ const int ACT_CNTRL             = PN_3;
 const int LOGIC_CNTRL           = PH_2;
 const int COM_CNTRL             = PD_1;
 const int COM_LOGIC_CNTRL       = PP_2;
-const int 12V_40A_GENERAL_CNTRL = PK_5;
+const int GENERAL_12V_40A_CNTRL = PK_5;
 const int M1_CNTRL              = PK_7;
 const int M2_CNTRL              = PK_6;
 const int M3_CNTRL              = PH_1;
@@ -109,7 +109,7 @@ const int FAN_CNTRL             = PM_3;
 const int ACT_AMPS              = PE_2;
 const int LOGIC_AMPS            = PE_0;
 const int COM_AMPS              = PE_1;
-const int 12V_40A_GENERAL_AMPS  = PD_0;
+const int GENERAL_12V_40A_AMPS  = PD_0;
 const int M1_AMPS               = PK_3;
 const int M2_AMPS               = PK_2;
 const int M3_AMPS               = PK_1; 
@@ -204,7 +204,7 @@ void setup()
   pinMode(COM_LOGIC_CNTRL, OUTPUT);
   pinMode(COM_CNTRL, OUTPUT);
   pinMode(LOGIC_CNTRL, OUTPUT);
-  pinMode(12V_40A_GENERAL_CNTRL, OUTPUT);
+  pinMode(GENERAL_12V_40A_CNTRL, OUTPUT);
   pinMode(M1_CNTRL, OUTPUT);
   pinMode(M2_CNTRL, OUTPUT);
   pinMode(M3_CNTRL, OUTPUT); 
@@ -217,7 +217,7 @@ void setup()
   pinMode(ACT_AMPS, INPUT);
   pinMode(COM_AMPS, INPUT);
   pinMode(LOGIC_AMPS, INPUT);
-  pinMode(12V_40A_GENERAL_AMPS, INPUT);
+  pinMode(GENERAL_12V_40A_AMPS, INPUT);
   pinMode(M1_AMPS, INPUT);
   pinMode(M2_AMPS, INPUT);
   pinMode(M3_AMPS, INPUT);
@@ -231,7 +231,7 @@ void setup()
   digitalWrite(COM_LOGIC_CNTRL, LOW);
   digitalWrite(COM_CNTRL, LOW);
   digitalWrite(LOGIC_CNTRL, LOW);
-  digitalWrite(12V_40A_GENERAL_CNTRL, LOW);
+  digitalWrite(GENERAL_12V_40A_CNTRL, LOW);
   digitalWrite(M1_CNTRL, LOW);
   digitalWrite(M2_CNTRL, LOW);
   digitalWrite(M3_CNTRL, LOW);
@@ -248,7 +248,7 @@ void setup()
   digitalWrite(COM_LOGIC_CNTRL, HIGH);
   digitalWrite(COM_CNTRL, HIGH);
   digitalWrite(LOGIC_CNTRL, HIGH);
-  digitalWrite(12V_40A_GENERAL_CNTRL, HIGH);
+  digitalWrite(GENERAL_12V_40A_CNTRL, HIGH);
   digitalWrite(M1_CNTRL, HIGH);
   digitalWrite(M2_CNTRL, HIGH);
   digitalWrite(M3_CNTRL, HIGH);
@@ -300,9 +300,9 @@ void loop()
       }
   }//end if
   
-  if( singleDebounce(12V_40A_GENERAL_AMPS, ESTOP_12V_40A_GENERAL_MAX_AMPS_THRESHOLD) )
+  if( singleDebounce(GENERAL_12V_40A_AMPS, ESTOP_12V_40A_GENERAL_MAX_AMPS_THRESHOLD) )
   {
-	digitalWrite(12V_40A_GENERAL_CNTRL, LOW);
+	digitalWrite(GENERAL_12V_40A_CNTRL, LOW);
 	roveComm_SendMsg(POWER_BUS_OVER_CURRENT, sizeof(BUS_12V_40A_GENERAL_ON_OFF), &BUS_12V_40A_GENERAL_ON_OFF);
 	delay(ROVECOMM_DELAY);
   }//end if
@@ -360,6 +360,12 @@ void loop()
   
   //If there is no message, data_id gets set to zero
   roveComm_GetMsg(&data_id, &data_size, &data_value);
+  if (data_id){
+  Serial.print("data_id: ");
+  Serial.println(data_id);
+  Serial.print("data_value: ");
+  Serial.println(data_value);
+  }
   switch (data_id) 
   {   
     case NO_ROVECOMM_MESSAGE: //data_id is 0; do nothing
@@ -385,7 +391,7 @@ void loop()
           break;
 		
 		    case BUS_12V_40A_GENERAL_ON_OFF:
-		      digitalWrite(12V_40A_GENERAL_CNTRL, HIGH);
+		      digitalWrite(GENERAL_12V_40A_CNTRL, HIGH);
 		      break;
           
         case BUS_M1_ON_OFF:
@@ -447,7 +453,7 @@ void loop()
               break;
 			  
 			     case BUS_12V_40A_GENERAL_ON_OFF:
-			       digitalWrite(12V_40A_GENERAL_CNTRL, LOW);
+			       digitalWrite(GENERAL_12V_40A_CNTRL, LOW);
 			       break;
               
             case BUS_M1_ON_OFF:
@@ -483,8 +489,8 @@ void loop()
               break;
               
             default:
-              //Serial.println("Unrecognized data : 3");
-              //Serial.println(data);
+              Serial.println("Unrecognized data : 3");
+              Serial.println(data_value);
               break; 
          }//endswitch 
          break;
@@ -503,7 +509,7 @@ void loop()
       digitalWrite(LOGIC_CNTRL, LOW);
       digitalWrite(COM_CNTRL, LOW);
       digitalWrite(COM_LOGIC_CNTRL, LOW);
-	  digitalWrite(12V_40A_GENERAL_CNTRL, LOW);
+	  digitalWrite(GENERAL_12V_40A_CNTRL, LOW);
       
       digitalWrite(FAN_CNTRL, LOW);
      
@@ -513,7 +519,7 @@ void loop()
       digitalWrite(COM_LOGIC_CNTRL, HIGH);
       digitalWrite(COM_CNTRL, HIGH);
       digitalWrite(LOGIC_CNTRL, HIGH);
-	  digitalWrite(12V_40A_GENERAL_CNTRL, HIGH);
+	  digitalWrite(GENERAL_12V_40A_CNTRL, HIGH);
     
       digitalWrite(M1_CNTRL, HIGH);
       digitalWrite(M2_CNTRL, HIGH);
@@ -580,14 +586,18 @@ void loop()
   roveComm_SendMsg(COM_12V_CURRENT_READING, sizeof(current_reading), &current_reading);
   delay(ROVECOMM_DELAY);
   
-  adc_reading = analogRead(12V_40A_GENERAL_AMPS);
+  adc_reading = analogRead(GENERAL_12V_40A_AMPS);
   current_reading = mapFloats(adc_reading, ADC_MIN, ADC_MAX, CURRENT_MIN, CURRENT_MAX);
-  roveComm_SendMsg(12V_40A_GENERAL_CURRENT_READING, sizeof(current_reading), &current_reading);
+  roveComm_SendMsg(GENERAL_12V_40A_CURRENT_READING, sizeof(current_reading), &current_reading);
   delay(ROVECOMM_DELAY);
   
   adc_reading = analogRead(M1_AMPS); 
   current_reading = mapFloats(adc_reading, ADC_MIN, ADC_MAX, CURRENT_MIN, CURRENT_MAX);  
   roveComm_SendMsg(M1_CURRENT_READING, sizeof(current_reading), &current_reading);
+  Serial.print("Data_id: ");
+  Serial.println(M1_CURRENT_READING);
+  Serial.print("Data_value: ");
+  Serial.println(current_reading);
   delay(ROVECOMM_DELAY);
 
   adc_reading = analogRead(M2_AMPS);
