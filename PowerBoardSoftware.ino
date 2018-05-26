@@ -179,6 +179,7 @@ union txable_float {
 union txable_float v_check_array;
 union txable_float bms_temp;      //may need to add another temp variable if we use two temp sensors.
 union txable_float pack_current;
+union txable_float cell_vtgs[8];
 
 int num_loops = 0; //used to track number of times the main loop has completed a cycle.
 
@@ -361,10 +362,10 @@ void loop()
   //If there is no message, data_id gets set to zero
   roveComm_GetMsg(&data_id, &data_size, &data_value);
   if (data_id){
-  Serial.print("data_id: ");
-  Serial.println(data_id);
-  Serial.print("data_value: ");
-  Serial.println(data_value);
+  //Serial.print("data_id: ");
+  //Serial.println(data_id);
+  //Serial.print("data_value: ");
+  //Serial.println(data_value);
   }
   switch (data_id) 
   {   
@@ -489,8 +490,8 @@ void loop()
               break;
               
             default:
-              Serial.println("Unrecognized data : 3");
-              Serial.println(data_value);
+              //Serial.println("Unrecognized data : 3");
+              //Serial.println(data_value);
               break; 
          }//endswitch 
          break;
@@ -534,11 +535,12 @@ void loop()
 
     case BATT_PACK_OFF: //data_id is 1040
         Serial7.write(1);
-        //Serial.println("BMS shutdown");
+        Serial.println("BMS shutdown");
         break;
 
     case BATT_PACK_RESET: //data_id is 1041
         Serial7.write(2);
+        Serial.println("BMS Reseting");
         break;
 
     case BATT_FANS_ON_OFF: //data_id is 1078
@@ -546,10 +548,12 @@ void loop()
           {
             case '1':
               Serial7.write(3); //fans on
+              Serial.println("Fans ON");
               break;
 
             case '0':
               Serial7.write(4); //fans off
+              Serial.println("Fans OFF");
               break;
           }
 
@@ -558,6 +562,7 @@ void loop()
           {
             case '1':
               Serial7.write(6); //buzzer on
+              Serial.println("Buzzer ON");
               break;
 
             case '0':
@@ -594,10 +599,10 @@ void loop()
   adc_reading = analogRead(M1_AMPS); 
   current_reading = mapFloats(adc_reading, ADC_MIN, ADC_MAX, CURRENT_MIN, CURRENT_MAX);  
   roveComm_SendMsg(M1_CURRENT_READING, sizeof(current_reading), &current_reading);
-  Serial.print("Data_id: ");
-  Serial.println(M1_CURRENT_READING);
-  Serial.print("Data_value: ");
-  Serial.println(current_reading);
+  //Serial.print("Data_id: ");
+  //Serial.println(M1_CURRENT_READING);
+  //Serial.print("Data_value: ");
+  //Serial.println(current_reading);
   delay(ROVECOMM_DELAY);
 
   adc_reading = analogRead(M2_AMPS);
@@ -636,14 +641,15 @@ void loop()
   delay(ROVECOMM_DELAY);
 
 
-}//end loop
 
-  ////////////// BMS Communication /////////////////////////////////////////////////////////
- /* /*
+
+////////////// BMS Communication /////////////////////////////////////////////////////////
+
   if (num_loops > 18 ) 
   {
     num_loops = 0;    //resets loops to zero to start count to 18 over again
     Serial7.write(5); //tells bms that I am ready to recieve data
+    Serial.println("Wrote 5");
   }
 
   if (Serial7.available() >= 24) //number of bytes I expect to recieve from bms
@@ -660,8 +666,10 @@ void loop()
     
             //assuming least significant byte first
     //pack_current = ((pack_current_byte[0]) | (pack_current_byte[1] << 8) | (pack_current_byte[2] << 16) | (pack_current_byte[3] <<24));
-    /*roveComm_SendMsg(BMS_PACK_CURRENT, sizeof(pack_current.f), &pack_current.f);
+    roveComm_SendMsg(BMS_PACK_CURRENT, sizeof(pack_current.f), &pack_current.f);
     delay(ROVECOMM_DELAY);
+    Serial.print("Pack Current: ");
+    Serial.println(pack_current.f);
 
     for (int i=0; i < 4; i++)           
     {
@@ -671,6 +679,8 @@ void loop()
     //v_check_array = ((v_check_array_byte[0]) | (v_check_array_byte[1] << 8) | (v_check_array_byte[2] << 16) | (v_check_array_byte[3] <<24));
     roveComm_SendMsg(BMS_V_CHECK_ARRAY, sizeof(v_check_array.f), &v_check_array.f);
     delay(ROVECOMM_DELAY);
+    Serial.print("V Check Array: ");
+    Serial.println(v_check_array.f);
 
     for (int i=0; i < 4; i++)
     {
@@ -685,65 +695,32 @@ void loop()
     //Serial.println(pack_current.ch[0], HEX);
     //Serial.println(v_check_array.f);
     //Serial.println(bms_temp.f);
+
+    for(int j=0; j<8; j++){
+      for(int h=0; h<4; h++){
+        cell_vtgs[j].ch[h] = Serial7.read();
+      }
+    }
+
+    roveComm_SendMsg(CELL_1_VOLTAGE, sizeof(cell_vtgs[0].f), &cell_vtgs[0].f);
+    roveComm_SendMsg(CELL_2_VOLTAGE, sizeof(cell_vtgs[1].f), &cell_vtgs[1].f);
+    roveComm_SendMsg(CELL_3_VOLTAGE, sizeof(cell_vtgs[2].f), &cell_vtgs[2].f);
+    roveComm_SendMsg(CELL_4_VOLTAGE, sizeof(cell_vtgs[3].f), &cell_vtgs[3].f);
+    roveComm_SendMsg(CELL_5_VOLTAGE, sizeof(cell_vtgs[4].f), &cell_vtgs[4].f);
+    roveComm_SendMsg(CELL_6_VOLTAGE, sizeof(cell_vtgs[5].f), &cell_vtgs[5].f);
+    roveComm_SendMsg(CELL_7_VOLTAGE, sizeof(cell_vtgs[6].f), &cell_vtgs[6].f);
+    roveComm_SendMsg(CELL_8_VOLTAGE, sizeof(cell_vtgs[7].f), &cell_vtgs[7].f);
+
     
-  
-    for (int i=0; i < 12; i++)
-    {
-      cell_voltages_byte[i] = Serial7.read();
-    }   
-
-    //The CVR0x registers, as read in from SPI, are 8 bits, but the actual voltages are 12-bit floats
-    // spread out across multiple registers. Consult the LTC6803 datasheet (table 8, p. 23)
-    //
-    //The "split" occurs at the most significant nybble, then at the least significant, then most again, etc.
-    cell_voltages[0] = cell_voltages_byte[0] | ((cell_voltages_byte[1] & 0x0F) << 8); //Cell 1
-    roveComm_SendMsg(CELL_1_VOLTAGE, sizeof(cell_voltages[0]), &cell_voltages[0]);
-    delay(ROVECOMM_DELAY);
-
-    cell_voltages[1] = ((cell_voltages_byte[1] & 0xF0) >> 4) | (cell_voltages_byte[2] << 4); //Cell 2
-    roveComm_SendMsg(CELL_2_VOLTAGE, sizeof(cell_voltages[1]), &cell_voltages[1]);
-    delay(ROVECOMM_DELAY);
-
-    cell_voltages[2] = cell_voltages_byte[3] | ((cell_voltages_byte[4] & 0x0F) << 8); //Cell 3
-    roveComm_SendMsg(CELL_3_VOLTAGE, sizeof(cell_voltages[2]), &cell_voltages[2]);
-    delay(ROVECOMM_DELAY);
-
-    cell_voltages[3] = ((cell_voltages_byte[4] & 0xF0) >> 4) | (cell_voltages_byte[5] << 4); //Cell 4
-    roveComm_SendMsg(CELL_4_VOLTAGE, sizeof(cell_voltages[3]), &cell_voltages[3]);
-    delay(ROVECOMM_DELAY);
-
-    cell_voltages[4] = cell_voltages_byte[6] | ((cell_voltages_byte[7] & 0x0F) << 8); //Cell 5
-    roveComm_SendMsg(CELL_5_VOLTAGE, sizeof(cell_voltages[4]), &cell_voltages[4]);
-    delay(ROVECOMM_DELAY);
-
-    cell_voltages[5] = ((cell_voltages_byte[7] & 0xF0) >> 4) | (cell_voltages_byte[8] << 4);//Cell 6
-    roveComm_SendMsg(CELL_6_VOLTAGE, sizeof(cell_voltages[5]), &cell_voltages[5]);
-    delay(ROVECOMM_DELAY);
-
-    cell_voltages[6] = cell_voltages_byte[9] | ((cell_voltages_byte[10] & 0x0F) << 8); //Cell 7
-    roveComm_SendMsg(CELL_7_VOLTAGE, sizeof(cell_voltages[6]), &cell_voltages[6]);
-    delay(ROVECOMM_DELAY);
-
-    cell_voltages[7] = ((cell_voltages_byte[10] & 0xF0) >> 4) | (cell_voltages_byte[11] << 4);//Cell 8
-    roveComm_SendMsg(CELL_8_VOLTAGE, sizeof(cell_voltages[7]), &cell_voltages[7]);
-    delay(ROVECOMM_DELAY);
-    
-
-    //These still aren't normal voltages after putting them in floats; you need to do some extra processing.
-    for(int k = 0; k < 8; k++)
-      {
-        cell_voltages[k] -= 512;
-        cell_voltages[k] *= 1.5 * .001;//I don't yet know if this is correct; taken wholesale from solar car
-      } 
   }
-    Serial.println(cell_voltages[0]);
-    Serial.println(cell_voltages[1]);
-    Serial.println(cell_voltages[2]);
-    Serial.println(cell_voltages[3]);
-    Serial.println(cell_voltages[4]);
-    Serial.println(cell_voltages[5]);
-    Serial.println(cell_voltages[6]);
-    Serial.println(cell_voltages[7]);
+    Serial.println(cell_vtgs[0].f);
+    Serial.println(cell_vtgs[1].f);
+    Serial.println(cell_vtgs[2].f);
+    Serial.println(cell_vtgs[3].f);
+    Serial.println(cell_vtgs[4].f);
+    Serial.println(cell_vtgs[5].f);
+    Serial.println(cell_vtgs[6].f);
+    Serial.println(cell_vtgs[7].f);
     
     
 
@@ -774,6 +751,7 @@ void loop()
     }
 num_loops++;
 
-*/
+}//end loop
+
 
 
