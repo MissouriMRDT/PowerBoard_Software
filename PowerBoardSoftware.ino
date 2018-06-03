@@ -23,18 +23,18 @@
 //RED can toggle the bus by bool
 const uint16_t NO_ROVECOMM_MESSAGE          = 0;
 
-const uint16_t M1_CURRENT_READING           = 1104;
-const uint16_t M2_CURRENT_READING           = 1105;
-const uint16_t M3_CURRENT_READING           = 1106;
-const uint16_t M4_CURRENT_READING           = 1107;
-const uint16_t M5_CURRENT_READING           = 1108;
-const uint16_t M6_CURRENT_READING           = 1109;
-const uint16_t M7_CURRENT_READING           = 1110;
-const uint16_t EXTRA_12V_CURRENT_READING    = 1114; 
-const uint16_t ACT_12V_CURRENT_READING      = 1115; 
-const uint16_t LOGIC_12V_CURRENT_READING    = 1116; 
-const uint16_t COM_12V_CURRENT_READING      = 1117;
-const uint16_t PACK_VOLTAGE_READING         = 1120;
+const uint16_t M1_CURRENT_READING              = 1104; //These data IDs can be found on ROVESODRIVE called Rovecomm DataID Allocations
+const uint16_t M2_CURRENT_READING              = 1105;
+const uint16_t M3_CURRENT_READING              = 1106;
+const uint16_t M4_CURRENT_READING              = 1107;
+const uint16_t M5_CURRENT_READING              = 1108;
+const uint16_t M6_CURRENT_READING              = 1109;
+const uint16_t M7_CURRENT_READING              = 1110;
+const uint16_t GENERAL_12V_40A_CURRENT_READING = 1114; 
+const uint16_t ACT_12V_CURRENT_READING         = 1115; 
+const uint16_t LOGIC_12V_CURRENT_READING       = 1116; 
+const uint16_t COM_12V_CURRENT_READING         = 1117;
+const uint16_t PACK_VOLTAGE_READING            = 1120;
 
 //const uint16_t ROVER_POWER_RESET            = 1041; //reset on power board buses no longer necessary since id 1041 now tells bms to turn off all power to rover. This accomplishes the same thing.
 const uint16_t POWER_BUS_ENABLE             = 1088;
@@ -48,18 +48,18 @@ const uint8_t BUS_M4_ON_OFF                 = 3;
 const uint8_t BUS_M5_ON_OFF                 = 4;
 const uint8_t BUS_M6_ON_OFF                 = 5;
 const uint8_t BUS_M7_ON_OFF                 = 6;
-const uint8_t BUS_12V_EXTRA_ON_OFF          = 7;
+const uint8_t BUS_12V_40A_GENERAL_ON_OFF    = 7;
 const uint8_t BUS_12V_ACT_ON_OFF            = 8;
 const uint8_t BUS_12V_LOGIC_ON_OFF          = 9;
 const uint8_t BUS_12V_COM_ON_OFF            = 10;
 const uint8_t BUS_12V_COM_LOGIC_ON_OFF      = 11;
-const uint8_t FAN_ON_OFF                    = 12; //power board fan
+const uint8_t FANS_ON_OFF                   = 12; //power board fans
 
 const uint16_t BMS_PACK_CURRENT             = 1072;
 const uint16_t BMS_PACK_OVER_CURRENT        = 1076;  //notification sent if pack overcurrents and shuts down
 const uint16_t BMS_V_CHECK_ARRAY            = 1073;  //Total pack voltage
 const uint16_t BMS_TEMP1                    = 1074;  
-//const uint16_t BMS_TEMP2                    = 1075; //Not yet recieveing 2nd temp sensing from BMS
+//const uint16_t BMS_TEMP2                    = 1075; //Not yet receiving 2nd temp sensing from BMS
 const uint16_t BMS_UNDER_VOLTAGE            = 1077;  //notification sent if a cell drops below a specified voltage. Value indicates cell
 const uint16_t CELL_1_VOLTAGE               = 1056;
 const uint16_t CELL_2_VOLTAGE               = 1057;
@@ -89,36 +89,35 @@ const int ROVECOMM_DELAY = 10;
 //////////////////////////////////////////////Pinmap
 // Control Pins
 
-//0 MIN VOLT    3.036 MAX_VOLT  RESISTOR DIVIDER = 11;      
-//const int BATTERYPACK_CNTRL  = 11;
-const int EXTRA_CNTRL         = 17;   
-const int ACT_CNTRL           = 13;
-const int LOGIC_CNTRL         = 18; //created new
-const int COM_CNTRL           = 34; //created new
-const int COM_LOGIC_CNTRL     = 11; //created new
-const int M1_CNTRL            = 58;
-const int M2_CNTRL            = 57;
-const int M3_CNTRL            = 74;
-const int M4_CNTRL            = 53;
-const int M5_CNTRL            = 73;
-const int M6_CNTRL            = 72;
-const int M7_CNTRL            = 71;
-const int FAN_CNTRL           = 42;
+//0 MIN VOLT    3.036 MAX_VOLT  RESISTOR DIVIDER = 11;
+const int ACT_CNTRL             = PN_3;
+const int LOGIC_CNTRL           = PH_2;
+const int COM_CNTRL             = PD_1;
+const int COM_LOGIC_CNTRL       = PP_2;
+const int GENERAL_12V_40A_CNTRL = PK_5;
+const int M1_CNTRL              = PK_7;
+const int M2_CNTRL              = PK_6;
+const int M3_CNTRL              = PH_1;
+const int M4_CNTRL              = PH_0;
+const int M5_CNTRL              = PM_2;
+const int M6_CNTRL              = PM_1;
+const int M7_CNTRL              = PM_0;
+const int FAN_CNTRL             = PM_3;
 
 
 // Sensor Volts/Amps Readings Pins
-const int EXTRA_AMPS          = 26;
-const int ACT_AMPS            = 25;
-const int LOGIC_AMPS          = 24;
-const int COM_AMPS            = 23;
-const int M1_AMPS             = 68;
-const int M2_AMPS             = 67;
-const int M3_AMPS             = 66; 
-const int M4_AMPS             = 45;
-const int M5_AMPS             = 65;
-const int M6_AMPS             = 64;
-const int M7_AMPS             = 63;
-const int PACK_VOLTAGE        = 6;
+const int ACT_AMPS              = PE_2;
+const int LOGIC_AMPS            = PE_0;
+const int COM_AMPS              = PE_1;
+const int GENERAL_12V_40A_AMPS  = PD_0;
+const int M1_AMPS               = PK_3;
+const int M2_AMPS               = PK_2;
+const int M3_AMPS               = PK_1; 
+const int M4_AMPS               = PK_0;
+const int M5_AMPS               = PB_5;
+const int M6_AMPS               = PB_4;
+const int M7_AMPS               = PE_3;
+const int PACK_VOLTAGE          = PE_5;
 
 //////////////////////////////////////////////RoveBoard
 // Tiva1294C RoveBoard Specs
@@ -146,9 +145,10 @@ float voltage_reading            = 0;
 const int DEBOUNCE_DELAY = 10;
 
 //Safest Test pin
-const int ESTOP_12V_COM_LOGIC_MAX_AMPS_THRESHOLD = 5;
-const int ESTOP_12V_EXTRA_ACT_MAX_AMPS_THRESHOLD = 15;   
-const int ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD = 22;
+const int ESTOP_12V_COM_LOGIC_MAX_AMPS_THRESHOLD = 5; //5
+const int ESTOP_12V_ACT_MAX_AMPS_THRESHOLD = 15; //15  
+const int ESTOP_12V_40A_GENERAL_MAX_AMPS_THRESHOLD = 20; //20  (480W/30V)
+const int ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD = 22; //22
 
 // Checks the pin for bouncing voltages to avoid false positives
 bool singleDebounce(int bouncing_pin, int max_amps_threshold)
@@ -179,13 +179,14 @@ union txable_float {
 union txable_float v_check_array;
 union txable_float bms_temp;      //may need to add another temp variable if we use two temp sensors.
 union txable_float pack_current;
+union txable_float cell_vtgs[8];
 
 int num_loops = 0; //used to track number of times the main loop has completed a cycle.
 
 ///////////////////////////////////////////////Implementation
 float mapFloats(float x, float in_min, float in_max, float out_min, float out_max)
 {
-  return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+  return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min + 1; //+1 added for offset
 }//end fnctn
 
 ///scales the input value x from analog input range (0 to 3.3) to actual values (Pack voltage or current)
@@ -198,12 +199,13 @@ float scale(float x, float in_min, float in_max, float out_min, float out_max)
 // the setup routine runs once when you press reset
 void setup() 
 {
+  
   // Control Pins are outputs
-  pinMode(EXTRA_CNTRL, OUTPUT);
   pinMode(ACT_CNTRL, OUTPUT);
   pinMode(COM_LOGIC_CNTRL, OUTPUT);
   pinMode(COM_CNTRL, OUTPUT);
   pinMode(LOGIC_CNTRL, OUTPUT);
+  pinMode(GENERAL_12V_40A_CNTRL, OUTPUT);
   pinMode(M1_CNTRL, OUTPUT);
   pinMode(M2_CNTRL, OUTPUT);
   pinMode(M3_CNTRL, OUTPUT); 
@@ -213,10 +215,10 @@ void setup()
   pinMode(M7_CNTRL, OUTPUT);
   pinMode(FAN_CNTRL, OUTPUT);
 
-  pinMode(EXTRA_AMPS, INPUT);
   pinMode(ACT_AMPS, INPUT);
   pinMode(COM_AMPS, INPUT);
   pinMode(LOGIC_AMPS, INPUT);
+  pinMode(GENERAL_12V_40A_AMPS, INPUT);
   pinMode(M1_AMPS, INPUT);
   pinMode(M2_AMPS, INPUT);
   pinMode(M3_AMPS, INPUT);
@@ -226,11 +228,11 @@ void setup()
   pinMode(M7_AMPS, INPUT);
   pinMode(PACK_VOLTAGE, INPUT);
   
-  digitalWrite(EXTRA_CNTRL, LOW);
   digitalWrite(ACT_CNTRL, LOW);
   digitalWrite(COM_LOGIC_CNTRL, LOW);
   digitalWrite(COM_CNTRL, LOW);
   digitalWrite(LOGIC_CNTRL, LOW);
+  digitalWrite(GENERAL_12V_40A_CNTRL, LOW);
   digitalWrite(M1_CNTRL, LOW);
   digitalWrite(M2_CNTRL, LOW);
   digitalWrite(M3_CNTRL, LOW);
@@ -243,11 +245,11 @@ void setup()
   // Turn on everything when we begin
   delay(ROVER_POWER_RESET_DELAY);
   
-  digitalWrite(EXTRA_CNTRL, HIGH);
   digitalWrite(ACT_CNTRL, HIGH);
   digitalWrite(COM_LOGIC_CNTRL, HIGH);
   digitalWrite(COM_CNTRL, HIGH);
   digitalWrite(LOGIC_CNTRL, HIGH);
+  digitalWrite(GENERAL_12V_40A_CNTRL, HIGH);
   digitalWrite(M1_CNTRL, HIGH);
   digitalWrite(M2_CNTRL, HIGH);
   digitalWrite(M3_CNTRL, HIGH);
@@ -259,39 +261,31 @@ void setup()
   
   roveComm_Begin(192, 168, 1, 132);
   Serial7.begin(115200); //corresponds to pair of Rx and Tx pins on the Tiva that pb uses to communicate with bms.
-  Serial.begin(9600);
+  Serial.begin(9600); //15000 is the baud rate that the integrated tiva chip needs to be set at so the serial monitor reads accurately at 9600.
+  Serial.println("Setting Up...");
   delay(500);
 }//end setup
 
-//Loop
-//
 /////////////////////////////////////////////Powerboard Loop Forever
 void loop() 
 { 
-  if( singleDebounce(EXTRA_AMPS, ESTOP_12V_EXTRA_ACT_MAX_AMPS_THRESHOLD) ) //checks current reading and if too high, sends error msg to base
-  {                                                                        //station then turns off the bus.      
-    (POWER_BUS_OVER_CURRENT, sizeof(BUS_12V_EXTRA_ON_OFF), &BUS_12V_EXTRA_ON_OFF);
-    digitalWrite(EXTRA_CNTRL, LOW);
-    delay(ROVECOMM_DELAY);
-  }//end if
-  
-  if( singleDebounce(ACT_AMPS, ESTOP_12V_EXTRA_ACT_MAX_AMPS_THRESHOLD) )
+  if( singleDebounce(ACT_AMPS, ESTOP_12V_ACT_MAX_AMPS_THRESHOLD) )
   {
-    (POWER_BUS_OVER_CURRENT, sizeof(BUS_12V_ACT_ON_OFF), &BUS_12V_ACT_ON_OFF);
+    roveComm_SendMsg(POWER_BUS_OVER_CURRENT, sizeof(BUS_12V_ACT_ON_OFF), &BUS_12V_ACT_ON_OFF);
     digitalWrite(ACT_CNTRL, LOW);
     delay(ROVECOMM_DELAY);
   }//end if
 
   if( singleDebounce(LOGIC_AMPS, ESTOP_12V_COM_LOGIC_MAX_AMPS_THRESHOLD) )
   {
-    (POWER_BUS_OVER_CURRENT, sizeof(BUS_12V_LOGIC_ON_OFF), &BUS_12V_LOGIC_ON_OFF);                                                                         
-    digitalWrite(LOGIC_CNTRL, LOW);                                            
+    digitalWrite(LOGIC_CNTRL, LOW);       
+    roveComm_SendMsg(POWER_BUS_OVER_CURRENT, sizeof(BUS_12V_LOGIC_ON_OFF), &BUS_12V_LOGIC_ON_OFF);                                                                         	
     delay(ROVECOMM_DELAY);                                                    
   }//end if
 
   if( singleDebounce(COM_AMPS, ESTOP_12V_COM_LOGIC_MAX_AMPS_THRESHOLD) )
   {
-    (POWER_BUS_OVER_CURRENT, sizeof(BUS_12V_COM_ON_OFF), &BUS_12V_COM_ON_OFF);
+    roveComm_SendMsg(POWER_BUS_OVER_CURRENT, sizeof(BUS_12V_COM_ON_OFF), &BUS_12V_COM_ON_OFF);
     digitalWrite(COM_CNTRL, LOW);
     time1 = millis();
     com_over_current = 1; //sets com_over_current to true
@@ -306,53 +300,60 @@ void loop()
         com_over_current = 0;
       }
   }//end if
+  
+  if( singleDebounce(GENERAL_12V_40A_AMPS, ESTOP_12V_40A_GENERAL_MAX_AMPS_THRESHOLD) )
+  {
+	digitalWrite(GENERAL_12V_40A_CNTRL, LOW);
+	roveComm_SendMsg(POWER_BUS_OVER_CURRENT, sizeof(BUS_12V_40A_GENERAL_ON_OFF), &BUS_12V_40A_GENERAL_ON_OFF);
+	delay(ROVECOMM_DELAY);
+  }//end if
 
   if( singleDebounce(M1_AMPS, ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD) ) 
   {
-    (POWER_BUS_OVER_CURRENT, sizeof(BUS_M1_ON_OFF), &BUS_M1_ON_OFF);
     digitalWrite(M1_CNTRL, LOW);
+	roveComm_SendMsg(POWER_BUS_OVER_CURRENT, sizeof(BUS_M1_ON_OFF), &BUS_M1_ON_OFF);
     delay(ROVECOMM_DELAY);
   }//end if
   
   if( singleDebounce(M2_AMPS, ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD) )
   {
-    (POWER_BUS_OVER_CURRENT, sizeof(BUS_M2_ON_OFF), &BUS_M2_ON_OFF);
     digitalWrite(M2_CNTRL, LOW);
+	roveComm_SendMsg(POWER_BUS_OVER_CURRENT, sizeof(BUS_M2_ON_OFF), &BUS_M2_ON_OFF);
     delay(ROVECOMM_DELAY);
   }//end if
   
    if(singleDebounce(M3_AMPS, ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD) )
   {
-    (POWER_BUS_OVER_CURRENT, sizeof(BUS_M3_ON_OFF), &BUS_M3_ON_OFF);
     digitalWrite(M3_CNTRL, LOW);
+	roveComm_SendMsg(POWER_BUS_OVER_CURRENT, sizeof(BUS_M3_ON_OFF), &BUS_M3_ON_OFF);
     delay(ROVECOMM_DELAY);
   }//end if
   
   if(singleDebounce(M4_AMPS, ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD) )
   {
-    (POWER_BUS_OVER_CURRENT, sizeof(BUS_M4_ON_OFF), &BUS_M4_ON_OFF);
     digitalWrite(M4_CNTRL, LOW);
+	roveComm_SendMsg(POWER_BUS_OVER_CURRENT, sizeof(BUS_M4_ON_OFF), &BUS_M4_ON_OFF);
     delay(ROVECOMM_DELAY);
   }//end if
   
   if( singleDebounce(M5_AMPS, ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD) )
   {
-    (POWER_BUS_OVER_CURRENT, sizeof(BUS_M5_ON_OFF), &BUS_M5_ON_OFF);
     digitalWrite(M5_CNTRL, LOW);
+	roveComm_SendMsg(POWER_BUS_OVER_CURRENT, sizeof(BUS_M5_ON_OFF), &BUS_M5_ON_OFF);
     delay(ROVECOMM_DELAY);
   }//end if
   
   if( singleDebounce(M6_AMPS, ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD) )
   {
-    (POWER_BUS_OVER_CURRENT, sizeof(BUS_M6_ON_OFF), &BUS_M6_ON_OFF);
     digitalWrite(M6_CNTRL, LOW);
+	roveComm_SendMsg(POWER_BUS_OVER_CURRENT, sizeof(BUS_M6_ON_OFF), &BUS_M6_ON_OFF);
     delay(ROVECOMM_DELAY);
   }//end if
   
   if(singleDebounce(M7_AMPS, ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD) )
   {
-    (POWER_BUS_OVER_CURRENT, sizeof(BUS_M7_ON_OFF), &BUS_M7_ON_OFF);
     digitalWrite(M7_CNTRL, LOW);
+	roveComm_SendMsg(POWER_BUS_OVER_CURRENT, sizeof(BUS_M7_ON_OFF), &BUS_M7_ON_OFF);
     delay(ROVECOMM_DELAY);
   }//end if
   
@@ -360,6 +361,12 @@ void loop()
   
   //If there is no message, data_id gets set to zero
   roveComm_GetMsg(&data_id, &data_size, &data_value);
+  if (data_id){
+  //Serial.print("data_id: ");
+  //Serial.println(data_id);
+  //Serial.print("data_value: ");
+  //Serial.println(data_value);
+  }
   switch (data_id) 
   {   
     case NO_ROVECOMM_MESSAGE: //data_id is 0; do nothing
@@ -368,10 +375,6 @@ void loop()
     case POWER_BUS_ENABLE: //data_id is 1088
       switch (data_value)
       { 
-        case BUS_12V_EXTRA_ON_OFF:
-          digitalWrite(EXTRA_CNTRL, HIGH);
-          break;
-
         case BUS_12V_ACT_ON_OFF:
           digitalWrite(ACT_CNTRL, HIGH);
           break;
@@ -387,6 +390,10 @@ void loop()
         case BUS_12V_COM_ON_OFF:
           digitalWrite(COM_CNTRL, HIGH);
           break;
+		
+		    case BUS_12V_40A_GENERAL_ON_OFF:
+		      digitalWrite(GENERAL_12V_40A_CNTRL, HIGH);
+		      break;
           
         case BUS_M1_ON_OFF:
           digitalWrite(M1_CNTRL, HIGH);
@@ -416,7 +423,7 @@ void loop()
           digitalWrite(M7_CNTRL, HIGH);
           break;
 
-        case FAN_ON_OFF:
+        case FANS_ON_OFF:
           digitalWrite(FAN_CNTRL, HIGH);
           break;
           
@@ -430,12 +437,10 @@ void loop()
     case POWER_BUS_DISABLE: //data_id id 1089
           switch (data_value)
           { 
-            case BUS_12V_EXTRA_ON_OFF:
-              digitalWrite(EXTRA_CNTRL, LOW);
-              break;
             case BUS_12V_ACT_ON_OFF:
               digitalWrite(ACT_CNTRL, LOW);
               break;
+			  
             case BUS_12V_COM_LOGIC_ON_OFF:
               digitalWrite(COM_LOGIC_CNTRL, LOW);
               break;
@@ -447,6 +452,10 @@ void loop()
             case BUS_12V_COM_ON_OFF:
               digitalWrite(COM_CNTRL, LOW);
               break;
+			  
+			     case BUS_12V_40A_GENERAL_ON_OFF:
+			       digitalWrite(GENERAL_12V_40A_CNTRL, LOW);
+			       break;
               
             case BUS_M1_ON_OFF:
               digitalWrite(M1_CNTRL, LOW);
@@ -476,13 +485,13 @@ void loop()
               digitalWrite(M7_CNTRL, LOW);
               break;
 
-            case FAN_ON_OFF:
+            case FANS_ON_OFF:
               digitalWrite(FAN_CNTRL, LOW);
               break;
               
             default:
               //Serial.println("Unrecognized data : 3");
-              //Serial.println(data);
+              //Serial.println(data_value);
               break; 
          }//endswitch 
          break;
@@ -498,20 +507,20 @@ void loop()
       digitalWrite(M7_CNTRL, LOW);  
                   
       digitalWrite(ACT_CNTRL, LOW);
-      digitalWrite(EXTRA_CNTRL, LOW);
       digitalWrite(LOGIC_CNTRL, LOW);
       digitalWrite(COM_CNTRL, LOW);
       digitalWrite(COM_LOGIC_CNTRL, LOW);
+	  digitalWrite(GENERAL_12V_40A_CNTRL, LOW);
       
       digitalWrite(FAN_CNTRL, LOW);
      
       delay(ROVER_POWER_RESET_DELAY);
 
-      digitalWrite(EXTRA_CNTRL, HIGH);
       digitalWrite(ACT_CNTRL, HIGH);
       digitalWrite(COM_LOGIC_CNTRL, HIGH);
       digitalWrite(COM_CNTRL, HIGH);
       digitalWrite(LOGIC_CNTRL, HIGH);
+	  digitalWrite(GENERAL_12V_40A_CNTRL, HIGH);
     
       digitalWrite(M1_CNTRL, HIGH);
       digitalWrite(M2_CNTRL, HIGH);
@@ -526,11 +535,12 @@ void loop()
 
     case BATT_PACK_OFF: //data_id is 1040
         Serial7.write(1);
-        //Serial.println("BMS shutdown");
+        Serial.println("BMS shutdown");
         break;
 
     case BATT_PACK_RESET: //data_id is 1041
         Serial7.write(2);
+        Serial.println("BMS Reseting");
         break;
 
     case BATT_FANS_ON_OFF: //data_id is 1078
@@ -538,10 +548,12 @@ void loop()
           {
             case '1':
               Serial7.write(3); //fans on
+              Serial.println("Fans ON");
               break;
 
             case '0':
               Serial7.write(4); //fans off
+              Serial.println("Fans OFF");
               break;
           }
 
@@ -550,6 +562,7 @@ void loop()
           {
             case '1':
               Serial7.write(6); //buzzer on
+              Serial.println("Buzzer ON");
               break;
 
             case '0':
@@ -562,11 +575,6 @@ void loop()
       //Serial.println(data_id);
       break;
   }//endswitch
-
-  adc_reading = analogRead(EXTRA_AMPS);
-  current_reading = mapFloats(adc_reading, ADC_MIN, ADC_MAX, CURRENT_MIN, CURRENT_MAX);
-  roveComm_SendMsg(EXTRA_12V_CURRENT_READING, sizeof(current_reading), &current_reading);
-  delay(ROVECOMM_DELAY);
   
   adc_reading = analogRead(ACT_AMPS);
   current_reading = mapFloats(adc_reading, ADC_MIN, ADC_MAX, CURRENT_MIN, CURRENT_MAX);
@@ -583,9 +591,18 @@ void loop()
   roveComm_SendMsg(COM_12V_CURRENT_READING, sizeof(current_reading), &current_reading);
   delay(ROVECOMM_DELAY);
   
+  adc_reading = analogRead(GENERAL_12V_40A_AMPS);
+  current_reading = mapFloats(adc_reading, ADC_MIN, ADC_MAX, CURRENT_MIN, CURRENT_MAX);
+  roveComm_SendMsg(GENERAL_12V_40A_CURRENT_READING, sizeof(current_reading), &current_reading);
+  delay(ROVECOMM_DELAY);
+  
   adc_reading = analogRead(M1_AMPS); 
   current_reading = mapFloats(adc_reading, ADC_MIN, ADC_MAX, CURRENT_MIN, CURRENT_MAX);  
   roveComm_SendMsg(M1_CURRENT_READING, sizeof(current_reading), &current_reading);
+  //Serial.print("Data_id: ");
+  //Serial.println(M1_CURRENT_READING);
+  //Serial.print("Data_value: ");
+  //Serial.println(current_reading);
   delay(ROVECOMM_DELAY);
 
   adc_reading = analogRead(M2_AMPS);
@@ -623,12 +640,16 @@ void loop()
   roveComm_SendMsg(PACK_VOLTAGE_READING, sizeof(voltage_reading), &voltage_reading);
   delay(ROVECOMM_DELAY);
 
-  ////////////// BMS Communication /////////////////////////////////////////////////////////
-  
+
+
+
+////////////// BMS Communication /////////////////////////////////////////////////////////
+
   if (num_loops > 18 ) 
   {
     num_loops = 0;    //resets loops to zero to start count to 18 over again
     Serial7.write(5); //tells bms that I am ready to recieve data
+    Serial.println("Wrote 5");
   }
 
   if (Serial7.available() >= 24) //number of bytes I expect to recieve from bms
@@ -647,6 +668,8 @@ void loop()
     //pack_current = ((pack_current_byte[0]) | (pack_current_byte[1] << 8) | (pack_current_byte[2] << 16) | (pack_current_byte[3] <<24));
     roveComm_SendMsg(BMS_PACK_CURRENT, sizeof(pack_current.f), &pack_current.f);
     delay(ROVECOMM_DELAY);
+    Serial.print("Pack Current: ");
+    Serial.println(pack_current.f);
 
     for (int i=0; i < 4; i++)           
     {
@@ -656,6 +679,8 @@ void loop()
     //v_check_array = ((v_check_array_byte[0]) | (v_check_array_byte[1] << 8) | (v_check_array_byte[2] << 16) | (v_check_array_byte[3] <<24));
     roveComm_SendMsg(BMS_V_CHECK_ARRAY, sizeof(v_check_array.f), &v_check_array.f);
     delay(ROVECOMM_DELAY);
+    Serial.print("V Check Array: ");
+    Serial.println(v_check_array.f);
 
     for (int i=0; i < 4; i++)
     {
@@ -666,75 +691,40 @@ void loop()
     delay(ROVECOMM_DELAY);
 
        
-    /*Serial.println(pack_current.f);         //used when testing
-    Serial.println(pack_current.ch[0], HEX);
-    Serial.println(v_check_array.f);
-    Serial.println(bms_temp.f);*/
-     
+    //Serial.println(pack_current.f);         //used when testing
+    //Serial.println(pack_current.ch[0], HEX);
+    //Serial.println(v_check_array.f);
+    //Serial.println(bms_temp.f);
+
+    for(int j=0; j<8; j++){
+      for(int h=0; h<4; h++){
+        cell_vtgs[j].ch[h] = Serial7.read();
+      }
+    }
+
+    roveComm_SendMsg(CELL_1_VOLTAGE, sizeof(cell_vtgs[0].f), &cell_vtgs[0].f);
+    roveComm_SendMsg(CELL_2_VOLTAGE, sizeof(cell_vtgs[1].f), &cell_vtgs[1].f);
+    roveComm_SendMsg(CELL_3_VOLTAGE, sizeof(cell_vtgs[2].f), &cell_vtgs[2].f);
+    roveComm_SendMsg(CELL_4_VOLTAGE, sizeof(cell_vtgs[3].f), &cell_vtgs[3].f);
+    roveComm_SendMsg(CELL_5_VOLTAGE, sizeof(cell_vtgs[4].f), &cell_vtgs[4].f);
+    roveComm_SendMsg(CELL_6_VOLTAGE, sizeof(cell_vtgs[5].f), &cell_vtgs[5].f);
+    roveComm_SendMsg(CELL_7_VOLTAGE, sizeof(cell_vtgs[6].f), &cell_vtgs[6].f);
+    roveComm_SendMsg(CELL_8_VOLTAGE, sizeof(cell_vtgs[7].f), &cell_vtgs[7].f);
+
+    
+  }
+    Serial.println(cell_vtgs[0].f);
+    Serial.println(cell_vtgs[1].f);
+    Serial.println(cell_vtgs[2].f);
+    Serial.println(cell_vtgs[3].f);
+    Serial.println(cell_vtgs[4].f);
+    Serial.println(cell_vtgs[5].f);
+    Serial.println(cell_vtgs[6].f);
+    Serial.println(cell_vtgs[7].f);
+    
+    
+
   
-    for (int i=0; i < 12; i++)
-    {
-      cell_voltages_byte[i] = Serial7.read();
-    }   
-
-    //The CVR0x registers, as read in from SPI, are 8 bits, but the actual voltages are 12-bit floats
-    // spread out across multiple registers. Consult the LTC6803 datasheet (table 8, p. 23)
-    //
-    //The "split" occurs at the most significant nybble, then at the least significant, then most again, etc.
-    cell_voltages[0] = cell_voltages_byte[0] | ((cell_voltages_byte[1] & 0x0F) << 8); //Cell 1
-    roveComm_SendMsg(CELL_1_VOLTAGE, sizeof(cell_voltages[0]), &cell_voltages[0]);
-    delay(ROVECOMM_DELAY);
-
-    cell_voltages[1] = ((cell_voltages_byte[1] & 0xF0) >> 4) | (cell_voltages_byte[2] << 4); //Cell 2
-    roveComm_SendMsg(CELL_2_VOLTAGE, sizeof(cell_voltages[1]), &cell_voltages[1]);
-    delay(ROVECOMM_DELAY);
-
-    cell_voltages[2] = cell_voltages_byte[3] | ((cell_voltages_byte[4] & 0x0F) << 8); //Cell 3
-    roveComm_SendMsg(CELL_3_VOLTAGE, sizeof(cell_voltages[2]), &cell_voltages[2]);
-    delay(ROVECOMM_DELAY);
-
-    cell_voltages[3] = ((cell_voltages_byte[4] & 0xF0) >> 4) | (cell_voltages_byte[5] << 4); //Cell 4
-    roveComm_SendMsg(CELL_4_VOLTAGE, sizeof(cell_voltages[3]), &cell_voltages[3]);
-    delay(ROVECOMM_DELAY);
-
-    cell_voltages[4] = cell_voltages_byte[6] | ((cell_voltages_byte[7] & 0x0F) << 8); //Cell 5
-    roveComm_SendMsg(CELL_5_VOLTAGE, sizeof(cell_voltages[4]), &cell_voltages[4]);
-    delay(ROVECOMM_DELAY);
-
-    cell_voltages[5] = ((cell_voltages_byte[7] & 0xF0) >> 4) | (cell_voltages_byte[8] << 4);//Cell 6
-    roveComm_SendMsg(CELL_6_VOLTAGE, sizeof(cell_voltages[5]), &cell_voltages[5]);
-    delay(ROVECOMM_DELAY);
-
-    cell_voltages[6] = cell_voltages_byte[9] | ((cell_voltages_byte[10] & 0x0F) << 8); //Cell 7
-    roveComm_SendMsg(CELL_7_VOLTAGE, sizeof(cell_voltages[6]), &cell_voltages[6]);
-    delay(ROVECOMM_DELAY);
-
-    cell_voltages[7] = ((cell_voltages_byte[10] & 0xF0) >> 4) | (cell_voltages_byte[11] << 4);//Cell 8
-    roveComm_SendMsg(CELL_8_VOLTAGE, sizeof(cell_voltages[7]), &cell_voltages[7]);
-    delay(ROVECOMM_DELAY);
-
-    
-
-    //These still aren't normal voltages after putting them in floats; you need to do some extra processing.
-    for(int k = 0; k < 8; k++)
-      {
-        cell_voltages[k] -= 512;
-        cell_voltages[k] *= 1.5 * .001;//I don't yet know if this is correct; taken wholesale from solar car*/
-      } 
-  }
-    /*Serial.println(cell_voltages[0]);
-    Serial.println(cell_voltages[1]);
-    Serial.println(cell_voltages[2]);
-    Serial.println(cell_voltages[3]);
-    Serial.println(cell_voltages[4]);
-    Serial.println(cell_voltages[5]);
-    Serial.println(cell_voltages[6]);
-    Serial.println(cell_voltages[7]);
-
-    
-    
-
-  }
   char incomingByte;
     if(Serial.available() > 0)
     {
@@ -758,8 +748,9 @@ void loop()
           digitalWrite(M7_CNTRL, HIGH);
           break;
       }
-    }*/
-  num_loops++;
+    }
+num_loops++;
+
 }//end loop
 
 
