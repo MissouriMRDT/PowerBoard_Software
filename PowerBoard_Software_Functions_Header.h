@@ -60,14 +60,14 @@ RoveCommEthernetUdp RoveComm;
 #define SENSOR_SCALE          0.1      //volts/amp
 #define SENSOR_BIAS           VCC * SENSOR_SCALE
 
-#define CURRENT_MAX           ((VCC - SENSOR_BIAS) / SENSOR_SENSITIVITY)
-#define CURRENT_MIN           -SENSOR_BIAS / SENSOR_SENSITIVITY
+#define CURRENT_MAX           40//((VCC - SENSOR_BIAS) / SENSOR_SENSITIVITY)
+#define CURRENT_MIN           0//-SENSOR_BIAS / SENSOR_SENSITIVITY
 
 #define VOLTS_MIN             0
 #define VOLTS_MAX             33.6
 
 //Safest Test pin
-#define ESTOP_12V_COM_LOGIC_MAX_AMPS_THRESHOLD  5 //5
+#define ESTOP_12V_COM_LOGIC_MAX_AMPS_THRESHOLD  10 //5
 #define ESTOP_12V_ACT_MAX_AMPS_THRESHOLD        15 //15  
 #define ESTOP_AUX_MAX_AMPS_THRESHOLD            20 //20  (480W/30V)
 #define ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD      22 //22
