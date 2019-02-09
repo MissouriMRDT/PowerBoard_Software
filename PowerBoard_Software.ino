@@ -31,31 +31,31 @@ void setup()
 void loop() 
 { 
   //Current Readings to Report back to Base Station
-  Pin_Read(Current_Reading[RC_POWERBOARD_IMEASmA_COMMENTRY], COM_I_MEAS) ;
-  Pin_Read(Current_Reading[RC_POWERBOARD_IMEASmA_LOGENTRY], LOGIC_I_MEAS) ;
-  Pin_Read(Current_Reading[RC_POWERBOARD_IMEASmA_ACTENTRY], ACT_I_MEAS) ;
-  Pin_Read(Current_Reading[RC_POWERBOARD_IMEASmA_AUXENTRY], AUX_I_MEAS) ;
-  Pin_Read(Current_Reading[RC_POWERBOARD_IMEASmA_M1ENTRY], M1_I_MEAS) ;
-  Pin_Read(Current_Reading[RC_POWERBOARD_IMEASmA_M2ENTRY], M2_I_MEAS) ;
-  Pin_Read(Current_Reading[RC_POWERBOARD_IMEASmA_M3ENTRY], M3_I_MEAS) ;
-  Pin_Read(Current_Reading[RC_POWERBOARD_IMEASmA_M4ENTRY], M4_I_MEAS) ;
-  Pin_Read(Current_Reading[RC_POWERBOARD_IMEASmA_M5ENTRY], M5_I_MEAS) ;
-  Pin_Read(Current_Reading[RC_POWERBOARD_IMEASmA_M6ENTRY], M6_I_MEAS) ;
-  Pin_Read(Current_Reading[RC_POWERBOARD_IMEASmA_M7ENTRY], M7_I_MEAS) ;
+  Pin_Read(Current_Reading[RC_POWERBOARD_IMEASmA_COMMENTRY], COM_I_MEAS_PIN) ;
+  Pin_Read(Current_Reading[RC_POWERBOARD_IMEASmA_LOGENTRY], LOGIC_I_MEAS_PIN) ;
+  Pin_Read(Current_Reading[RC_POWERBOARD_IMEASmA_ACTENTRY], ACT_I_MEAS_PIN) ;
+  Pin_Read(Current_Reading[RC_POWERBOARD_IMEASmA_AUXENTRY], AUX_I_MEAS_PIN) ;
+  Pin_Read(Current_Reading[RC_POWERBOARD_IMEASmA_M1ENTRY], M1_I_MEAS_PIN) ;
+  Pin_Read(Current_Reading[RC_POWERBOARD_IMEASmA_M2ENTRY], M2_I_MEAS_PIN) ;
+  Pin_Read(Current_Reading[RC_POWERBOARD_IMEASmA_M3ENTRY], M3_I_MEAS_PIN) ;
+  Pin_Read(Current_Reading[RC_POWERBOARD_IMEASmA_M4ENTRY], M4_I_MEAS_PIN) ;
+  Pin_Read(Current_Reading[RC_POWERBOARD_IMEASmA_M5ENTRY], M5_I_MEAS_PIN) ;
+  Pin_Read(Current_Reading[RC_POWERBOARD_IMEASmA_M6ENTRY], M6_I_MEAS_PIN) ;
+  Pin_Read(Current_Reading[RC_POWERBOARD_IMEASmA_M7ENTRY], M7_I_MEAS_PIN) ;
   RoveComm.write(RC_POWERBOARD_IMEASmA_DATAID, RC_POWERBOARD_IMEASmA_DATACOUNT, Current_Reading) ;
   
   //Checking for Over Currents on all busses
-  Shut_Off(COM_I_MEAS, Bus, COM_CTL, ESTOP_12V_COM_LOGIC_MAX_AMPS_THRESHOLD) ;
-  Shut_Off(ACT_I_MEAS, Bus, ACT_CTL, ESTOP_12V_ACT_MAX_AMPS_THRESHOLD) ;
-  Shut_Off(LOGIC_I_MEAS, Bus, LOGIC_CTL, ESTOP_12V_COM_LOGIC_MAX_AMPS_THRESHOLD) ;
-  Shut_Off(AUX_I_MEAS, Bus, AUX_CTL, ESTOP_AUX_MAX_AMPS_THRESHOLD) ;
-  Shut_Off(M1_I_MEAS, Bus, M1_CTL, ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD) ;
-  Shut_Off(M2_I_MEAS, Bus, M2_CTL, ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD) ;
-  Shut_Off(M3_I_MEAS, Bus, M3_CTL, ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD) ;
-  Shut_Off(M4_I_MEAS, Bus, M4_CTL, ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD) ;
-  Shut_Off(M5_I_MEAS, Bus, M5_CTL, ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD) ;
-  Shut_Off(M6_I_MEAS, Bus, M6_CTL, ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD) ;
-  Shut_Off(M7_I_MEAS, Bus, M7_CTL, ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD) ;
+  Shut_Off(COM_I_MEAS_PIN, Bus, COM_CTL_PIN, ESTOP_12V_COM_LOGIC_MAX_AMPS_THRESHOLD) ;
+  Shut_Off(ACT_I_MEAS_PIN, Bus, ACT_CTL_PIN, ESTOP_12V_ACT_MAX_AMPS_THRESHOLD) ;
+  Shut_Off(LOGIC_I_MEAS_PIN, Bus, LOGIC_CTL_PIN, ESTOP_12V_COM_LOGIC_MAX_AMPS_THRESHOLD) ;
+  Shut_Off(AUX_I_MEAS_PIN, Bus, AUX_CTL_PIN, ESTOP_AUX_MAX_AMPS_THRESHOLD) ;
+  Shut_Off(M1_I_MEAS_PIN, Bus, M1_CTL_PIN, ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD) ;
+  Shut_Off(M2_I_MEAS_PIN, Bus, M2_CTL_PIN, ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD) ;
+  Shut_Off(M3_I_MEAS_PIN, Bus, M3_CTL_PIN, ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD) ;
+  Shut_Off(M4_I_MEAS_PIN, Bus, M4_CTL_PIN, ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD) ;
+  Shut_Off(M5_I_MEAS_PIN, Bus, M5_CTL_PIN, ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD) ;
+  Shut_Off(M6_I_MEAS_PIN, Bus, M6_CTL_PIN, ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD) ;
+  Shut_Off(M7_I_MEAS_PIN, Bus, M7_CTL_PIN, ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD) ;
   RoveComm.write(RC_POWERBOARD_BUSENABLED_DATAID, RC_POWERBOARD_BUSENABLED_DATACOUNT, Bus) ; //Send out a summary of what is off after current check
   delay(ROVECOMM_DELAY) ;
   
@@ -69,7 +69,7 @@ void loop()
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //Functions
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-bool singleDebounce(int bouncing_pin, int max_amps_threshold)
+bool singleDebounce(const int & bouncing_pin, const int & max_amps_threshold)
 {
   int adc_threshhold = map(max_amps_threshold, CURRENT_MIN, CURRENT_MAX, ADC_MIN, ADC_MAX);
   
@@ -98,68 +98,68 @@ bool singleDebounce(int bouncing_pin, int max_amps_threshold)
 void Configure_Pins ()
 {
   // Control Pins are outputs
-  pinMode(ACT_CTL, OUTPUT);
-  pinMode(COM_LOGIC_CTL, OUTPUT);
-  pinMode(COM_CTL, OUTPUT);
-  pinMode(LOGIC_CTL, OUTPUT);
-  pinMode(AUX_CTL, OUTPUT);
-  pinMode(M1_CTL, OUTPUT);
-  pinMode(M2_CTL, OUTPUT);
-  pinMode(M3_CTL, OUTPUT); 
-  pinMode(M4_CTL, OUTPUT);
-  pinMode(M5_CTL, OUTPUT);
-  pinMode(M6_CTL, OUTPUT);
-  pinMode(M7_CTL, OUTPUT);
-  pinMode(FAN_CTL, OUTPUT);
+  pinMode(ACT_CTL_PIN, OUTPUT);
+  pinMode(COM_LOGIC_CTL_PIN, OUTPUT);
+  pinMode(COM_CTL_PIN, OUTPUT);
+  pinMode(LOGIC_CTL_PIN, OUTPUT);
+  pinMode(AUX_CTL_PIN, OUTPUT);
+  pinMode(M1_CTL_PIN, OUTPUT);
+  pinMode(M2_CTL_PIN, OUTPUT);
+  pinMode(M3_CTL_PIN, OUTPUT); 
+  pinMode(M4_CTL_PIN, OUTPUT);
+  pinMode(M5_CTL_PIN, OUTPUT);
+  pinMode(M6_CTL_PIN, OUTPUT);
+  pinMode(M7_CTL_PIN, OUTPUT);
+  pinMode(FAN_CTL_PIN, OUTPUT);
 
   //Current Measurement pins are inputs
-  pinMode(ACT_I_MEAS, INPUT);
-  pinMode(COM_I_MEAS, INPUT);
-  pinMode(LOGIC_I_MEAS, INPUT);
-  pinMode(AUX_I_MEAS, INPUT);
-  pinMode(M1_I_MEAS, INPUT);
-  pinMode(M2_I_MEAS, INPUT);
-  pinMode(M3_I_MEAS, INPUT);
-  pinMode(M4_I_MEAS, INPUT);
-  pinMode(M5_I_MEAS, INPUT);
-  pinMode(M6_I_MEAS, INPUT);
-  pinMode(M7_I_MEAS, INPUT);
-  pinMode(PACK_VOLTAGE, INPUT);
+  pinMode(ACT_I_MEAS_PIN, INPUT);
+  pinMode(COM_I_MEAS_PIN, INPUT);
+  pinMode(LOGIC_I_MEAS_PIN, INPUT);
+  pinMode(AUX_I_MEAS_PIN, INPUT);
+  pinMode(M1_I_MEAS_PIN, INPUT);
+  pinMode(M2_I_MEAS_PIN, INPUT);
+  pinMode(M3_I_MEAS_PIN, INPUT);
+  pinMode(M4_I_MEAS_PIN, INPUT);
+  pinMode(M5_I_MEAS_PIN, INPUT);
+  pinMode(M6_I_MEAS_PIN, INPUT);
+  pinMode(M7_I_MEAS_PIN, INPUT);
+  pinMode(PACK_VOLTAGE_PIN, INPUT);
   return ;
 }
 
 void Pin_Initialization ()
 {
-  digitalWrite(ACT_CTL, LOW);
-  digitalWrite(COM_LOGIC_CTL, LOW);
-  digitalWrite(COM_CTL, LOW);
-  digitalWrite(LOGIC_CTL, LOW);
-  digitalWrite(AUX_CTL, LOW);
-  digitalWrite(M1_CTL, LOW);
-  digitalWrite(M2_CTL, LOW);
-  digitalWrite(M3_CTL, LOW);
-  digitalWrite(M4_CTL, LOW);
-  digitalWrite(M5_CTL, LOW);
-  digitalWrite(M6_CTL, LOW);
-  digitalWrite(M7_CTL, LOW);
-  digitalWrite(FAN_CTL, LOW);
+  digitalWrite(ACT_CTL_PIN, LOW);
+  digitalWrite(COM_LOGIC_CTL_PIN, LOW);
+  digitalWrite(COM_CTL_PIN, LOW);
+  digitalWrite(LOGIC_CTL_PIN, LOW);
+  digitalWrite(AUX_CTL_PIN, LOW);
+  digitalWrite(M1_CTL_PIN, LOW);
+  digitalWrite(M2_CTL_PIN, LOW);
+  digitalWrite(M3_CTL_PIN, LOW);
+  digitalWrite(M4_CTL_PIN, LOW);
+  digitalWrite(M5_CTL_PIN, LOW);
+  digitalWrite(M6_CTL_PIN, LOW);
+  digitalWrite(M7_CTL_PIN, LOW);
+  digitalWrite(FAN_CTL_PIN, LOW);
    // Turn on everything when we begin
   delay(ROVER_POWER_RESET_DELAY);
 
   //After Delay, make sure everything turns on
-  digitalWrite(ACT_CTL, HIGH);
-  digitalWrite(COM_LOGIC_CTL, HIGH);
-  digitalWrite(COM_CTL, HIGH);
-  digitalWrite(LOGIC_CTL, HIGH);
-  digitalWrite(AUX_CTL, HIGH);
-  digitalWrite(M1_CTL, HIGH);
-  digitalWrite(M2_CTL, HIGH);
-  digitalWrite(M3_CTL, HIGH);
-  digitalWrite(M4_CTL, HIGH);
-  digitalWrite(M5_CTL, HIGH);
-  digitalWrite(M6_CTL, HIGH);
-  digitalWrite(M7_CTL, HIGH);
-  digitalWrite(FAN_CTL, HIGH);
+  digitalWrite(ACT_CTL_PIN, HIGH);
+  digitalWrite(COM_LOGIC_CTL_PIN, HIGH);
+  digitalWrite(COM_CTL_PIN, HIGH);
+  digitalWrite(LOGIC_CTL_PIN, HIGH);
+  digitalWrite(AUX_CTL_PIN, HIGH);
+  digitalWrite(M1_CTL_PIN, HIGH);
+  digitalWrite(M2_CTL_PIN, HIGH);
+  digitalWrite(M3_CTL_PIN, HIGH);
+  digitalWrite(M4_CTL_PIN, HIGH);
+  digitalWrite(M5_CTL_PIN, HIGH);
+  digitalWrite(M6_CTL_PIN, HIGH);
+  digitalWrite(M7_CTL_PIN, HIGH);
+  digitalWrite(FAN_CTL_PIN, HIGH);
   
   return ;
 }
@@ -192,78 +192,78 @@ void Communication_Begin (uint8_t Bus [])
   RoveComm.write(RC_POWERBOARD_BUSENABLED_DATAID, RC_POWERBOARD_BUSENABLED_DATACOUNT, Bus) ; //Initial states of Busses
 }
 
-void Shut_Off( const int BUS_I_MEAS, uint8_t Bus[], const int BUS_CTL, const int ESTOP_AMP_THRESHOLD)
+void Shut_Off( const int & BUS_I_MEAS_PIN, uint8_t Bus[], const int & BUS_CTL_PIN, const int & ESTOP_AMP_THRESHOLD)
 {
   uint8_t time1 = 0 ;
-  if(singleDebounce(BUS_I_MEAS, ESTOP_AMP_THRESHOLD) ) //If pin is tripped
+  if(singleDebounce(BUS_I_MEAS_PIN, ESTOP_AMP_THRESHOLD) ) //If pin is tripped
   {
-     if(BUS_CTL == COM_CTL)//Special rules for communication bus
+     if(BUS_CTL_PIN == COM_CTL_PIN)//Special rules for communication bus
      {
        bitWrite(Bus[0],RC_POWERBOARD_BUSENABLED_COMMBIT, 0) ;
        RoveComm.write(RC_POWERBOARD_BUSENABLED_DATAID, RC_POWERBOARD_BUSENABLED_DATACOUNT, Bus) ;
-       digitalWrite(COM_CTL, LOW);
+       digitalWrite(COM_CTL_PIN, LOW);
        time1 = millis();
        delay(ROVECOMM_DELAY);
        if(millis()>=(time1+10000))            //it is turned off in case the overcurrent was just a random spike. 
        {                                      //If there actually is a short in the bus, the bus will turn itself 
                                               //back on
-         digitalWrite(COM_CTL,HIGH);
+         digitalWrite(COM_CTL_PIN,HIGH);
          bitSet(Bus[0], RC_POWERBOARD_BUSENABLED_COMMBIT) ;
        } 
      }
      else //All other busses
      {
-       switch(BUS_CTL)
+       switch(BUS_CTL_PIN)
        {
-         case ACT_CTL:
+         case ACT_CTL_PIN:
            bitWrite(Bus[0], RC_POWERBOARD_BUSENABLED_ACTBIT, 0) ;
-           digitalWrite(BUS_CTL, LOW);
+           digitalWrite(BUS_CTL_PIN, LOW);
            delay(ROVECOMM_DELAY);
            break ;
-         case LOGIC_CTL:
+         case LOGIC_CTL_PIN:
            bitWrite(Bus[0], RC_POWERBOARD_BUSENABLED_LOGBIT, 0) ;
-           digitalWrite(BUS_CTL, LOW) ;
+           digitalWrite(BUS_CTL_PIN, LOW) ;
            delay(ROVECOMM_DELAY) ;
            break ;
-         case M1_CTL:
+         case M1_CTL_PIN:
            bitWrite(Bus[1], RC_POWERBOARD_BUSENABLED_M1BIT, 0) ;
-           digitalWrite(BUS_CTL, LOW) ;
+           digitalWrite(BUS_CTL_PIN, LOW) ;
            delay(ROVECOMM_DELAY) ;
            break ;
-         case M2_CTL:
+         case M2_CTL_PIN:
            bitWrite(Bus[1], RC_POWERBOARD_BUSENABLED_M2BIT, 0) ;
-           digitalWrite(BUS_CTL, LOW) ;
+           digitalWrite(BUS_CTL_PIN, LOW) ;
            delay(ROVECOMM_DELAY) ;
            break ;
-         case M3_CTL:
+         case M3_CTL_PIN:
            bitWrite(Bus[1], RC_POWERBOARD_BUSENABLED_M3BIT, 0) ;
-           digitalWrite(BUS_CTL, LOW) ;
+           digitalWrite(BUS_CTL_PIN, LOW) ;
            delay(ROVECOMM_DELAY) ;
            break ;
-         case M4_CTL:
+         case M4_CTL_PIN:
            bitWrite(Bus[1], RC_POWERBOARD_BUSENABLED_M4BIT, 0) ;
-           digitalWrite(BUS_CTL, LOW) ;
+           digitalWrite(BUS_CTL_PIN, LOW) ;
            delay(ROVECOMM_DELAY) ;
            break ;
-         case M5_CTL:
+         case M5_CTL_PIN:
            bitWrite(Bus[1], RC_POWERBOARD_BUSENABLED_M5BIT, 0) ;
-           digitalWrite(BUS_CTL, LOW) ;
+           digitalWrite(BUS_CTL_PIN, LOW) ;
            delay(ROVECOMM_DELAY) ;
            break ;
-         case M6_CTL:
+         case M6_CTL_PIN:
            bitWrite(Bus[1], RC_POWERBOARD_BUSENABLED_M6BIT, 0) ;
-           digitalWrite(BUS_CTL, LOW) ;
+           digitalWrite(BUS_CTL_PIN, LOW) ;
            delay(ROVECOMM_DELAY) ;
            break ;
-         case M7_CTL:
+         case M7_CTL_PIN:
            bitWrite(Bus[1], RC_POWERBOARD_BUSENABLED_M7BIT, 0) ;
-           digitalWrite(BUS_CTL, LOW) ;
+           digitalWrite(BUS_CTL_PIN, LOW) ;
            delay(ROVECOMM_DELAY) ;
            break ;
-         case AUX_CTL:
+         case AUX_CTL_PIN:
            bitWrite(Bus[1], RC_POWERBOARD_BUSENABLED_AUXBIT, 0) ;
-           digitalWrite(BUS_CTL, LOW) ;
-           delay(ROVECOMM_DELAY) ;
+           digitalWrite(BUS_CTL_PIN, LOW) ;
+           delay( ROVECOMM_DELAY ) ;
            break ;
        }
      }
@@ -278,13 +278,13 @@ void Bus_Enable (const rovecomm_packet & Enable_Disable, uint8_t Bus[])
   {
     bitWrite(Bus[0], RC_POWERBOARD_BUSENABLED_COMMBIT, 0) ;
     RoveComm.write(RC_POWERBOARD_BUSENABLED_DATAID, RC_POWERBOARD_BUSENABLED_DATACOUNT, Bus) ; //Sends a shut off packet before shutting off
-    digitalWrite(COM_CTL, LOW) ;
+    digitalWrite(COM_CTL_PIN, LOW) ;
     delay(ROVECOMM_DELAY) ;
   }
   if(bitRead(Enable_Disable.data[RC_POWERBOARD_BUSENABLE_ALCENTRY], RC_POWERBOARD_BUSENABLE_COMMBIT) == 1)
   {
     bitSet(Bus[0], RC_POWERBOARD_BUSENABLED_COMMBIT) ;
-    digitalWrite(COM_CTL, HIGH) ;
+    digitalWrite(COM_CTL_PIN, HIGH) ;
     delay(ROVECOMM_DELAY) ;
     RoveComm.write(RC_POWERBOARD_BUSENABLED_DATAID, RC_POWERBOARD_BUSENABLED_DATACOUNT, Bus) ; //Gives the system a chance to boot up   
   }
@@ -292,118 +292,118 @@ void Bus_Enable (const rovecomm_packet & Enable_Disable, uint8_t Bus[])
   if(bitRead(Enable_Disable.data[RC_POWERBOARD_BUSENABLE_ALCENTRY], RC_POWERBOARD_BUSENABLE_LOGBIT) == 0)
   {
     bitWrite(Bus[0], RC_POWERBOARD_BUSENABLED_LOGBIT, 0) ;
-    digitalWrite(LOGIC_CTL, LOW) ;
+    digitalWrite(LOGIC_CTL_PIN, LOW) ;
   }
   if(bitRead(Enable_Disable.data[RC_POWERBOARD_BUSENABLE_ALCENTRY], RC_POWERBOARD_BUSENABLE_LOGBIT) == 1)
   {
     bitSet(Bus[0], RC_POWERBOARD_BUSENABLED_LOGBIT) ;
-    digitalWrite(LOGIC_CTL, HIGH) ;
+    digitalWrite(LOGIC_CTL_PIN, HIGH) ;
   }
   //Actuation Bus
     if(bitRead(Enable_Disable.data[RC_POWERBOARD_BUSENABLE_ALCENTRY], RC_POWERBOARD_BUSENABLE_ACTBIT) == 0)
   {
     bitWrite(Bus[0], RC_POWERBOARD_BUSENABLED_ACTBIT, 0) ;
-    digitalWrite(ACT_CTL, LOW) ;
+    digitalWrite(ACT_CTL_PIN, LOW) ;
   }
   if(bitRead(Enable_Disable.data[RC_POWERBOARD_BUSENABLE_ALCENTRY], RC_POWERBOARD_BUSENABLE_ACTBIT) == 1)
   {
     bitSet(Bus[0], RC_POWERBOARD_BUSENABLED_ACTBIT) ;
-    digitalWrite(ACT_CTL, HIGH) ;
+    digitalWrite(ACT_CTL_PIN, HIGH) ;
   }
   //Motor Bus 1
   if(bitRead(Enable_Disable.data[RC_POWERBOARD_BUSENABLE_MOTORSENTRY], RC_POWERBOARD_BUSENABLE_M1BIT) == 0)
   {
     bitWrite(Bus[1], RC_POWERBOARD_BUSENABLED_M1BIT, 0) ;
-    digitalWrite(M1_CTL, LOW) ;
+    digitalWrite(M1_CTL_PIN, LOW) ;
   }
   if(bitRead(Enable_Disable.data[RC_POWERBOARD_BUSENABLE_MOTORSENTRY], RC_POWERBOARD_BUSENABLE_M1BIT) == 1)
   {
     bitSet(Bus[0], RC_POWERBOARD_BUSENABLED_M1BIT) ;
-    digitalWrite(M1_CTL, HIGH) ;
+    digitalWrite(M1_CTL_PIN, HIGH) ;
   }
   //Motor Bus 2
   if(bitRead(Enable_Disable.data[RC_POWERBOARD_BUSENABLE_MOTORSENTRY], RC_POWERBOARD_BUSENABLE_M2BIT) == 0)
   {
     bitWrite(Bus[0], RC_POWERBOARD_BUSENABLED_M2BIT, 0) ;
-    digitalWrite(M2_CTL, LOW) ;
+    digitalWrite(M2_CTL_PIN, LOW) ;
   }
   if(bitRead(Enable_Disable.data[RC_POWERBOARD_BUSENABLE_MOTORSENTRY], RC_POWERBOARD_BUSENABLE_M2BIT) == 1)
   {
     bitSet(Bus[0], RC_POWERBOARD_BUSENABLED_M2BIT) ;
-    digitalWrite(M2_CTL, HIGH) ;
+    digitalWrite(M2_CTL_PIN, HIGH) ;
   }
   //Motor Bus 3
   if(bitRead(Enable_Disable.data[RC_POWERBOARD_BUSENABLE_MOTORSENTRY], RC_POWERBOARD_BUSENABLE_M3BIT) == 0)
   {
     bitWrite(Bus[0], RC_POWERBOARD_BUSENABLED_M3BIT, 0) ;
-    digitalWrite(M3_CTL, LOW) ;
+    digitalWrite(M3_CTL_PIN, LOW) ;
   }
   if(bitRead(Enable_Disable.data[RC_POWERBOARD_BUSENABLE_MOTORSENTRY], RC_POWERBOARD_BUSENABLE_M3BIT) == 1)
   {
     bitSet(Bus[0], RC_POWERBOARD_BUSENABLED_M3BIT) ;
-    digitalWrite(M3_CTL, HIGH) ;
+    digitalWrite(M3_CTL_PIN, HIGH) ;
   }
   //Motor Bus 4
   if(bitRead(Enable_Disable.data[RC_POWERBOARD_BUSENABLE_MOTORSENTRY], RC_POWERBOARD_BUSENABLE_M4BIT) == 0)
   {
     bitWrite(Bus[0], RC_POWERBOARD_BUSENABLED_M4BIT, 0) ;
-    digitalWrite(M4_CTL, LOW) ;
+    digitalWrite(M4_CTL_PIN, LOW) ;
   }
   if(bitRead(Enable_Disable.data[RC_POWERBOARD_BUSENABLE_MOTORSENTRY], RC_POWERBOARD_BUSENABLE_M4BIT) == 1)
   {
     bitSet(Bus[0], RC_POWERBOARD_BUSENABLED_M4BIT) ;
-    digitalWrite(M4_CTL, HIGH) ;
+    digitalWrite(M4_CTL_PIN, HIGH) ;
   }
   //Motor Bus 5
   if(bitRead(Enable_Disable.data[RC_POWERBOARD_BUSENABLE_MOTORSENTRY], RC_POWERBOARD_BUSENABLE_M5BIT) == 0)
   {
     bitWrite(Bus[0], RC_POWERBOARD_BUSENABLED_M5BIT, 0) ;
-    digitalWrite(M3_CTL, LOW) ;
+    digitalWrite(M5_CTL_PIN, LOW) ;
   }
   if(bitRead(Enable_Disable.data[RC_POWERBOARD_BUSENABLE_MOTORSENTRY], RC_POWERBOARD_BUSENABLE_M5BIT) == 1)
   {
     bitSet(Bus[0], RC_POWERBOARD_BUSENABLED_M5BIT) ;
-    digitalWrite(M5_CTL, HIGH) ;
+    digitalWrite(M5_CTL_PIN, HIGH) ;
   }  
   //Motor Bus 6
     if(bitRead(Enable_Disable.data[RC_POWERBOARD_BUSENABLE_MOTORSENTRY], RC_POWERBOARD_BUSENABLE_M6BIT) == 0)
   {
     bitWrite(Bus[0], RC_POWERBOARD_BUSENABLED_M6BIT, 0) ;
-    digitalWrite(M6_CTL, LOW) ;
+    digitalWrite(M6_CTL_PIN, LOW) ;
   }
   if(bitRead(Enable_Disable.data[RC_POWERBOARD_BUSENABLE_MOTORSENTRY], RC_POWERBOARD_BUSENABLE_M6BIT) == 1)
   {
     bitSet(Bus[0], RC_POWERBOARD_BUSENABLED_M6BIT) ;
-    digitalWrite(M6_CTL, HIGH) ;
+    digitalWrite(M6_CTL_PIN, HIGH) ;
   }
   //Motor Bus 7
   if(bitRead(Enable_Disable.data[RC_POWERBOARD_BUSENABLE_MOTORSENTRY], RC_POWERBOARD_BUSENABLE_M7BIT) == 0)
   {
     bitWrite(Bus[0], RC_POWERBOARD_BUSENABLED_M7BIT, 0) ;
-    digitalWrite(M7_CTL, LOW) ;
+    digitalWrite(M7_CTL_PIN, LOW) ;
   }
   if(bitRead(Enable_Disable.data[RC_POWERBOARD_BUSENABLE_MOTORSENTRY], RC_POWERBOARD_BUSENABLE_M7BIT) == 1)
   {
     bitSet(Bus[0], RC_POWERBOARD_BUSENABLED_M7BIT) ;
-    digitalWrite(M7_CTL, HIGH) ;
+    digitalWrite(M7_CTL_PIN, HIGH) ;
   }
   //Auxilliary Bus
   if(bitRead(Enable_Disable.data[RC_POWERBOARD_BUSENABLE_MOTORSENTRY], RC_POWERBOARD_BUSENABLE_AUXBIT) == 0)
   {
     bitWrite(Bus[0], RC_POWERBOARD_BUSENABLED_AUXBIT, 0) ;
-    digitalWrite(AUX_CTL, LOW) ;
+    digitalWrite(AUX_CTL_PIN, LOW) ;
   }
   if(bitRead(Enable_Disable.data[RC_POWERBOARD_BUSENABLE_MOTORSENTRY], RC_POWERBOARD_BUSENABLE_AUXBIT) == 1)
   {
     bitSet(Bus[0], RC_POWERBOARD_BUSENABLED_AUXBIT) ;
-    digitalWrite(AUX_CTL, HIGH) ;
+    digitalWrite(AUX_CTL_PIN, HIGH) ;
   }
   return ;
 }
 
-void Pin_Read (uint16_t & current_reading, const int & BUS_I_MEAS)
+void Pin_Read (uint16_t & current_reading, const int & BUS_I_MEAS_PIN)
 {
-  float adc_reading = analogRead(BUS_I_MEAS) ;
+  float adc_reading = analogRead(BUS_I_MEAS_PIN) ;
   current_reading = static_cast<uint16_t>(map(adc_reading, ADC_MIN, ADC_MAX, CURRENT_MIN, CURRENT_MAX)*1000) ;
   return ;
 }
