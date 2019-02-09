@@ -19,7 +19,7 @@ RoveCommEthernetUdp RoveComm;
 #define DEBOUNCE_DELAY  10 //Delay after current or voltage trip
 
 //////////////////////////////////////////////Pinmap
-// Control Pins
+// Control Pins for Busses
 #define ACT_CTL_PIN              PN_3
 #define LOGIC_CTL_PIN            PD_1
 #define COM_CTL_PIN              PH_2
@@ -80,47 +80,36 @@ RoveCommEthernetUdp RoveComm;
 //Post: Returns a bool of true if the pin has too much current
 bool singleDebounce(const int & bouncing_pin,const int & max_amps_threshold);
 
-//Description: Scales the input value x from analog input range (0 to 3.3) to actual values
-//This is for current only, x is input, in_min and in_max is ADC value. out_max and out_min
-//are the values that we are mapping to, has an offset of 1.
-//Pre:
-//Post:
-//float mapFloats(float x, float in_min, float in_max, float out_min, float out_max) ;
-
-//Description:Scales the input value x from analog input range (0 to 3.3) to actual values
-//This is for voltage. It is the exact same as mapFloats, except there is no offset.
-//Pre:
-//Post:
-//float scale(float x, float in_min, float in_max, float out_min, float out_max) ;
-
-//Description:
-//Pre:
-//Post:
+//Description: Sets the pins on the tiva to certain buses on the powerboard
+//Pre: None
+//Post: All pins on the tiva are set to correct values.
 void Configure_Pins ();
 
-//Description:
-//Pre:
-//Post:
+//Description: Turns all pins to on after setting all to low
+//Pre: Pins must be in correct position from Configure_Pins
+//Post: All pins are set high
 void Pin_Initialization ();
 
-//Description:
-//Pre:
-//Post:
+//Description: Begins communication with RoveComm and sends a packet to rovecomm
+//Pre: Bus[] must have a size of RC_POWERBOARD_BUSENABLED_DATACOUNT to work.
+//Post: Sends to RoveComm a packet that the powerboard is live.
 void Communication_Begin (uint8_t Bus []) ;
 
-//Description:
-//Pre:
-//Post:
+//Description: Checks overcurrent on the Bus and shuts off in need be
+//Pre: BUS_I_MEAS_PIN must be a pin for current measurement, Bus[] must be the same array from Commuincation_Begin.
+// BUS_CTL_PIN must be the relevent pin that controls the bus. and ESTOP_AMP_THRESHOLD must also be the relevent estop threshold.
+//Post: Shuts off the bus if there is an overcurrent situation and writes this to Bus[]
 void Shut_Off( const int & BUS_I_MEAS_PIN, uint8_t Bus[], const int & BUS_CTL_PIN, const int & ESTOP_AMP_THRESHOLD) ;
 
-//Description:
-//Pre:
-//Post:
+//Description: Takes a packet from RoveComm and turn on or off a bus
+//Pre: Enable_Disable should be a packet recieved from RoveComm, and Bus should be from Shut_Off
+//Post: Turns on or off all buses that the packet says should be on or off and writes this to Bus[].
 void Bus_Enable (const rovecomm_packet & Enable_Disable, uint8_t Bus[]) ;
 
-//Description:
-//Pre:
-//Post:
+//Description: Reads a current sensing pin and saves this value to current_reading
+//Pre: Current_Reading should be an array part, for RoveComm reasons. BUS_I_MEAS_PIN should be a current measuring pin
+//that corresponds to the spot on the Current_Reading array.
+//Post: Returns a value to current_reading of the current reading value from the BUS_I_MEAS_PIN in mA.
 void Pin_Read (uint16_t & current_reading, const int & BUS_I_MEAS_PIN) ;
 
 #endif

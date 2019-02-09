@@ -22,9 +22,9 @@ uint16_t Current_Reading[RC_POWERBOARD_IMEASmA_DATACOUNT] ; //Current Reading fo
 // the setup routine runs once when you press reset
 void setup() 
 {
-  Configure_Pins () ;
-  Pin_Initialization () ;
-  Communication_Begin (Bus) ;
+  Configure_Pins () ; //Configures pins to correct busses
+  Pin_Initialization () ; //Sets pins to low then to high
+  Communication_Begin (Bus) ; //Sends to base station that everything is now on and communication begins
 }//end setup
 
 /////////////////////////////////////////////Powerboard Loop Forever
@@ -69,17 +69,18 @@ void loop()
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //Functions
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 bool singleDebounce(const int & bouncing_pin, const int & max_amps_threshold)
 {
-  int adc_threshhold = map(max_amps_threshold, CURRENT_MIN, CURRENT_MAX, ADC_MIN, ADC_MAX);
+  int adc_threshhold = map(max_amps_threshold, CURRENT_MIN, CURRENT_MAX, ADC_MIN, ADC_MAX); //Get reading off pin
   
-  if( analogRead(bouncing_pin) > adc_threshhold)
+  if( analogRead(bouncing_pin) > adc_threshhold) //If pin reading is high
   {  
     delay(DEBOUNCE_DELAY);
     
-    if( analogRead(bouncing_pin) > adc_threshhold)
+    if( analogRead(bouncing_pin) > adc_threshhold) //If pin reading is still high
     {
-       return true;
+       return true; //Sends back true to indicate shut off
     }//end if
   }// end if 
   return false;
@@ -403,6 +404,7 @@ void Bus_Enable (const rovecomm_packet & Enable_Disable, uint8_t Bus[])
 
 void Pin_Read (uint16_t & current_reading, const int & BUS_I_MEAS_PIN)
 {
+  // Using http://www.digikey.com/product-detail/en/allegro-microsystems-llc/ACS722LLCTR-40AU-T/620-1640-1-ND/4948876
   float adc_reading = analogRead(BUS_I_MEAS_PIN) ;
   current_reading = static_cast<uint16_t>(map(adc_reading, ADC_MIN, ADC_MAX, CURRENT_MIN, CURRENT_MAX)*1000) ;
   return ;
