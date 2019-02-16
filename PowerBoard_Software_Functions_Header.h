@@ -50,9 +50,9 @@ RoveCommEthernetUdp RoveComm;
 
 //////////////////////////////////////////////RoveBoard
 // Tiva1294C RoveBoard Specs
-#define VCC                  3.3       //volts
+#define VCC                  3300       //volts
 #define ADC_MAX              4096      //bits
-#define ADC_MIN              0         //bits
+#define ADC_MIN              420         //meme bits
 
 //////////////////////////////////////////////Sensor
 // ACS722LLCTR-40AU-T IC Sensor Specs 
@@ -60,17 +60,23 @@ RoveCommEthernetUdp RoveComm;
 #define SENSOR_SCALE          0.1      //volts/amp
 #define SENSOR_BIAS           VCC * SENSOR_SCALE
 
-#define CURRENT_MAX           40//((VCC - SENSOR_BIAS) / SENSOR_SENSITIVITY)
+#define CURRENT_MAX           40000//((VCC - SENSOR_BIAS) / SENSOR_SENSITIVITY)
 #define CURRENT_MIN           0//-SENSOR_BIAS / SENSOR_SENSITIVITY
 
 #define VOLTS_MIN             0
-#define VOLTS_MAX             33.6
+#define VOLTS_MAX             33600
 
 //Safest Test pin
-#define ESTOP_12V_COM_LOGIC_MAX_AMPS_THRESHOLD  5 //5
-#define ESTOP_12V_ACT_MAX_AMPS_THRESHOLD        15 //15  
-#define ESTOP_AUX_MAX_AMPS_THRESHOLD            20 //20  (480W/30V)
-#define ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD      22 //22
+#define ESTOP_12V_COM_LOGIC_MAX_AMPS_THRESHOLD  5000 //5
+#define ESTOP_12V_ACT_MAX_AMPS_THRESHOLD        15000 //15  
+#define ESTOP_AUX_MAX_AMPS_THRESHOLD            20000 //20  (480W/30V)
+#define ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD      22000 //22
+
+//Tuning Variables
+#define LOGIC_COMM_TUNER  1085 //Tuner for ADC values for Logic and Comm busses
+#define ACT_TUNER         1132 //Tuner for ADC values for Actuation bus
+#define AUX_TUNER         1144 //Tuner for ADC values for Auxilliary bus
+#define MOTOR_TUNER       1144 //Tuner for ADC values for motor busses
 
 //Functions/////////////////////////////////////////////////////////////////////////
 
@@ -78,7 +84,7 @@ RoveCommEthernetUdp RoveComm;
 //Pre: Bouncing_pin is a pin on the tiva that reads amperage, max_amps_threshold
 // is the maximum aperage the device can tolerate
 //Post: Returns a bool of true if the pin has too much current
-bool singleDebounce(const int & bouncing_pin,const int & max_amps_threshold);
+bool singleDebounce(const int & bouncing_pin,const int & max_amps_threshold, const int & Tuner);
 
 //Description: Sets the pins on the tiva to certain buses on the powerboard
 //Pre: None
@@ -99,7 +105,7 @@ void Communication_Begin (uint8_t Bus []) ;
 //Pre: BUS_I_MEAS_PIN must be a pin for current measurement, Bus[] must be the same array from Commuincation_Begin.
 // BUS_CTL_PIN must be the relevent pin that controls the bus. and ESTOP_AMP_THRESHOLD must also be the relevent estop threshold.
 //Post: Shuts off the bus if there is an overcurrent situation and writes this to Bus[]
-void Shut_Off( const int & BUS_I_MEAS_PIN, uint8_t Bus[], const int & BUS_CTL_PIN, const int & ESTOP_AMP_THRESHOLD) ;
+void Shut_Off( const int & BUS_I_MEAS_PIN, uint8_t Bus[], const int & BUS_CTL_PIN, const int & ESTOP_AMP_THRESHOLD, const int & Tuner) ;
 
 //Description: Takes a packet from RoveComm and turn on or off a bus
 //Pre: Enable_Disable should be a packet recieved from RoveComm, and Bus should be from Shut_Off
