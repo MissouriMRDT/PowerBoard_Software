@@ -67,15 +67,15 @@ RoveCommEthernetUdp RoveComm;
 #define VOLTS_MAX             33600
 
 //Safest Test pin
-#define ESTOP_12V_COM_LOGIC_MAX_AMPS_THRESHOLD  5000 //5
-#define ESTOP_12V_ACT_MAX_AMPS_THRESHOLD        15000 //15  
-#define ESTOP_AUX_MAX_AMPS_THRESHOLD            20000 //20  (480W/30V)
+#define ESTOP_12V_COM_LOGIC_MAX_AMPS_THRESHOLD  2000 //5
+#define ESTOP_12V_ACT_MAX_AMPS_THRESHOLD        2000 //15  
+#define ESTOP_AUX_MAX_AMPS_THRESHOLD            17000 //17  (360W/21.6V) = 16.6 A
 #define ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD      22000 //22
 
 //Tuning Variables
 #define LOGIC_COMM_TUNER  1085 //Tuner for ADC values for Logic and Comm busses
 #define ACT_TUNER         1132 //Tuner for ADC values for Actuation bus
-#define AUX_TUNER         1144 //Tuner for ADC values for Auxilliary bus
+#define AUX_TUNER         1136 //Tuner for ADC values for Auxilliary bus
 #define MOTOR_TUNER       1144 //Tuner for ADC values for motor busses
 
 //Functions/////////////////////////////////////////////////////////////////////////

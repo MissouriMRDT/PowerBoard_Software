@@ -51,37 +51,37 @@ void loop()
   
   //Checking for Over Currents on all busses
 Serial.println("Checking comms") ;
-delay(10) ;
+//delay(10) ;
   Shut_Off(COM_I_MEAS_PIN, Bus, COM_CTL_PIN, ESTOP_12V_COM_LOGIC_MAX_AMPS_THRESHOLD, LOGIC_COMM_TUNER) ;
 Serial.println("Checking ACT") ;
-delay(10) ;
+//delay(10) ;
   Shut_Off(ACT_I_MEAS_PIN, Bus, ACT_CTL_PIN, ESTOP_12V_ACT_MAX_AMPS_THRESHOLD, ACT_TUNER) ;
 Serial.println("Checking log") ;
-delay(10) ;
+//delay(10) ;
   Shut_Off(LOGIC_I_MEAS_PIN, Bus, LOGIC_CTL_PIN, ESTOP_12V_COM_LOGIC_MAX_AMPS_THRESHOLD, LOGIC_COMM_TUNER) ;
-Serial.println("Checking AUX") ;
-delay(10) ;
+//Serial.println("Checking AUX") ;
+//delay(10) ;
   Shut_Off(AUX_I_MEAS_PIN, Bus, AUX_CTL_PIN, ESTOP_AUX_MAX_AMPS_THRESHOLD, AUX_TUNER) ;
-Serial.println("Checking M1") ;
-delay(10) ;
+//Serial.println("Checking M1") ;
+//delay(10) ;
   Shut_Off(M1_I_MEAS_PIN, Bus, M1_CTL_PIN, ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD, MOTOR_TUNER) ;
-Serial.println("Checking m2") ;
-delay(10) ;
+//Serial.println("Checking m2") ;
+//delay(10) ;
   Shut_Off(M2_I_MEAS_PIN, Bus, M2_CTL_PIN, ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD, MOTOR_TUNER) ;
-Serial.println("Checking m3") ;
-delay(10) ;
+//Serial.println("Checking m3") ;
+//delay(10) ;
   Shut_Off(M3_I_MEAS_PIN, Bus, M3_CTL_PIN, ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD, MOTOR_TUNER) ;
-Serial.println("Checking m4") ;
-delay(10) ;
+//Serial.println("Checking m4") ;
+//delay(10) ;
   Shut_Off(M4_I_MEAS_PIN, Bus, M4_CTL_PIN, ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD, MOTOR_TUNER) ;
-Serial.println("Checking m5") ;
-delay(10) ;
+//Serial.println("Checking m5") ;
+//delay(10) ;
   Shut_Off(M5_I_MEAS_PIN, Bus, M5_CTL_PIN, ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD, MOTOR_TUNER) ;
-Serial.println("Checking m6") ;
-delay(10) ;
+//Serial.println("Checking m6") ;
+//delay(10) ;
   Shut_Off(M6_I_MEAS_PIN, Bus, M6_CTL_PIN, ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD, MOTOR_TUNER) ;
-Serial.println("Checking m7") ;
-delay(10) ;
+//Serial.println("Checking m7") ;
+//delay(10) ;
   Shut_Off(M7_I_MEAS_PIN, Bus, M7_CTL_PIN, ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD, MOTOR_TUNER) ;
   RoveComm.write(RC_POWERBOARD_BUSENABLED_DATAID, RC_POWERBOARD_BUSENABLED_DATACOUNT, Bus) ; //Send out a summary of what is off after current check
   delay(ROVECOMM_DELAY) ;
@@ -110,13 +110,13 @@ bool singleDebounce(const int & bouncing_pin, const int & max_amps_threshold, co
   int adc_threshhold = ((map(max_amps_threshold, CURRENT_MIN, CURRENT_MAX, ADC_MIN, ADC_MAX)*1000)/(Tuner));
   
   //Get reading off pin
-Serial.print(adc_threshhold) ; //Debug
-Serial.println(" , at debounce") ; //Debug
-delay(10) ; //Debug
-int tester = ((map(adc_threshhold, ADC_MIN, ADC_MAX, CURRENT_MIN, CURRENT_MAX)*1180)/1000) ; //Debug
-Serial.print(tester) ; //Debug
-Serial.println(" tester value") ; //Debug
-delay(10) ; //Debug
+//MSerial.print(adc_threshhold) ; //Debug
+//Serial.println(" , at debounce") ; //Debug
+//delay(10) ; //Debug
+//int tester = ((map(adc_threshhold, ADC_MIN, ADC_MAX, CURRENT_MIN, CURRENT_MAX)*1180)/1000) ; //Debug
+//Serial.print(tester) ; //Debug
+//Serial.println(" tester value") ; //Debug
+//delay(10) ; //Debug
   bool trip = false ;
   if( analogRead(bouncing_pin) > adc_threshhold) //If pin reading is high
   {
@@ -253,30 +253,32 @@ void Communication_Begin (uint8_t Bus [])
 
 void Shut_Off( const int & BUS_I_MEAS_PIN, uint8_t Bus[], const int & BUS_CTL_PIN, const int & ESTOP_AMP_THRESHOLD, const int & Tuner)
 {
-  static uint8_t time1 = 0 ;
+  static uint16_t time1 = 0 ;
+  static bool comms_off ;
   if(singleDebounce(BUS_I_MEAS_PIN, ESTOP_AMP_THRESHOLD, Tuner) ) //If pin is tripped
   {
      if(BUS_CTL_PIN == COM_CTL_PIN)//Special rules for communication bus
      {
-Serial.println("Shutting off Comms") ; //Debug Code
-delay(10) ;
+//Serial.println("Shutting off Comms") ; //Debug Code
+//delay(10) ;
        bitWrite(Bus[0],RC_POWERBOARD_BUSENABLED_COMMBIT, 0) ;
        RoveComm.write(RC_POWERBOARD_BUSENABLED_DATAID, RC_POWERBOARD_BUSENABLED_DATACOUNT, Bus) ;
        delay(ROVECOMM_DELAY) ;
        digitalWrite(COM_CTL_PIN, LOW);
+//Serial.println(time1) ;
+//delay(10) ;
        if(time1 == 0)
        {
+//Serial.println("comms_off is now true") ;
+//delay(10) ;
+         comms_off = true ;
          time1 = millis();
+//Serial.println(millis()) ;
+//delay(10) ;
+//Serial.println(time1) ;
+//delay(10) ;
        }
-       delay(ROVECOMM_DELAY);
-       if(millis()>=(time1+10000))            //it is turned off in case the overcurrent was just a random spike. 
-       {                                      //If there actually is a short in the bus, the bus will turn itself 
-         time1 = 0 ;                                       //back on
-Serial.println("shut on Comms") ; //Debug Code
-delay(10) ;         
-         digitalWrite(COM_CTL_PIN,HIGH);
-         bitSet(Bus[0], RC_POWERBOARD_BUSENABLED_COMMBIT) ;
-       } 
+//       delay(ROVECOMM_DELAY);
      }
      else //All other busses
      {
@@ -285,67 +287,79 @@ delay(10) ;
          case ACT_CTL_PIN:
            bitWrite(Bus[0], RC_POWERBOARD_BUSENABLED_ACTBIT, 0) ;
            digitalWrite(BUS_CTL_PIN, LOW);
-Serial.println("shut off ACT_CTL_PIN") ; //Debug Code
-           delay(ROVECOMM_DELAY);
+//Serial.println("shut off ACT_CTL_PIN") ; //Debug Code
+//           delay(ROVECOMM_DELAY);
            break ;
          case LOGIC_CTL_PIN:
            bitWrite(Bus[0], RC_POWERBOARD_BUSENABLED_LOGBIT, 0) ;
            digitalWrite(BUS_CTL_PIN, LOW) ;
-Serial.println("shut off Logic_CTL_PIN") ; //Debug Code
-           delay(ROVECOMM_DELAY) ;
+//Serial.println("shut off Logic_CTL_PIN") ; //Debug Code
+//           delay(ROVECOMM_DELAY) ;
            break ;
          case M1_CTL_PIN:
            bitWrite(Bus[1], RC_POWERBOARD_BUSENABLED_M1BIT, 0) ;
            digitalWrite(BUS_CTL_PIN, LOW) ;
-Serial.println("shut off M1") ; //Debug Code
-           delay(ROVECOMM_DELAY) ;
+//Serial.println("shut off M1") ; //Debug Code
+//          delay(ROVECOMM_DELAY) ;
            break ;
          case M2_CTL_PIN:
            bitWrite(Bus[1], RC_POWERBOARD_BUSENABLED_M2BIT, 0) ;
            digitalWrite(BUS_CTL_PIN, LOW) ;
-Serial.println("shut off m2") ; //Debug Code
-           delay(ROVECOMM_DELAY) ;
+//Serial.println("shut off m2") ; //Debug Code
+//           delay(ROVECOMM_DELAY) ;
            break ;
          case M3_CTL_PIN:
            bitWrite(Bus[1], RC_POWERBOARD_BUSENABLED_M3BIT, 0) ;
            digitalWrite(BUS_CTL_PIN, LOW) ;
-Serial.println("shut off m3") ; //Debug Code
-           delay(ROVECOMM_DELAY) ;
+//Serial.println("shut off m3") ; //Debug Code
+//           delay(ROVECOMM_DELAY) ;
            break ;
          case M4_CTL_PIN:
            bitWrite(Bus[1], RC_POWERBOARD_BUSENABLED_M4BIT, 0) ;
            digitalWrite(BUS_CTL_PIN, LOW) ;
-Serial.println("shut off m4") ; //Debug Code
-           delay(ROVECOMM_DELAY) ;
+//Serial.println("shut off m4") ; //Debug Code
+//           delay(ROVECOMM_DELAY) ;
            break ;
          case M5_CTL_PIN:
            bitWrite(Bus[1], RC_POWERBOARD_BUSENABLED_M5BIT, 0) ;
            digitalWrite(BUS_CTL_PIN, LOW) ;
-Serial.println("shut off m5") ; //Debug Code           
-           delay(ROVECOMM_DELAY) ;
+//Serial.println("shut off m5") ; //Debug Code           
+//           delay(ROVECOMM_DELAY) ;
            break ;
          case M6_CTL_PIN:
            bitWrite(Bus[1], RC_POWERBOARD_BUSENABLED_M6BIT, 0) ;
            digitalWrite(BUS_CTL_PIN, LOW) ;
-Serial.println("shut off m6") ; //Debug Code
-           delay(ROVECOMM_DELAY) ;
+//Serial.println("shut off m6") ; //Debug Code
+//           delay(ROVECOMM_DELAY) ;
            break ;
          case M7_CTL_PIN:
            bitWrite(Bus[1], RC_POWERBOARD_BUSENABLED_M7BIT, 0) ;
            digitalWrite(BUS_CTL_PIN, LOW) ;
-Serial.println("shut off m7") ; //Debug Code           
-           delay(ROVECOMM_DELAY) ;
+//Serial.println("shut off m7") ; //Debug Code           
+//           delay(ROVECOMM_DELAY) ;
            break ;
          case AUX_CTL_PIN:
            bitWrite(Bus[1], RC_POWERBOARD_BUSENABLED_AUXBIT, 0) ;
            digitalWrite(BUS_CTL_PIN, LOW) ;
-Serial.println("shut off Aux") ; //Debug Code
-           delay( ROVECOMM_DELAY ) ;
+//Serial.println("shut off Aux") ; //Debug Code
+//           delay( ROVECOMM_DELAY ) ;
            break ;
        }
      }
   }
-  return ;
+  if(comms_off == true)
+  {
+    if(millis()>=(time1+10000))            //it is turned off in case the overcurrent was just a random spike. 
+    {   
+      comms_off = false ;                  //If there actually is a short in the bus, the bus will turn itself 
+      time1 = 0 ;                          //back on
+//Serial.println("shut on Comms") ; //Debug Code
+//delay(10) ;         
+      digitalWrite(COM_CTL_PIN,HIGH);
+      bitSet(Bus[0], RC_POWERBOARD_BUSENABLED_COMMBIT) ;
+    }
+  } 
+    return ;
 }
 
 void Bus_Enable (const rovecomm_packet & Enable_Disable, uint8_t Bus[])
@@ -356,17 +370,17 @@ void Bus_Enable (const rovecomm_packet & Enable_Disable, uint8_t Bus[])
     bitWrite(Bus[0], RC_POWERBOARD_BUSENABLED_COMMBIT, 0) ;
     RoveComm.write(RC_POWERBOARD_BUSENABLED_DATAID, RC_POWERBOARD_BUSENABLED_DATACOUNT, Bus) ; //Sends a shut off packet before shutting off
     digitalWrite(COM_CTL_PIN, LOW) ;
-Serial.println("Turned off Comm") ; //Debug Code
-delay(10) ;
-    delay(ROVECOMM_DELAY) ;
+//Serial.println("Turned off Comm") ; //Debug Code
+//delay(10) ;
+//    delay(ROVECOMM_DELAY) ;
   }
   if(bitRead(Enable_Disable.data[RC_POWERBOARD_BUSENABLE_ALCENTRY], RC_POWERBOARD_BUSENABLE_COMMBIT) == 1)
   {
     bitSet(Bus[0], RC_POWERBOARD_BUSENABLED_COMMBIT) ;
     digitalWrite(COM_CTL_PIN, HIGH) ;
-Serial.println("Turned on Comm") ; //Debug Code
-delay(10) ;
-    delay(ROVECOMM_DELAY) ;
+//Serial.println("Turned on Comm") ; //Debug Code
+//delay(10) ;
+//    delay(ROVECOMM_DELAY) ;
     RoveComm.write(RC_POWERBOARD_BUSENABLED_DATAID, RC_POWERBOARD_BUSENABLED_DATACOUNT, Bus) ; //Gives the system a chance to boot up   
   }
   //Logic Bus
@@ -374,150 +388,150 @@ delay(10) ;
   {
     bitWrite(Bus[0], RC_POWERBOARD_BUSENABLED_LOGBIT, 0) ;
     digitalWrite(LOGIC_CTL_PIN, LOW) ;
-Serial.println("Turned off Logic") ; //Debug Code
-delay(10) ;
+//Serial.println("Turned off Logic") ; //Debug Code
+//delay(10) ;
   }
   if(bitRead(Enable_Disable.data[RC_POWERBOARD_BUSENABLE_ALCENTRY], RC_POWERBOARD_BUSENABLE_LOGBIT) == 1)
   {
     bitSet(Bus[0], RC_POWERBOARD_BUSENABLED_LOGBIT) ;
     digitalWrite(LOGIC_CTL_PIN, HIGH) ;
-Serial.println("Turned on Logic") ; //Debug Code
-delay(10) ;
+//Serial.println("Turned on Logic") ; //Debug Code
+//delay(10) ;
   }
   //Actuation Bus
     if(bitRead(Enable_Disable.data[RC_POWERBOARD_BUSENABLE_ALCENTRY], RC_POWERBOARD_BUSENABLE_ACTBIT) == 0)
   {
     bitWrite(Bus[0], RC_POWERBOARD_BUSENABLED_ACTBIT, 0) ;
     digitalWrite(ACT_CTL_PIN, LOW) ;
-Serial.println("Turned off Act") ; //Debug Code
-delay(10) ;  
+//Serial.println("Turned off Act") ; //Debug Code
+//delay(10) ;  
   }
   if(bitRead(Enable_Disable.data[RC_POWERBOARD_BUSENABLE_ALCENTRY], RC_POWERBOARD_BUSENABLE_ACTBIT) == 1)
   {
     bitSet(Bus[0], RC_POWERBOARD_BUSENABLED_ACTBIT) ;
     digitalWrite(ACT_CTL_PIN, HIGH) ;
-Serial.println("Turned on ACT") ; //Debug Code
-delay(10) ;
+//Serial.println("Turned on ACT") ; //Debug Code
+//delay(10) ;
   }
   //Motor Bus 1
   if(bitRead(Enable_Disable.data[RC_POWERBOARD_BUSENABLE_MOTORSENTRY], RC_POWERBOARD_BUSENABLE_M1BIT) == 0)
   {
     bitWrite(Bus[1], RC_POWERBOARD_BUSENABLED_M1BIT, 0) ;
     digitalWrite(M1_CTL_PIN, LOW) ;
-Serial.println("Turned off M1") ; //Debug Code
-delay(10) ;
+//Serial.println("Turned off M1") ; //Debug Code
+//delay(10) ;
   }
   if(bitRead(Enable_Disable.data[RC_POWERBOARD_BUSENABLE_MOTORSENTRY], RC_POWERBOARD_BUSENABLE_M1BIT) == 1)
   {
     bitSet(Bus[1], RC_POWERBOARD_BUSENABLED_M1BIT) ;
     digitalWrite(M1_CTL_PIN, HIGH) ;
-Serial.println("Turned on M1") ; //Debug Code
-delay(10) ;
+//Serial.println("Turned on M1") ; //Debug Code
+//delay(10) ;
   }
   //Motor Bus 2
   if(bitRead(Enable_Disable.data[RC_POWERBOARD_BUSENABLE_MOTORSENTRY], RC_POWERBOARD_BUSENABLE_M2BIT) == 0)
   {
     bitWrite(Bus[1], RC_POWERBOARD_BUSENABLED_M2BIT, 0) ;
     digitalWrite(M2_CTL_PIN, LOW) ;
-Serial.println("Turned off M2") ; //Debug Code
-delay(10) ;  
+//Serial.println("Turned off M2") ; //Debug Code
+//delay(10) ;  
   }
   if(bitRead(Enable_Disable.data[RC_POWERBOARD_BUSENABLE_MOTORSENTRY], RC_POWERBOARD_BUSENABLE_M2BIT) == 1)
   {
     bitSet(Bus[1], RC_POWERBOARD_BUSENABLED_M2BIT) ;
     digitalWrite(M2_CTL_PIN, HIGH) ;
-Serial.println("Turned on M2") ; //Debug Code
-delay(10) ;  
+//Serial.println("Turned on M2") ; //Debug Code
+//delay(10) ;  
   }
   //Motor Bus 3
   if(bitRead(Enable_Disable.data[RC_POWERBOARD_BUSENABLE_MOTORSENTRY], RC_POWERBOARD_BUSENABLE_M3BIT) == 0)
   {
     bitWrite(Bus[1], RC_POWERBOARD_BUSENABLED_M3BIT, 0) ;
     digitalWrite(M3_CTL_PIN, LOW) ;
-Serial.println("Turned off M3") ; //Debug Code
-delay(10) ;  
+//Serial.println("Turned off M3") ; //Debug Code
+//delay(10) ;  
   }
   if(bitRead(Enable_Disable.data[RC_POWERBOARD_BUSENABLE_MOTORSENTRY], RC_POWERBOARD_BUSENABLE_M3BIT) == 1)
   {
     bitSet(Bus[1], RC_POWERBOARD_BUSENABLED_M3BIT) ;
     digitalWrite(M3_CTL_PIN, HIGH) ;
-Serial.println("Turned on M3") ; //Debug Code
-delay(10) ;  
+//Serial.println("Turned on M3") ; //Debug Code
+//delay(10) ;  
   }
   //Motor Bus 4
   if(bitRead(Enable_Disable.data[RC_POWERBOARD_BUSENABLE_MOTORSENTRY], RC_POWERBOARD_BUSENABLE_M4BIT) == 0)
   {
     bitWrite(Bus[1], RC_POWERBOARD_BUSENABLED_M4BIT, 0) ;
     digitalWrite(M4_CTL_PIN, LOW) ;
-Serial.println("Turned off M4") ; //Debug Code
-delay(10) ;  
+//Serial.println("Turned off M4") ; //Debug Code
+//delay(10) ;  
   }
   if(bitRead(Enable_Disable.data[RC_POWERBOARD_BUSENABLE_MOTORSENTRY], RC_POWERBOARD_BUSENABLE_M4BIT) == 1)
   {
     bitSet(Bus[1], RC_POWERBOARD_BUSENABLED_M4BIT) ;
     digitalWrite(M4_CTL_PIN, HIGH) ;
-Serial.println("Turned on M4") ; //Debug Code
-delay(10) ;  
+//Serial.println("Turned on M4") ; //Debug Code
+//delay(10) ;  
   }
   //Motor Bus 5
   if(bitRead(Enable_Disable.data[RC_POWERBOARD_BUSENABLE_MOTORSENTRY], RC_POWERBOARD_BUSENABLE_M5BIT) == 0)
   {
     bitWrite(Bus[1], RC_POWERBOARD_BUSENABLED_M5BIT, 0) ;
     digitalWrite(M5_CTL_PIN, LOW) ;
-Serial.println("Turned off M5") ; //Debug Code
-delay(10) ;
+//Serial.println("Turned off M5") ; //Debug Code
+//delay(10) ;
   }
   if(bitRead(Enable_Disable.data[RC_POWERBOARD_BUSENABLE_MOTORSENTRY], RC_POWERBOARD_BUSENABLE_M5BIT) == 1)
   {
     bitSet(Bus[1], RC_POWERBOARD_BUSENABLED_M5BIT) ;
     digitalWrite(M5_CTL_PIN, HIGH) ;
-Serial.println("Turned on M5") ; //Debug Code
-delay(10) ;  
+//Serial.println("Turned on M5") ; //Debug Code
+//delay(10) ;  
   }  
   //Motor Bus 6
     if(bitRead(Enable_Disable.data[RC_POWERBOARD_BUSENABLE_MOTORSENTRY], RC_POWERBOARD_BUSENABLE_M6BIT) == 0)
   {
     bitWrite(Bus[1], RC_POWERBOARD_BUSENABLED_M6BIT, 0) ;
     digitalWrite(M6_CTL_PIN, LOW) ;
-Serial.println("Turned off M6") ; //Debug Code
-delay(10) ;  
+//Serial.println("Turned off M6") ; //Debug Code
+//delay(10) ;  
   }
   if(bitRead(Enable_Disable.data[RC_POWERBOARD_BUSENABLE_MOTORSENTRY], RC_POWERBOARD_BUSENABLE_M6BIT) == 1)
   {
     bitSet(Bus[1], RC_POWERBOARD_BUSENABLED_M6BIT) ;
     digitalWrite(M6_CTL_PIN, HIGH) ;
-Serial.println("Turned on M6") ; //Debug Code
-delay(10) ;
+//Serial.println("Turned on M6") ; //Debug Code
+//delay(10) ;
   }
   //Motor Bus 7
   if(bitRead(Enable_Disable.data[RC_POWERBOARD_BUSENABLE_MOTORSENTRY], RC_POWERBOARD_BUSENABLE_M7BIT) == 0)
   {
     bitWrite(Bus[1], RC_POWERBOARD_BUSENABLED_M7BIT, 0) ;
     digitalWrite(M7_CTL_PIN, LOW) ;
-Serial.println("Turned off M7") ; //Debug Code
-delay(10) ;  
+//Serial.println("Turned off M7") ; //Debug Code
+//delay(10) ;  
   }
   if(bitRead(Enable_Disable.data[RC_POWERBOARD_BUSENABLE_MOTORSENTRY], RC_POWERBOARD_BUSENABLE_M7BIT) == 1)
   {
     bitSet(Bus[1], RC_POWERBOARD_BUSENABLED_M7BIT) ;
     digitalWrite(M7_CTL_PIN, HIGH) ;
-Serial.println("Turned on M7") ; //Debug Code
-delay(10) ;
+//Serial.println("Turned on M7") ; //Debug Code
+//delay(10) ;
   }
   //Auxilliary Bus
   if(bitRead(Enable_Disable.data[RC_POWERBOARD_BUSENABLE_MOTORSENTRY], RC_POWERBOARD_BUSENABLE_AUXBIT) == 0)
   {
     bitWrite(Bus[1], RC_POWERBOARD_BUSENABLED_AUXBIT, 0) ;
     digitalWrite(AUX_CTL_PIN, LOW) ;
-Serial.println("Turned off AUX") ; //Debug Code
-delay(10) ;
+//Serial.println("Turned off AUX") ; //Debug Code
+//delay(10) ;
   }
   if(bitRead(Enable_Disable.data[RC_POWERBOARD_BUSENABLE_MOTORSENTRY], RC_POWERBOARD_BUSENABLE_AUXBIT) == 1)
   {
     bitSet(Bus[1], RC_POWERBOARD_BUSENABLED_AUXBIT) ;
     digitalWrite(AUX_CTL_PIN, HIGH) ;
-Serial.println("Turned on AUX") ; //Debug Code
-delay(10) ;  
+//Serial.println("Turned on AUX") ; //Debug Code
+//delay(10) ;  
   }
   return ;
 }
@@ -537,13 +551,13 @@ void Pin_Read (uint16_t & current_reading, const int & BUS_I_MEAS_PIN)
   //Serial.println(adc_reading) ; //Debug Code
   //delay(10) ;
   current_reading = ((map(adc_reading, ADC_MIN, ADC_MAX, CURRENT_MIN, CURRENT_MAX)*1180)/1000) ;
-  Serial.print("Calculated Current: "); //Debug all the way down
-  delay(10) ; //Debug
-  Serial.println(current_reading) ; //Debug Code
-  delay(10) ; //Debug Code
-  Serial.print("Adc Reading: ") ;//Debug
-  Serial.println(adc_reading) ;
-  delay(10) ; //Debug
+  //Serial.print("Calculated Current: "); //Debug all the way down
+  //delay(10) ; //Debug
+  //Serial.println(current_reading) ; //Debug Code
+  //delay(10) ; //Debug Code
+  //Serial.print("Adc Reading: ") ;//Debug
+  //Serial.println(adc_reading) ;
+  //delay(10) ; //Debug
   return ;
 }
 
