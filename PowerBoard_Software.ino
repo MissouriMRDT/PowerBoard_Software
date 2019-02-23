@@ -2,7 +2,7 @@
 //
 // Created for Zenith by: Judah Schad, jrs6w7
 // Altered for Gryphon by: Jacob Lipina, jrlwd5
-// Altered for Valkyrie by: Evan Hite erhtpc
+// Altered for Valkyrie by: Evan Hite erhtpc                                                                                                                                
 // Using http://www.digikey.com/product-detail/en/allegro-microsystems-llc/ACS722LLCTR-40AU-T/620-1640-1-ND/4948876
 //
 // Standard C
@@ -62,7 +62,10 @@ void loop()
   if(millis() >= (last_time_packet+ROVECOMM_UPDATE_DELAY))
   {
     RoveComm.write(RC_POWERBOARD_IMEASmA_DATAID, RC_POWERBOARD_IMEASmA_DATACOUNT, Current_Reading) ;
-    sent_packet = true ; //So we can updtate timestamp
+    sent_packet = true ; //So we can updtate 
+    delay(ROVECOMM_DELAY) ;
+//Serial.println("Hello") ; //Debug Code
+//delay(10) ;
   }
   
   //Checking for Over Currents on all busses//////////////////////////////////////////////////////////////////////////////////////////////////
