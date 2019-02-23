@@ -18,6 +18,10 @@ uint8_t Bus[] {0,0} ; //Bus to Enable or Disable
 rovecomm_packet Enable_Disable ; //packet reception variable
 //rovecomm_packet Same ; //Packet to be used in case of no packet reception
 uint16_t Current_Reading[RC_POWERBOARD_IMEASmA_DATACOUNT] ; //Current Reading for all busses
+bool Bus_Tripped ; //To determine whether or not to send a packet based on overcurrents
+bool sent_packet = true ; //To determine whether or not to send a packet of current values
+uint16_t last_time_packet = 0 ; //Time since last packet or current values sent
+bool Overcurrent = false ; //Shows whether or not a bus has overcurrented
 
 //////////////////////////////////////////////Powerboard Begin
 // the setup routine runs once when you press reset
@@ -34,100 +38,155 @@ void setup()
 /////////////////////////////////////////////Powerboard Loop Forever
 void loop() 
 {
-//Serial.println("In the loop") ; 
-  //Current Readings to Report back to Base Station
-  Pin_Read(Current_Reading[RC_POWERBOARD_IMEASmA_COMMENTRY], COM_I_MEAS_PIN) ;
-  Pin_Read(Current_Reading[RC_POWERBOARD_IMEASmA_LOGENTRY], LOGIC_I_MEAS_PIN) ;
-  Pin_Read(Current_Reading[RC_POWERBOARD_IMEASmA_ACTENTRY], ACT_I_MEAS_PIN) ;
-  Pin_Read(Current_Reading[RC_POWERBOARD_IMEASmA_AUXENTRY], AUX_I_MEAS_PIN) ;
-  Pin_Read(Current_Reading[RC_POWERBOARD_IMEASmA_M1ENTRY], M1_I_MEAS_PIN) ;
-  Pin_Read(Current_Reading[RC_POWERBOARD_IMEASmA_M2ENTRY], M2_I_MEAS_PIN) ;
-  Pin_Read(Current_Reading[RC_POWERBOARD_IMEASmA_M3ENTRY], M3_I_MEAS_PIN) ;
-  Pin_Read(Current_Reading[RC_POWERBOARD_IMEASmA_M4ENTRY], M4_I_MEAS_PIN) ;
-  Pin_Read(Current_Reading[RC_POWERBOARD_IMEASmA_M5ENTRY], M5_I_MEAS_PIN) ;
-  Pin_Read(Current_Reading[RC_POWERBOARD_IMEASmA_M6ENTRY], M6_I_MEAS_PIN) ;
-  Pin_Read(Current_Reading[RC_POWERBOARD_IMEASmA_M7ENTRY], M7_I_MEAS_PIN) ;
-  RoveComm.write(RC_POWERBOARD_IMEASmA_DATAID, RC_POWERBOARD_IMEASmA_DATACOUNT, Current_Reading) ;
+  //Current Readings to Report back to Base Station//////////////////////////////////////////////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //Code to setup sending a current reading packet every second
+  if(sent_packet == true)
+  {
+    last_time_packet = millis() ; //Timestamp
+    sent_packet = false ; //So last_time_packet will not be overwritten too quickly
+  }
+  Pin_Read(Current_Reading[RC_POWERBOARD_IMEASmA_COMMENTRY], COM_I_MEAS_PIN) ; //Current Reading of Communication
+  Pin_Read(Current_Reading[RC_POWERBOARD_IMEASmA_LOGENTRY], LOGIC_I_MEAS_PIN) ; //Current Reading of Logic
+  Pin_Read(Current_Reading[RC_POWERBOARD_IMEASmA_ACTENTRY], ACT_I_MEAS_PIN) ; //Current Reading of Actuation
+  Pin_Read(Current_Reading[RC_POWERBOARD_IMEASmA_AUXENTRY], AUX_I_MEAS_PIN) ; //Current Reading of Auxilliary
+  Pin_Read(Current_Reading[RC_POWERBOARD_IMEASmA_M1ENTRY], M1_I_MEAS_PIN) ; //Current Reading of Motor Bus 1
+  Pin_Read(Current_Reading[RC_POWERBOARD_IMEASmA_M2ENTRY], M2_I_MEAS_PIN) ; //Current Reading of Motor Bus 2
+  Pin_Read(Current_Reading[RC_POWERBOARD_IMEASmA_M3ENTRY], M3_I_MEAS_PIN) ; //Current Reading of Motor Bus 3
+  Pin_Read(Current_Reading[RC_POWERBOARD_IMEASmA_M4ENTRY], M4_I_MEAS_PIN) ; //Current Reading of Motor Bus 4
+  Pin_Read(Current_Reading[RC_POWERBOARD_IMEASmA_M5ENTRY], M5_I_MEAS_PIN) ; //Current Reading of Motor Bus 5
+  Pin_Read(Current_Reading[RC_POWERBOARD_IMEASmA_M6ENTRY], M6_I_MEAS_PIN) ; //Current Reading of Motor Bus 6
+  Pin_Read(Current_Reading[RC_POWERBOARD_IMEASmA_M7ENTRY], M7_I_MEAS_PIN) ; //Current Reading of Motor Bus 7
+  //End of Current Reads
+  //Sends Current Values back to basestation every second, after the board has run through the code once
+  if(millis() >= (last_time_packet+ROVECOMM_UPDATE_DELAY))
+  {
+    RoveComm.write(RC_POWERBOARD_IMEASmA_DATAID, RC_POWERBOARD_IMEASmA_DATACOUNT, Current_Reading) ;
+    sent_packet = true ; //So we can updtate timestamp
+  }
   
-  //Checking for Over Currents on all busses
-Serial.println("Checking comms") ;
+  //Checking for Over Currents on all busses//////////////////////////////////////////////////////////////////////////////////////////////////
+  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//Serial.println("Checking comms") ; //Serial Debugging Code
 //delay(10) ;
-  Shut_Off(COM_I_MEAS_PIN, Bus, COM_CTL_PIN, ESTOP_12V_COM_LOGIC_MAX_AMPS_THRESHOLD, LOGIC_COMM_TUNER) ;
-Serial.println("Checking ACT") ;
+  Bus_Tripped = Shut_Off(COM_I_MEAS_PIN, Bus, COM_CTL_PIN, ESTOP_12V_COM_LOGIC_MAX_AMPS_THRESHOLD, LOGIC_COMM_TUNER) ;
+  if(Bus_Tripped == true)
+  {
+    Overcurrent = true ;
+  }
+//Serial.println("Checking ACT") ; //Serial Debugging Code
 //delay(10) ;
-  Shut_Off(ACT_I_MEAS_PIN, Bus, ACT_CTL_PIN, ESTOP_12V_ACT_MAX_AMPS_THRESHOLD, ACT_TUNER) ;
-Serial.println("Checking log") ;
+  Bus_Tripped = Shut_Off(ACT_I_MEAS_PIN, Bus, ACT_CTL_PIN, ESTOP_12V_ACT_MAX_AMPS_THRESHOLD, ACT_TUNER) ;
+  if(Bus_Tripped == true)
+  {
+    Overcurrent = true ;
+  }
+//Serial.println("Checking log") ; //Serial Debugging Code
 //delay(10) ;
-  Shut_Off(LOGIC_I_MEAS_PIN, Bus, LOGIC_CTL_PIN, ESTOP_12V_COM_LOGIC_MAX_AMPS_THRESHOLD, LOGIC_COMM_TUNER) ;
-//Serial.println("Checking AUX") ;
+  Bus_Tripped = Shut_Off(LOGIC_I_MEAS_PIN, Bus, LOGIC_CTL_PIN, ESTOP_12V_COM_LOGIC_MAX_AMPS_THRESHOLD, LOGIC_COMM_TUNER) ;
+  if(Bus_Tripped == true)
+  {
+    Overcurrent = true ;
+  }
+//Serial.println("Checking AUX") ; //Serial Debugging Code
 //delay(10) ;
-  Shut_Off(AUX_I_MEAS_PIN, Bus, AUX_CTL_PIN, ESTOP_AUX_MAX_AMPS_THRESHOLD, AUX_TUNER) ;
-//Serial.println("Checking M1") ;
+  Bus_Tripped = Shut_Off(AUX_I_MEAS_PIN, Bus, AUX_CTL_PIN, ESTOP_AUX_MAX_AMPS_THRESHOLD, AUX_TUNER) ;
+  if(Bus_Tripped == true)
+  {
+    Overcurrent = true ;
+  }
+//Serial.println("Checking M1") ; //Serial Debugging Code
 //delay(10) ;
-  Shut_Off(M1_I_MEAS_PIN, Bus, M1_CTL_PIN, ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD, MOTOR_TUNER) ;
-//Serial.println("Checking m2") ;
+  Bus_Tripped = Shut_Off(M1_I_MEAS_PIN, Bus, M1_CTL_PIN, ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD, MOTOR_TUNER) ;
+  if(Bus_Tripped == true )
+  {
+    Overcurrent = true ;
+  }
+//Serial.println("Checking m2") ; //Serial Debugging Code
 //delay(10) ;
-  Shut_Off(M2_I_MEAS_PIN, Bus, M2_CTL_PIN, ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD, MOTOR_TUNER) ;
-//Serial.println("Checking m3") ;
+  Bus_Tripped = Shut_Off(M2_I_MEAS_PIN, Bus, M2_CTL_PIN, ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD, MOTOR_TUNER) ;
+  if(Bus_Tripped == true)
+  {
+    Overcurrent = true ;
+  }
+//Serial.println("Checking m3") ; //Serial Debugging Code
 //delay(10) ;
-  Shut_Off(M3_I_MEAS_PIN, Bus, M3_CTL_PIN, ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD, MOTOR_TUNER) ;
-//Serial.println("Checking m4") ;
+  Bus_Tripped = Shut_Off(M3_I_MEAS_PIN, Bus, M3_CTL_PIN, ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD, MOTOR_TUNER) ;
+  if(Bus_Tripped == true)
+  {
+    Overcurrent = true ;
+  }
+//Serial.println("Checking m4") ; //Serial Debugging Code
 //delay(10) ;
-  Shut_Off(M4_I_MEAS_PIN, Bus, M4_CTL_PIN, ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD, MOTOR_TUNER) ;
-//Serial.println("Checking m5") ;
+  Bus_Tripped = Shut_Off(M4_I_MEAS_PIN, Bus, M4_CTL_PIN, ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD, MOTOR_TUNER) ;
+  if(Bus_Tripped == true)
+  {
+    Overcurrent = true ;
+  }
+//Serial.println("Checking m5") ; //Serial Debugging Code
 //delay(10) ;
-  Shut_Off(M5_I_MEAS_PIN, Bus, M5_CTL_PIN, ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD, MOTOR_TUNER) ;
-//Serial.println("Checking m6") ;
+  Bus_Tripped = Shut_Off(M5_I_MEAS_PIN, Bus, M5_CTL_PIN, ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD, MOTOR_TUNER) ;
+  if(Bus_Tripped == true)
+  {
+    Overcurrent = true ;
+  }
+//Serial.println("Checking m6") ; //Serial Debugging Code
 //delay(10) ;
-  Shut_Off(M6_I_MEAS_PIN, Bus, M6_CTL_PIN, ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD, MOTOR_TUNER) ;
-//Serial.println("Checking m7") ;
+  Bus_Tripped = Shut_Off(M6_I_MEAS_PIN, Bus, M6_CTL_PIN, ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD, MOTOR_TUNER) ;
+  if(Bus_Tripped == true)
+  {
+    Overcurrent = true ;
+  }
+//Serial.println("Checking m7") ; //Serial Debugging Code
 //delay(10) ;
-  Shut_Off(M7_I_MEAS_PIN, Bus, M7_CTL_PIN, ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD, MOTOR_TUNER) ;
-  RoveComm.write(RC_POWERBOARD_BUSENABLED_DATAID, RC_POWERBOARD_BUSENABLED_DATACOUNT, Bus) ; //Send out a summary of what is off after current check
-  delay(ROVECOMM_DELAY) ;
-  
+  Bus_Tripped = Shut_Off(M7_I_MEAS_PIN, Bus, M7_CTL_PIN, ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD, MOTOR_TUNER) ;
+  if(Bus_Tripped == true)
+  {
+    Overcurrent = true ;
+  }
+  //End of Overcurrents
+  //If any bus senses an overcurrent, then a packet will be sent 
+  if(Overcurrent == true)
+  {
+    RoveComm.write(RC_POWERBOARD_BUSENABLED_DATAID, RC_POWERBOARD_BUSENABLED_DATACOUNT, Bus) ; //Send out a summary of what is off after current check
+    delay(ROVECOMM_DELAY) ;
+    Bus_Tripped = false ;
+    Overcurrent = false ;
+  }
+
   /////////////////////////////////////////////RED Control and Telem RoveComm
   //Recieves Pack form rovecomm and shuts off or turns on busses at need
     Enable_Disable = RoveComm.read();
     if(Enable_Disable.data_id == RC_POWERBOARD_BUSENABLE_DATAID)
     {  
-Serial.println("Packet Recieved") ;
-delay(1000) ; //Debug Time
+//Serial.println("Packet Recieved") ;
+//delay(1000) ; //Debug Time
       Bus_Enable(Enable_Disable, Bus) ;
-      RoveComm.write(RC_POWERBOARD_BUSENABLED_DATAID, RC_POWERBOARD_BUSENABLED_DATACOUNT, Bus) ; //Send whats on and off after the message, to match up
-      //Same = Enable_Disable ;
+//      RoveComm.write(RC_POWERBOARD_BUSENABLED_DATAID, RC_POWERBOARD_BUSENABLED_DATACOUNT, Bus) ; //Send whats on and off after the message, to match up
     }
-  //Bus_Enable(Same, Bus) ;
-  //RoveComm.write(RC_POWERBOARD_BUSENABLED_DATAID, RC_POWERBOARD_BUSENABLED_DATACOUNT, Bus) ; //Send whats on and off after the message, to match up
 }  
+//End of Main Loop
+
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //Functions
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+
+//Function 1.////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 bool singleDebounce(const int & bouncing_pin, const int & max_amps_threshold, const int & Tuner)
 {
-  int adc_threshhold = ((map(max_amps_threshold, CURRENT_MIN, CURRENT_MAX, ADC_MIN, ADC_MAX)*1000)/(Tuner));
-  
-  //Get reading off pin
-//MSerial.print(adc_threshhold) ; //Debug
-//Serial.println(" , at debounce") ; //Debug
-//delay(10) ; //Debug
-//int tester = ((map(adc_threshhold, ADC_MIN, ADC_MAX, CURRENT_MIN, CURRENT_MAX)*1180)/1000) ; //Debug
-//Serial.print(tester) ; //Debug
-//Serial.println(" tester value") ; //Debug
-//delay(10) ; //Debug
+  int adc_threshhold = ((map(max_amps_threshold, CURRENT_MIN, CURRENT_MAX, ADC_MIN, ADC_MAX)*1000)/(Tuner)); //Get reading off pin
   bool trip = false ;
-  if( analogRead(bouncing_pin) > adc_threshhold) //If pin reading is high
+  if(analogRead(bouncing_pin) > adc_threshhold) //If pin reading is high
   {
-//Serial.println(analogRead(bouncing_pin)) ; //Debug Code
+//Serial.println(analogRead(bouncing_pin)) ; //Debug Code to adjust Tuners
 //delay(100) ;
 //Serial.println(adc_threshhold) ;
 //delay(100) ;  
 //Serial.println("Pin was tripped") ;
 //delay(1000) ;
     delay(DEBOUNCE_DELAY);
-    
     if( analogRead(bouncing_pin) > adc_threshhold) //If pin reading is still high
     {
        trip = true; //Sends back true to indicate shut off
@@ -142,17 +201,7 @@ bool singleDebounce(const int & bouncing_pin, const int & max_amps_threshold, co
   return trip;
 }
 
-//Functions from Years past. No longer in use.
-//float mapFloats(float x, float in_min, float in_max, float out_min, float out_max)
-//{
-//  return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min + 1; //+1 added for offset
-//}
-
-//float scale(float x, float in_min, float in_max, float out_min, float out_max)
-//{
-// return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
-//}
-
+//Function 2.////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void Configure_Pins ()
 {
   // Control Pins are outputs
@@ -186,6 +235,7 @@ void Configure_Pins ()
   return ;
 }
 
+//Function 4.////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void Pin_Initialization ()
 {
   digitalWrite(ACT_CTL_PIN, LOW);
@@ -218,10 +268,10 @@ void Pin_Initialization ()
   digitalWrite(M6_CTL_PIN, HIGH);
   digitalWrite(M7_CTL_PIN, HIGH);
   digitalWrite(FAN_CTL_PIN, HIGH); //Fans Always On
-  
   return ;
 }
 
+//Function 5./////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void Communication_Begin (uint8_t Bus []) 
 {
   bool order = false ; //Indicates first set of Bus's bits are filled
@@ -251,12 +301,15 @@ void Communication_Begin (uint8_t Bus [])
   RoveComm.write(RC_POWERBOARD_BUSENABLED_DATAID, RC_POWERBOARD_BUSENABLED_DATACOUNT, Bus) ; //Initial states of Busses
 }
 
-void Shut_Off( const int & BUS_I_MEAS_PIN, uint8_t Bus[], const int & BUS_CTL_PIN, const int & ESTOP_AMP_THRESHOLD, const int & Tuner)
+//Function 6.////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+bool Shut_Off( const int & BUS_I_MEAS_PIN, uint8_t Bus[], const int & BUS_CTL_PIN, const int & ESTOP_AMP_THRESHOLD, const int & Tuner)
 {
+  bool Bus_Tripped = false ;
   static uint16_t time1 = 0 ;
   static bool comms_off ;
   if(singleDebounce(BUS_I_MEAS_PIN, ESTOP_AMP_THRESHOLD, Tuner) ) //If pin is tripped
   {
+     Bus_Tripped = true ;
      if(BUS_CTL_PIN == COM_CTL_PIN)//Special rules for communication bus
      {
 //Serial.println("Shutting off Comms") ; //Debug Code
@@ -265,20 +318,13 @@ void Shut_Off( const int & BUS_I_MEAS_PIN, uint8_t Bus[], const int & BUS_CTL_PI
        RoveComm.write(RC_POWERBOARD_BUSENABLED_DATAID, RC_POWERBOARD_BUSENABLED_DATACOUNT, Bus) ;
        delay(ROVECOMM_DELAY) ;
        digitalWrite(COM_CTL_PIN, LOW);
-//Serial.println(time1) ;
-//delay(10) ;
        if(time1 == 0)
        {
 //Serial.println("comms_off is now true") ;
 //delay(10) ;
          comms_off = true ;
          time1 = millis();
-//Serial.println(millis()) ;
-//delay(10) ;
-//Serial.println(time1) ;
-//delay(10) ;
        }
-//       delay(ROVECOMM_DELAY);
      }
      else //All other busses
      {
@@ -359,9 +405,10 @@ void Shut_Off( const int & BUS_I_MEAS_PIN, uint8_t Bus[], const int & BUS_CTL_PI
       bitSet(Bus[0], RC_POWERBOARD_BUSENABLED_COMMBIT) ;
     }
   } 
-    return ;
+    return Bus_Tripped ;
 }
 
+//Function 7.//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void Bus_Enable (const rovecomm_packet & Enable_Disable, uint8_t Bus[])
 {
   //Communication Bus
@@ -536,6 +583,7 @@ void Bus_Enable (const rovecomm_packet & Enable_Disable, uint8_t Bus[])
   return ;
 }
 
+//Function 8.////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void Pin_Read (uint16_t & current_reading, const int & BUS_I_MEAS_PIN)
 {
   // Using http://www.digikey.com/product-detail/en/allegro-microsystems-llc/ACS722LLCTR-40AU-T/620-1640-1-ND/4948876

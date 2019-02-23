@@ -17,6 +17,7 @@ RoveCommEthernetUdp RoveComm;
 #define ROVER_POWER_RESET_DELAY  3000 //Delay to reset rover power
 #define ROVECOMM_DELAY  10 //Delay to send Rovecomm a package
 #define DEBOUNCE_DELAY  10 //Delay after current or voltage trip
+#define ROVECOMM_UPDATE_DELAY 1000 //Delay so that Rovecomm is not overloaded
 
 //////////////////////////////////////////////Pinmap
 // Control Pins for Busses
@@ -105,7 +106,7 @@ void Communication_Begin (uint8_t Bus []) ;
 //Pre: BUS_I_MEAS_PIN must be a pin for current measurement, Bus[] must be the same array from Commuincation_Begin.
 // BUS_CTL_PIN must be the relevent pin that controls the bus. and ESTOP_AMP_THRESHOLD must also be the relevent estop threshold.
 //Post: Shuts off the bus if there is an overcurrent situation and writes this to Bus[]
-void Shut_Off( const int & BUS_I_MEAS_PIN, uint8_t Bus[], const int & BUS_CTL_PIN, const int & ESTOP_AMP_THRESHOLD, const int & Tuner) ;
+bool Shut_Off( const int & BUS_I_MEAS_PIN, uint8_t Bus[], const int & BUS_CTL_PIN, const int & ESTOP_AMP_THRESHOLD, const int & Tuner) ;
 
 //Description: Takes a packet from RoveComm and turn on or off a bus
 //Pre: Enable_Disable should be a packet recieved from RoveComm, and Bus should be from Shut_Off
