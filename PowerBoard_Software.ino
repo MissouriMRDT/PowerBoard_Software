@@ -20,7 +20,7 @@ rovecomm_packet Enable_Disable ; //packet reception variable
 uint16_t Current_Reading[RC_POWERBOARD_IMEASmA_DATACOUNT] ; //Current Reading for all busses
 bool Bus_Tripped ; //To determine whether or not to send a packet based on overcurrents
 bool sent_packet = true ; //To determine whether or not to send a packet of current values
-uint16_t last_time_packet = 0 ; //Time since last packet or current values sent
+uint32_t last_time_packet = 0 ; //Time since last packet or current values sent
 bool Overcurrent = false ; //Shows whether or not a bus has overcurrented
 
 //////////////////////////////////////////////Powerboard Begin
@@ -61,7 +61,9 @@ void loop()
   //Sends Current Values back to basestation every second, after the board has run through the code once
   if(millis() >= (last_time_packet+ROVECOMM_UPDATE_DELAY))
   {
-    RoveComm.write(RC_POWERBOARD_IMEASmA_DATAID, RC_POWERBOARD_IMEASmA_DATACOUNT, Current_Reading) ;
+    RoveComm.write(RC_POWERBOARD_IMEASmA_DATAID, RC_POWERBOARD_IMEASmA_DATACOUNT, Current_Reading) ; //Sends back current readings
+    delay(ROVECOMM_DELAY) ;
+    RoveComm.write(RC_POWERBOARD_BUSENABLED_DATAID, RC_POWERBOARD_BUSENABLED_DATACOUNT, Bus) ; //Sends back present state of motor busses
     sent_packet = true ; //So we can updtate 
     delay(ROVECOMM_DELAY) ;
 //Serial.println("Hello") ; //Debug Code
@@ -308,7 +310,7 @@ void Communication_Begin (uint8_t Bus [])
 bool Shut_Off( const int & BUS_I_MEAS_PIN, uint8_t Bus[], const int & BUS_CTL_PIN, const int & ESTOP_AMP_THRESHOLD, const int & Tuner)
 {
   bool Bus_Tripped = false ;
-  static uint16_t time1 = 0 ;
+  static uint32_t time1 = 0 ;
   static bool comms_off ;
   if(singleDebounce(BUS_I_MEAS_PIN, ESTOP_AMP_THRESHOLD, Tuner) ) //If pin is tripped
   {
