@@ -49,10 +49,14 @@ void loop()
     last_time_packet = millis() ; //Timestamp
     sent_packet = false ; //So last_time_packet will not be overwritten too quickly
   }
-  for(int i = 0 ; i < RC_POWERBOARD_IMEASmA_DATACOUNT ; i++)
+  for(int i = 0 ; i < (RC_POWERBOARD_IMEASmA_DATACOUNT-1) ; i++)
   {
     Pin_Read(Current_Reading[i], Bus[i].imeas_pin) ;
+    Serial.print(Bus[i].identity) ;
+    Serial.println(" Current Reading") ;
+    delay(10) ;
   }
+  Serial.println("") ;
   //End of Current Reads
   //Sends Current Values back to basestation every second, after the board has run through the code once
   if(millis() >= (last_time_packet+ROVECOMM_UPDATE_DELAY))
@@ -70,14 +74,18 @@ void loop()
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //Serial.println("Checking comms") ; //Serial Debugging Code
 //delay(10) ;
-  for(int j = 0 ; j < RC_POWERBOARD_IMEASmA_DATACOUNT ; j++)
+  for(int j = 0 ; j < (RC_POWERBOARD_IMEASmA_DATACOUNT-1) ; j++)
   {
     Bus_Tripped = Shut_Off(Bus[j], Send_Recieve) ;
+    Serial.print(Bus[j].identity) ;
+    Serial.println(" Overcurrent check") ;
+    delay(10) ;
     if(Bus_Tripped == true)
     {
       Overcurrent = true ;
     }
   }
+  Serial.println("") ;
   //End of Overcurrents
   //If any bus senses an overcurrent, then a packet will be sent 
   if(Overcurrent == true)
@@ -94,6 +102,11 @@ void loop()
     if(Enable_Disable.data_id == RC_POWERBOARD_BUSENABLE_DATAID)
     {  
       Bus_Enable(Enable_Disable, Send_Recieve, Bus) ;
+      Serial.println("") ;
+      Serial.println("Packet Recieved") ;
+      Serial.println("") ;
+      delay(3000) ;
+      
     }
 }  
 //End of Main Loop
@@ -265,26 +278,36 @@ bool Shut_Off( const PB_Bus & Bus, uint8_t Send_Recieve[])
 void Bus_Enable (const rovecomm_packet & Enable_Disable, uint8_t Send_Recieve[], const PB_Bus Bus[])
 {
   int ALC_to_Motor_Count = ALC_BUSSES ;
-for(int i = 0 ; i < (RC_POWERBOARD_BUSENABLE_DATACOUNT-1) ; i++)
+  int Start_Point = 0 ;
+for(int i = 0 ; i < (RC_POWERBOARD_BUSENABLE_DATACOUNT) ; i++)
 {
-  for(int j = 1 ; j <= ALC_to_Motor_Count ; j++)
+  for(int j = Start_Point ; j < ALC_to_Motor_Count ; j++)
   {
-    if(bitRead(Enable_Disable.data[i] , j) == 1) //Changing State of the Bus
+    Serial.println(j) ;
+    delay(10) ;
+    if(bitRead(Enable_Disable.data[i] , (j+1)) == 1) //Changing State of the Bus
     {
       if(Enable_Disable.data[2] == 1) //Turn on
       {
+        Serial.print(Bus[j].identity) ;
+        Serial.println(" Turn On") ;
+        delay(10) ;
         Send_Recieve[i] = Send_Recieve[i] | Bus[j].bit_code_on ;
         digitalWrite(Bus[j].ctl_pin, HIGH) ;
         delay(ROVECOMM_DELAY) ;
       }
       else //Turn OFF
       {
+        Serial.print(Bus[j].identity) ;
+        Serial.println( " Turn OFF") ;
+        delay(10) ;
         Send_Recieve[i] = Send_Recieve[i] & Bus[j].bit_code_off ;
         digitalWrite(Bus[j].ctl_pin, LOW) ;
         delay(ROVECOMM_DELAY) ;
       }
     }
   }
+  Start_Point = ALC_to_Motor_Count - 1 ;
   ALC_to_Motor_Count = ALC_to_Motor_Count + MOTOR_BUSSES ;
 }
   return ;
@@ -303,7 +326,8 @@ void Pin_Read (uint16_t & current_reading, const int & BUS_I_MEAS_PIN)
   {
     adc_reading = ADC_MAX ;
   }
-  current_reading = ((map(adc_reading, ADC_MIN, ADC_MAX, CURRENT_MIN, CURRENT_MAX)*1180)/1000) ;
+  current_reading = ((map(adc_reading, ADC_MIN, ADC_MAX, CURRENT_MIN, CURRENT_MAX)*1180)/1000);
+  Serial.println(current_reading) ;
   return ;
 }
 
