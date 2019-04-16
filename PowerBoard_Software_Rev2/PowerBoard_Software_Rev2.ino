@@ -15,15 +15,18 @@
 
 //Bus Control Variables
 uint8_t Send_Recieve[] {0,0} ; //Bus to Enable or Disable
-PB_Bus Bus[ALC_BUSSES+MOTOR_BUSSES] ; //An array of all the Busses on the Powerboard
+PB_Bus Bus[RC_POWERBOARD_IMEASmA_DATACOUNT] ; //An array of all the Busses on the Powerboard
 
 //Packet Reception and Sent Variables
 rovecomm_packet Enable_Disable ; //packet reception variable
 uint16_t Current_Reading[RC_POWERBOARD_IMEASmA_DATACOUNT] ; //Current Reading for all busses
+uint16_t error_reading[CURRENT_AVERAGE][RC_POWERBOARD_IMEASmA_DATACOUNT] ;
 bool Bus_Tripped ; //To determine whether or not to send a packet based on overcurrents
 bool sent_packet = true ; //To determine whether or not to send a packet of current values
 uint32_t last_time_packet = 0 ; //Time since last packet or current values sent
 bool Overcurrent = false ; //Shows whether or not a bus has overcurrented
+int times_through = 0 ;
+int average_holder = 0 ;
 
 //////////////////////////////////////////////Powerboard Begin
 // the setup routine runs once when you press reset
@@ -49,13 +52,18 @@ void loop()
     last_time_packet = millis() ; //Timestamp
     sent_packet = false ; //So last_time_packet will not be overwritten too quickly
   }
-  for(int i = 0 ; i < (RC_POWERBOARD_IMEASmA_DATACOUNT-1) ; i++)
+  for(int i = 0 ; i < (RC_POWERBOARD_IMEASmA_DATACOUNT) ; i++)
   {
     Pin_Read(Current_Reading[i], Bus[i].imeas_pin) ;
     Serial.print(Bus[i].identity) ;
     Serial.println(" Current Reading") ;
     delay(10) ;
   }
+  for(int k = 0 ; k <(RC_POWERBOARD_IMEASmA_DATACOUNT) ; k++)
+  {
+    error_reading[times_through][k] = Current_Reading[k] ;
+  }
+  times_through++ ;
   Serial.println("") ;
   //End of Current Reads
   //Sends Current Values back to basestation every second, after the board has run through the code once
@@ -74,28 +82,41 @@ void loop()
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //Serial.println("Checking comms") ; //Serial Debugging Code
 //delay(10) ;
-  for(int j = 0 ; j < (RC_POWERBOARD_IMEASmA_DATACOUNT-1) ; j++)
+  if(times_through >= CURRENT_AVERAGE)
   {
-    Bus_Tripped = Shut_Off(Bus[j], Send_Recieve) ;
-    Serial.print(Bus[j].identity) ;
-    Serial.println(" Overcurrent check") ;
-    delay(10) ;
-    if(Bus_Tripped == true)
+    times_through = 0 ; //Reset the averaging of the current reads
+    for(int L = 0 ; L < (RC_POWERBOARD_IMEASmA_DATACOUNT) ; L++) //Averaging the Current Readings over the amount specified by the Current_Average
     {
-      Overcurrent = true ;
+      for(int M = 0 ; M < CURRENT_AVERAGE ; M++)
+      {
+        average_holder = average_holder + error_reading[M][L] ;
+      }
+      average_holder = average_holder/CURRENT_AVERAGE ;
+      Current_Reading[L] = average_holder ;
+      average_holder = 0 ;
+    }
+    for(int j = 0 ; j < (RC_POWERBOARD_IMEASmA_DATACOUNT) ; j++)
+    {
+      Bus_Tripped = Shut_Off(Bus[j], Send_Recieve, Current_Reading[j]) ;
+      Serial.print(Bus[j].identity) ;
+      Serial.println(" Overcurrent check") ;
+      delay(10) ;
+      if(Bus_Tripped == true)
+      {
+        Overcurrent = true ;
+      }
+    }
+    Serial.println("") ;
+    //End of Overcurrents
+    //If any bus senses an overcurrent, then a packet will be sent 
+    if(Overcurrent == true)
+    {
+      RoveComm.write(RC_POWERBOARD_BUSENABLED_DATAID, RC_POWERBOARD_BUSENABLED_DATACOUNT, Send_Recieve) ; //Send out a summary of what is off after current check
+      delay(ROVECOMM_DELAY) ;
+      Bus_Tripped = false ;
+      Overcurrent = false ;
     }
   }
-  Serial.println("") ;
-  //End of Overcurrents
-  //If any bus senses an overcurrent, then a packet will be sent 
-  if(Overcurrent == true)
-  {
-    RoveComm.write(RC_POWERBOARD_BUSENABLED_DATAID, RC_POWERBOARD_BUSENABLED_DATACOUNT, Send_Recieve) ; //Send out a summary of what is off after current check
-    delay(ROVECOMM_DELAY) ;
-    Bus_Tripped = false ;
-    Overcurrent = false ;
-  }
-
   /////////////////////////////////////////////RED Control and Telem RoveComm
   //Recieves Pack form rovecomm and shuts off or turns on busses at need
     Enable_Disable = RoveComm.read();
@@ -229,15 +250,14 @@ void Communication_Begin (uint8_t Send_Recieve []) //This function may have to c
 }
 
 //Function 6.////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-bool Shut_Off( const PB_Bus & Bus, uint8_t Send_Recieve[])
+bool Shut_Off( const PB_Bus & Bus, uint8_t Send_Recieve[], const uint16_t & Current_Reading)
 { 
   bool Bus_Tripped = false ;
-  static const byte Turn_On = 11111111 ;
   //Special Variables in case of the communication bus being tripped
   static uint32_t time1 = 0 ;
   static bool comms_off = false ;
   const uint8_t comm_on_bit_code = 4 ;
-  if(singleDebounce(Bus.imeas_pin, Bus.amp_threshold, Bus.bus_tuning) ) //If pin is tripped
+  if(Current_Reading > Bus.amp_threshold ) //If pin is tripped
   {
      Bus_Tripped = true ;
      //Special Case for the Communication Bus

@@ -86,7 +86,7 @@ void Adjust_Values (const uint8_t & Rovecomm_cell, const uint8_t & Bit_code_off,
 //Safest Test pin
 #define ESTOP_12V_COMM_LOGIC_MAX_AMPS_THRESHOLD  2000 //2 amps, 5 amp fuse
 #define ESTOP_12V_ACT_MAX_AMPS_THRESHOLD        2000 //2 amps, 20 amp fuse  
-#define ESTOP_AUX_MAX_AMPS_THRESHOLD            17000 //17 amps, 20 amp fuse(360W/21.6V) = 16.6 A
+#define ESTOP_AUX_MAX_AMPS_THRESHOLD            19000 //17 amps, 20 amp fuse(360W/21.6) = 16.6 Amps, due to inaccurate readings raised to 19
 #define ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD      30000 //30 amps, 40 amp fuse
 #define ESTOP_ROCKET_BUS_MAX_AMPS_THRESHOLD     2000 //2 amps, 5 amp fuse 
 
@@ -96,6 +96,7 @@ void Adjust_Values (const uint8_t & Rovecomm_cell, const uint8_t & Bit_code_off,
 #define AUX_TUNER         1136 //Tuner for ADC values for Auxilliary bus
 #define MOTOR_TUNER       1144 //Tuner for ADC values for motor busses
 #define ROCKET_TUNER      1085 //Tuner for ADC values for Rocket antennas
+#define CURRENT_AVERAGE      5 //The amount of current readings that we average over to get accurate current readings
 
 //Number of Busses
 #define ALC_BUSSES        3 //Number of Actuation, logic and Communication busses
@@ -128,7 +129,7 @@ void Communication_Begin (uint8_t Bus []) ;
 //Pre: BUS_I_MEAS_PIN must be a pin for current measurement, Bus[] must be the same array from Commuincation_Begin.
 // BUS_CTL_PIN must be the relevent pin that controls the bus. and ESTOP_AMP_THRESHOLD must also be the relevent estop threshold.
 //Post: Shuts off the bus if there is an overcurrent situation and writes this to Bus[]
-bool Shut_Off(const PB_Bus & Bus, uint8_t Send_Recieve[]) ;
+bool Shut_Off(const PB_Bus & Bus, uint8_t Send_Recieve[], const uint16_t & Current_Reading) ;
 
 //Description: Takes a packet from RoveComm and turn on or off a bus
 //Pre: Enable_Disable should be a packet recieved from RoveComm, and Bus should be from Shut_Off
