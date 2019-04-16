@@ -84,18 +84,18 @@ void Adjust_Values (const uint8_t & Rovecomm_cell, const uint8_t & Bit_code_off,
 #define VOLTS_MAX             33600
 
 //Safest Test pin
-#define ESTOP_12V_COMM_LOGIC_MAX_AMPS_THRESHOLD  2000 //2 amps, 5 amp fuse
+#define ESTOP_12V_COMM_LOGIC_MAX_AMPS_THRESHOLD  5000 //5 amps, 5 amp fuse
 #define ESTOP_12V_ACT_MAX_AMPS_THRESHOLD        2000 //2 amps, 20 amp fuse  
 #define ESTOP_AUX_MAX_AMPS_THRESHOLD            19000 //17 amps, 20 amp fuse(360W/21.6) = 16.6 Amps, due to inaccurate readings raised to 19
 #define ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD      30000 //30 amps, 40 amp fuse
-#define ESTOP_ROCKET_BUS_MAX_AMPS_THRESHOLD     2000 //2 amps, 5 amp fuse 
+#define ESTOP_ROCKET_BUS_MAX_AMPS_THRESHOLD     4000 //4 amps, 5 amp fuse 
 
 //Tuning Variables
 #define LOGIC_COMM_TUNER  1085 //Tuner for ADC values for Logic and Comm busses
 #define ACT_TUNER         1132 //Tuner for ADC values for Actuation bus
-#define AUX_TUNER         1136 //Tuner for ADC values for Auxilliary bus
-#define MOTOR_TUNER       1144 //Tuner for ADC values for motor busses
-#define ROCKET_TUNER      1085 //Tuner for ADC values for Rocket antennas
+#define AUX_TUNER         1050 //Tuner for ADC values for Auxilliary bus
+#define MOTOR_TUNER       1005 //Tuner for ADC values for motor busses
+#define ROCKET_TUNER      1000 //Tuner for ADC values for Rocket antennas
 #define CURRENT_AVERAGE      5 //The amount of current readings that we average over to get accurate current readings
 
 //Number of Busses
@@ -140,7 +140,7 @@ void Bus_Enable (const rovecomm_packet & Enable_Disable, uint8_t Send_Recieve[],
 //Pre: Current_Reading should be an array part, for RoveComm reasons. BUS_I_MEAS_PIN should be a current measuring pin
 //that corresponds to the spot on the Current_Reading array.
 //Post: Returns a value to current_reading of the current reading value from the BUS_I_MEAS_PIN in mA.
-void Pin_Read (uint16_t & current_reading, const int & BUS_I_MEAS_PIN) ;
+void Pin_Read (uint16_t & current_reading, const int & BUS_I_MEAS_PIN, const int & Tuner) ;
 
 //Description:
 //Pre:

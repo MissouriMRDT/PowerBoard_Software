@@ -54,17 +54,17 @@ void loop()
   }
   for(int i = 0 ; i < (RC_POWERBOARD_IMEASmA_DATACOUNT) ; i++)
   {
-    Pin_Read(Current_Reading[i], Bus[i].imeas_pin) ;
-    Serial.print(Bus[i].identity) ;
-    Serial.println(" Current Reading") ;
-    delay(10) ;
+    Pin_Read(Current_Reading[i], Bus[i].imeas_pin, Bus[i].bus_tuning) ;
+    //Serial.print(Bus[i].identity) ;
+    //Serial.println(" Current Reading") ;
+    //delay(10) ;
   }
   for(int k = 0 ; k <(RC_POWERBOARD_IMEASmA_DATACOUNT) ; k++)
   {
     error_reading[times_through][k] = Current_Reading[k] ;
   }
   times_through++ ;
-  Serial.println("") ;
+  //Serial.println("") ;
   //End of Current Reads
   //Sends Current Values back to basestation every second, after the board has run through the code once
   if(millis() >= (last_time_packet+ROVECOMM_UPDATE_DELAY))
@@ -98,6 +98,8 @@ void loop()
     for(int j = 0 ; j < (RC_POWERBOARD_IMEASmA_DATACOUNT) ; j++)
     {
       Bus_Tripped = Shut_Off(Bus[j], Send_Recieve, Current_Reading[j]) ;
+      Serial.print(Current_Reading[j]) ;
+      Serial.print(" ") ;
       Serial.print(Bus[j].identity) ;
       Serial.println(" Overcurrent check") ;
       delay(10) ;
@@ -123,10 +125,10 @@ void loop()
     if(Enable_Disable.data_id == RC_POWERBOARD_BUSENABLE_DATAID)
     {  
       Bus_Enable(Enable_Disable, Send_Recieve, Bus) ;
-      Serial.println("") ;
-      Serial.println("Packet Recieved") ;
-      Serial.println("") ;
-      delay(3000) ;
+      //Serial.println("") ;
+      //Serial.println("Packet Recieved") ;
+      //Serial.println("") ;
+      //delay(3000) ;
       
     }
 }  
@@ -299,42 +301,50 @@ void Bus_Enable (const rovecomm_packet & Enable_Disable, uint8_t Send_Recieve[],
 {
   int ALC_to_Motor_Count = ALC_BUSSES ;
   int Start_Point = 0 ;
+  int bit_helper = 1 ;
 for(int i = 0 ; i < (RC_POWERBOARD_BUSENABLE_DATACOUNT) ; i++)
 {
   for(int j = Start_Point ; j < ALC_to_Motor_Count ; j++)
   {
-    Serial.println(j) ;
-    delay(10) ;
-    if(bitRead(Enable_Disable.data[i] , (j+1)) == 1) //Changing State of the Bus
+    //Serial.println(j) ;
+    //delay(10) ;
+    //Serial.print(Enable_Disable.data[i]) ;
+    //Serial.println( " <- data sent") ;
+    //delay(10) ;
+    if(bitRead(Enable_Disable.data[i] , (bit_helper)) == 1) //Changing State of the Bus
     {
+      //Serial.print("Changing State of ") ;
+      //delay(10) ;
       if(Enable_Disable.data[2] == 1) //Turn on
       {
-        Serial.print(Bus[j].identity) ;
-        Serial.println(" Turn On") ;
-        delay(10) ;
+        //Serial.print(Bus[j].identity) ;
+        //Serial.println(" Turn On") ;
+        //delay(10) ;
         Send_Recieve[i] = Send_Recieve[i] | Bus[j].bit_code_on ;
-        digitalWrite(Bus[j].ctl_pin, HIGH) ;
-        delay(ROVECOMM_DELAY) ;
+        //digitalWrite(Bus[j].ctl_pin, HIGH) ;
+        //delay(ROVECOMM_DELAY) ;
       }
       else //Turn OFF
       {
-        Serial.print(Bus[j].identity) ;
-        Serial.println( " Turn OFF") ;
-        delay(10) ;
+        //Serial.print(Bus[j].identity) ;
+        //Serial.println( " Turn OFF") ;
+        //delay(10) ;
         Send_Recieve[i] = Send_Recieve[i] & Bus[j].bit_code_off ;
         digitalWrite(Bus[j].ctl_pin, LOW) ;
         delay(ROVECOMM_DELAY) ;
       }
     }
+    bit_helper++ ;
   }
-  Start_Point = ALC_to_Motor_Count - 1 ;
+  Start_Point = ALC_to_Motor_Count;
   ALC_to_Motor_Count = ALC_to_Motor_Count + MOTOR_BUSSES ;
+  bit_helper = 1 ;
 }
   return ;
 }
 
 //Function 8.////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void Pin_Read (uint16_t & current_reading, const int & BUS_I_MEAS_PIN)
+void Pin_Read (uint16_t & current_reading, const int & BUS_I_MEAS_PIN, const int & Tuner)
 {
   // Using http://www.digikey.com/product-detail/en/allegro-microsystems-llc/ACS722LLCTR-40AU-T/620-1640-1-ND/4948876
   int adc_reading = analogRead(BUS_I_MEAS_PIN) ;
@@ -346,8 +356,8 @@ void Pin_Read (uint16_t & current_reading, const int & BUS_I_MEAS_PIN)
   {
     adc_reading = ADC_MAX ;
   }
-  current_reading = ((map(adc_reading, ADC_MIN, ADC_MAX, CURRENT_MIN, CURRENT_MAX)*1180)/1000);
-  Serial.println(current_reading) ;
+  current_reading = ((((map(adc_reading, ADC_MIN, ADC_MAX, CURRENT_MIN, CURRENT_MAX)*1180)/1000)*Tuner)/1000);
+  //Serial.println(current_reading) ;
   return ;
 }
 
