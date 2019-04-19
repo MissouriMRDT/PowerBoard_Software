@@ -98,11 +98,11 @@ void loop()
     for(int j = 0 ; j < (RC_POWERBOARD_IMEASmA_DATACOUNT) ; j++)
     {
       Bus_Tripped = Shut_Off(Bus[j], Send_Recieve, Current_Reading[j]) ;
-      Serial.print(Current_Reading[j]) ;
-      Serial.print(" ") ;
-      Serial.print(Bus[j].identity) ;
-      Serial.println(" Overcurrent check") ;
-      delay(10) ;
+//      Serial.print(Current_Reading[j]) ;
+//      Serial.print(" ") ;
+//      Serial.print(Bus[j].identity) ;
+//      Serial.println(" Overcurrent check") ;
+//      delay(10) ;
       if(Bus_Tripped == true)
       {
         Overcurrent = true ;
@@ -128,7 +128,7 @@ void loop()
       //Serial.println("") ;
       //Serial.println("Packet Recieved") ;
       //Serial.println("") ;
-      //delay(3000) ;
+      delay(3000) ;
       
     }
 }  
@@ -317,17 +317,17 @@ for(int i = 0 ; i < (RC_POWERBOARD_BUSENABLE_DATACOUNT) ; i++)
       //delay(10) ;
       if(Enable_Disable.data[2] == 1) //Turn on
       {
-        //Serial.print(Bus[j].identity) ;
-        //Serial.println(" Turn On") ;
+     //   Serial.print(Bus[j].identity) ;
+     //   Serial.println(" Turn On") ;
         //delay(10) ;
         Send_Recieve[i] = Send_Recieve[i] | Bus[j].bit_code_on ;
-        //digitalWrite(Bus[j].ctl_pin, HIGH) ;
-        //delay(ROVECOMM_DELAY) ;
+        digitalWrite(Bus[j].ctl_pin, HIGH) ;
+        delay(ROVECOMM_DELAY) ;
       }
       else //Turn OFF
       {
-        //Serial.print(Bus[j].identity) ;
-        //Serial.println( " Turn OFF") ;
+     //   Serial.print(Bus[j].identity) ;
+     //   Serial.println( " Turn OFF") ;
         //delay(10) ;
         Send_Recieve[i] = Send_Recieve[i] & Bus[j].bit_code_off ;
         digitalWrite(Bus[j].ctl_pin, LOW) ;
@@ -382,7 +382,7 @@ void Bus_Setup(PB_Bus Bus[])
   Bus[5].Adjust_Values(RC_POWERBOARD_BUSENABLE_MOTORSENTRY, 251, 4, BM_I_MEAS_PIN, BM_CTL_PIN, ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD, MOTOR_TUNER, "Back Motors") ;
   Bus[6].Adjust_Values(RC_POWERBOARD_BUSENABLE_MOTORSENTRY, 247, 8, EM_I_MEAS_PIN, EM_CTL_PIN, ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD, MOTOR_TUNER, "Extra Motors") ;
   Bus[7].Adjust_Values(RC_POWERBOARD_BUSENABLE_MOTORSENTRY, 239, 16, ROCKET_I_MEAS_PIN, ROCKET_CTL_PIN, ESTOP_ROCKET_BUS_MAX_AMPS_THRESHOLD, ROCKET_TUNER, "Rockets") ;
-  Bus[8].Adjust_Values(RC_POWERBOARD_BUSENABLE_MOTORSENTRY, 223, 32, GE_I_MEAS_PIN, GE_CTL_PIN, ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD, MOTOR_TUNER, "General Extra") ;
+  Bus[8].Adjust_Values(RC_POWERBOARD_BUSENABLE_MOTORSENTRY, 223, 32, GE_I_MEAS_PIN, GE_CTL_PIN, ESTOP_GEN_EXTRA_BUS_MAX_AMPS_THRESHOLD, MOTOR_TUNER, "General Extra") ;
   Bus[9].Adjust_Values(RC_POWERBOARD_BUSENABLE_MOTORSENTRY, 191, 64, AUX_I_MEAS_PIN, AUX_CTL_PIN, ESTOP_AUX_MAX_AMPS_THRESHOLD, AUX_TUNER, "Auxillary") ;
 }
 

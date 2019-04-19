@@ -85,15 +85,16 @@ void Adjust_Values (const uint8_t & Rovecomm_cell, const uint8_t & Bit_code_off,
 
 //Safest Test pin
 #define ESTOP_12V_COMM_LOGIC_MAX_AMPS_THRESHOLD  5000 //5 amps, 5 amp fuse
-#define ESTOP_12V_ACT_MAX_AMPS_THRESHOLD        2000 //2 amps, 20 amp fuse  
+#define ESTOP_12V_ACT_MAX_AMPS_THRESHOLD        15000 //15 amps, 20 amp fuse  
 #define ESTOP_AUX_MAX_AMPS_THRESHOLD            19000 //17 amps, 20 amp fuse(360W/21.6) = 16.6 Amps, due to inaccurate readings raised to 19
 #define ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD      30000 //30 amps, 40 amp fuse
 #define ESTOP_ROCKET_BUS_MAX_AMPS_THRESHOLD     4000 //4 amps, 5 amp fuse 
+#define ESTOP_GEN_EXTRA_BUS_MAX_AMPS_THRESHOLD     30000 // 30 Amps, 40 Amp fuse
 
 //Tuning Variables
-#define LOGIC_COMM_TUNER  1085 //Tuner for ADC values for Logic and Comm busses
-#define ACT_TUNER         1132 //Tuner for ADC values for Actuation bus
-#define AUX_TUNER         1050 //Tuner for ADC values for Auxilliary bus
+#define LOGIC_COMM_TUNER  1010 //Tuner for ADC values for Logic and Comm busses
+#define ACT_TUNER         970 //Tuner for ADC values for Actuation bus
+#define AUX_TUNER         1030 //Tuner for ADC values for Auxilliary bus
 #define MOTOR_TUNER       1005 //Tuner for ADC values for motor busses
 #define ROCKET_TUNER      1000 //Tuner for ADC values for Rocket antennas
 #define CURRENT_AVERAGE      5 //The amount of current readings that we average over to get accurate current readings
