@@ -27,6 +27,7 @@ uint32_t last_time_packet = 0 ; //Time since last packet or current values sent
 bool Overcurrent = false ; //Shows whether or not a bus has overcurrented
 int times_through = 0 ;
 int average_holder = 0 ;
+uint32_t comm_off_timer = 0 ;
 
 //////////////////////////////////////////////Powerboard Begin
 // the setup routine runs once when you press reset
@@ -128,9 +129,16 @@ void loop()
       //Serial.println("") ;
       //Serial.println("Packet Recieved") ;
       //Serial.println("") ;
-      delay(3000) ;
-      
+      //delay(3000) ;
+      if(COMM_CTL_PIN == LOW)
+      {
+        comm_off_timer = millis() ;
+      }
     }
+      if(millis() >= (comm_off_timer+COMM_OFF_DELAY))
+      {
+        digitalWrite(COMM_CTL_PIN, HIGH) ;
+      }
 }  
 //End of Main Loop
 

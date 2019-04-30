@@ -34,6 +34,7 @@ void Adjust_Values (const uint8_t & Rovecomm_cell, const uint8_t & Bit_code_off,
 #define ROVECOMM_DELAY  10 //Delay to send Rovecomm a package
 #define DEBOUNCE_DELAY  10 //Delay after current or voltage trip
 #define ROVECOMM_UPDATE_DELAY 1000 //Delay so that Rovecomm is not overloaded
+#define COMM_OFF_DELAY 5000 //Delay so that comms turn on after being turned off
 
 //////////////////////////////////////////////Pinmap
 // Control Pins for Busses
