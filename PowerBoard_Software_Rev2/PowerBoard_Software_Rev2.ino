@@ -28,6 +28,7 @@ bool Overcurrent = false ; //Shows whether or not a bus has overcurrented
 int times_through = 0 ;
 int average_holder = 0 ;
 uint32_t comm_off_timer = 0 ;
+bool comm_off = false ;
 
 //////////////////////////////////////////////Powerboard Begin
 // the setup routine runs once when you press reset
@@ -107,9 +108,13 @@ void loop()
       if(Bus_Tripped == true)
       {
         Overcurrent = true ;
+        Serial.print(Bus[j].identity) ;
+        Serial.print(" Overcurrented at") ;
+        Serial.print(Current_Reading[j]) ;
+        Serial.println("mA") ;
       }
     }
-    Serial.println("") ;
+    //Serial.println("") ;
     //End of Overcurrents
     //If any bus senses an overcurrent, then a packet will be sent 
     if(Overcurrent == true)
@@ -130,15 +135,20 @@ void loop()
       //Serial.println("Packet Recieved") ;
       //Serial.println("") ;
       //delay(3000) ;
-      if(COMM_CTL_PIN == LOW)
+      if(digitalRead(COMM_CTL_PIN) == LOW)
       {
+        comm_off = true ;
         comm_off_timer = millis() ;
       }
     }
+    if(comm_off == true)
+    {
       if(millis() >= (comm_off_timer+COMM_OFF_DELAY))
       {
         digitalWrite(COMM_CTL_PIN, HIGH) ;
+        comm_off = false ;
       }
+    }
 }  
 //End of Main Loop
 
@@ -293,7 +303,7 @@ bool Shut_Off( const PB_Bus & Bus, uint8_t Send_Recieve[], const uint16_t & Curr
   }
   if(comms_off == true) //Second half of timing code to turn on comms after 10 seconds
   {
-    if(millis()>=(time1+10000))            //it is turned off in case the overcurrent was just a random spike. 
+    if(millis()>=(time1+COMM_OFF_DELAY))            //it is turned off in case the overcurrent was just a random spike. 
     {   
       comms_off = false ;                  //If there actually is a short in the bus, the bus will turn itself 
       time1 = 0 ;                          //back on        
@@ -325,8 +335,8 @@ for(int i = 0 ; i < (RC_POWERBOARD_BUSENABLE_DATACOUNT) ; i++)
       //delay(10) ;
       if(Enable_Disable.data[2] == 1) //Turn on
       {
-     //   Serial.print(Bus[j].identity) ;
-     //   Serial.println(" Turn On") ;
+        Serial.print(Bus[j].identity) ;
+        Serial.println(" Turned on by user") ;
         //delay(10) ;
         Send_Recieve[i] = Send_Recieve[i] | Bus[j].bit_code_on ;
         digitalWrite(Bus[j].ctl_pin, HIGH) ;
@@ -334,8 +344,8 @@ for(int i = 0 ; i < (RC_POWERBOARD_BUSENABLE_DATACOUNT) ; i++)
       }
       else //Turn OFF
       {
-     //   Serial.print(Bus[j].identity) ;
-     //   Serial.println( " Turn OFF") ;
+        Serial.print(Bus[j].identity) ;
+        Serial.println( " Turned off by user") ;
         //delay(10) ;
         Send_Recieve[i] = Send_Recieve[i] & Bus[j].bit_code_off ;
         digitalWrite(Bus[j].ctl_pin, LOW) ;
