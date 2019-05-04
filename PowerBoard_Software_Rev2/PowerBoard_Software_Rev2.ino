@@ -29,6 +29,7 @@ int times_through = 0 ;
 int average_holder = 0 ;
 uint32_t comm_off_timer = 0 ;
 bool comm_off = false ;
+uint32_t Motor_Turn_On_Time = 0 ;
 
 //////////////////////////////////////////////Powerboard Begin
 // the setup routine runs once when you press reset
@@ -41,6 +42,7 @@ void setup()
   Pin_Initialization () ; //Sets pins to low then to high
   Bus_Setup(Bus) ; //Sets up the PowerBoard Busses in software
   Communication_Begin (Send_Recieve) ; //Sends to base station that everything is now on and communication begins
+  Motor_Turn_On_Time = millis()+MOTOR_DELAY ;
 }//end setup
 
 /////////////////////////////////////////////Powerboard Loop Forever
@@ -49,6 +51,13 @@ void loop()
   //Current Readings to Report back to Base Station//////////////////////////////////////////////////////////////////////////////////////////
   ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   //Code to setup sending a current reading packet every second
+  if(millis() >= Motor_Turn_On_Time)
+  {
+    digitalWrite(EM_CTL_PIN, HIGH) ;
+    digitalWrite(FM_CTL_PIN, HIGH) ;
+    digitalWrite(MM_CTL_PIN, HIGH) ;
+    digitalWrite(BM_CTL_PIN, HIGH) ;
+  }
   if(sent_packet == true)
   {
     last_time_packet = millis() ; //Timestamp
@@ -96,6 +105,10 @@ void loop()
       average_holder = average_holder/CURRENT_AVERAGE ;
       Current_Reading[L] = average_holder ;
       average_holder = 0 ;
+      //Serial.print(Bus[L].identity) ;
+      //Serial.print(" current reading of ") ;
+      //Serial.print(Current_Reading[L]) ;
+      //Serial.println(" mA") ;
     }
     for(int j = 0 ; j < (RC_POWERBOARD_IMEASmA_DATACOUNT) ; j++)
     {
@@ -134,7 +147,7 @@ void loop()
       //Serial.println("") ;
       //Serial.println("Packet Recieved") ;
       //Serial.println("") ;
-      //delay(3000) ;
+      delay(500) ; //Delay half a second after recieving a packet to let the rover turn on.
       if(digitalRead(COMM_CTL_PIN) == LOW)
       {
         comm_off = true ;
@@ -147,6 +160,7 @@ void loop()
       {
         digitalWrite(COMM_CTL_PIN, HIGH) ;
         comm_off = false ;
+        delay(1000) ; //Delay a second to let everything turn on
       }
     }
 }  
@@ -232,10 +246,10 @@ void Pin_Initialization ()
   digitalWrite(COMM_LOGIC_CTL_PIN, HIGH);
   digitalWrite(COMM_CTL_PIN, HIGH);
   digitalWrite(LOGIC_CTL_PIN, HIGH);
-  digitalWrite(EM_CTL_PIN, HIGH);
-  digitalWrite(FM_CTL_PIN, HIGH);
-  digitalWrite(MM_CTL_PIN, HIGH);
-  digitalWrite(BM_CTL_PIN, HIGH);
+  //digitalWrite(EM_CTL_PIN, HIGH);
+  //digitalWrite(FM_CTL_PIN, HIGH);
+  //digitalWrite(MM_CTL_PIN, HIGH);
+  //digitalWrite(BM_CTL_PIN, HIGH);
   digitalWrite(AUX_CTL_PIN, HIGH);
   digitalWrite(ROCKET_CTL_PIN, HIGH);
   digitalWrite(GE_CTL_PIN, HIGH);
