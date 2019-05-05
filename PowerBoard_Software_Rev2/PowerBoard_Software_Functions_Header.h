@@ -36,6 +36,7 @@ void Adjust_Values (const uint8_t & Rovecomm_cell, const uint8_t & Bit_code_off,
 #define ROVECOMM_UPDATE_DELAY 1000 //Delay so that Rovecomm is not overloaded
 #define COMM_OFF_DELAY 5000 //Delay so that comms turn on after being turned off
 #define MOTOR_DELAY 5000 //Delay so that the motors turn on after everything else
+#define ROCKET_OFF_DELAY 5000 //Delay so that rockets turn on after being turned off
 
 //////////////////////////////////////////////Pinmap
 // Control Pins for Busses

@@ -30,6 +30,8 @@ int average_holder = 0 ;
 uint32_t comm_off_timer = 0 ;
 bool comm_off = false ;
 uint32_t Motor_Turn_On_Time = 0 ;
+bool rockets_off = false ;
+uint32_t rocket_off_timer = 0 ;
 
 //////////////////////////////////////////////Powerboard Begin
 // the setup routine runs once when you press reset
@@ -147,11 +149,16 @@ void loop()
       //Serial.println("") ;
       //Serial.println("Packet Recieved") ;
       //Serial.println("") ;
-      delay(500) ; //Delay half a second after recieving a packet to let the rover turn on.
+      delay(500) ; //Delay half a second after recieving a packet to let the rover turn on and off certain busses.
       if(digitalRead(COMM_CTL_PIN) == LOW)
       {
         comm_off = true ;
         comm_off_timer = millis() ;
+      }
+      if(digitalRead(ROCKET_CTL_PIN) == LOW)
+      {
+        rockets_off = true ;
+        rocket_off_timer = millis() ;
       }
     }
     if(comm_off == true)
@@ -161,6 +168,15 @@ void loop()
         digitalWrite(COMM_CTL_PIN, HIGH) ;
         comm_off = false ;
         delay(1000) ; //Delay a second to let everything turn on
+      }
+    }
+    if(rockets_off == true)
+    {
+      if(millis() >= (rocket_off_timer+ROCKET_OFF_DELAY))
+      {
+        digitalWrite(ROCKET_CTL_PIN, HIGH) ;
+        rockets_off = false ;
+        delay(1000) ; //Delay a second to let it turn on
       }
     }
 }  
