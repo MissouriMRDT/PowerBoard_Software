@@ -37,7 +37,7 @@ uint32_t rocket_off_timer = 0 ;
 // the setup routine runs once when you press reset
 void setup() 
 {
-  Serial.begin(9600) ;
+  Serial.begin(115200) ;
   delay(500) ;
 //Serial.println("Got here...") ;
   Configure_Pins () ; //Configures pins to correct busses
@@ -53,8 +53,11 @@ void loop()
   //Current Readings to Report back to Base Station//////////////////////////////////////////////////////////////////////////////////////////
   ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   //Code to setup sending a current reading packet every second
-  if(millis() >= Motor_Turn_On_Time)
+  static bool first_run = true;
+  if(millis() >= Motor_Turn_On_Time && first_run)
   {
+    Serial.println("Motor On");
+    first_run = false;
     digitalWrite(EM_CTL_PIN, HIGH) ;
     digitalWrite(FM_CTL_PIN, HIGH) ;
     digitalWrite(MM_CTL_PIN, HIGH) ;
@@ -350,6 +353,10 @@ void Bus_Enable (const rovecomm_packet & Enable_Disable, uint8_t Send_Recieve[],
   int ALC_to_Motor_Count = ALC_BUSSES ;
   int Start_Point = 0 ;
   int bit_helper = 1 ;
+  Serial.println("Bus En");
+  Serial.println(Enable_Disable.data[0]);
+  Serial.println(Enable_Disable.data[1]);
+  Serial.println(Enable_Disable.data[2]);
 for(int i = 0 ; i < (RC_POWERBOARD_BUSENABLE_DATACOUNT) ; i++)
 {
   for(int j = Start_Point ; j < ALC_to_Motor_Count ; j++)
