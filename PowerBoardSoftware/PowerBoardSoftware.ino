@@ -97,13 +97,14 @@ const uint8_t OCP_12V = 18;
 const uint8_t OCP_30V = 18;
 const uint8_t OCP_RKT = 4;
 const uint8_t OCP_VAC = 13;
-const uint16_t RESET_TIME = 3000;  //ms between tripping OCP and turn on
+const uint16_t RESET_TIME = 5000;  //ms between tripping OCP and turn on
 
 
 struct Bus
 {
   int EN_PIN;
   int ISENSE_PIN = -1;//default for busses without ISENSE pins
+  bool enabled = false;
 
   Bus(const int en, const int isense)
   {
@@ -121,10 +122,10 @@ struct Bus
 
 };
 
-const Bus busses_Motor[6] = {Bus(M1_EN,M1_ISENSE),Bus(M2_EN,M2_ISENSE),Bus(M3_EN,M3_ISENSE),Bus(M4_EN,M4_ISENSE),Bus(M5_EN,M5_ISENSE),Bus(M6_EN,M6_ISENSE)};
-const Bus busses_12V[3] = {Bus(ACT_EN,ACT_ISENSE),Bus(LOG_EN,LOG_ISENSE),Bus(VOUT_EN)};
-const Bus busses_30V[3] = {Bus(TWV_EN,TWV_ISENSE),Bus(RKT_EN,RKT_ISENSE),Bus(AUX_EN,AUX_ISENSE)};
-const Bus vac = Bus(VAC_EN,VAC_ISENSE);
+Bus busses_Motor[6] = {Bus(M1_EN,M1_ISENSE),Bus(M2_EN,M2_ISENSE),Bus(M3_EN,M3_ISENSE),Bus(M4_EN,M4_ISENSE),Bus(M5_EN,M5_ISENSE),Bus(M6_EN,M6_ISENSE)};
+Bus busses_12V[3] = {Bus(ACT_EN,ACT_ISENSE),Bus(LOG_EN,LOG_ISENSE),Bus(VOUT_EN)};
+Bus busses_30V[3] = {Bus(TWV_EN,TWV_ISENSE),Bus(RKT_EN,RKT_ISENSE),Bus(AUX_EN,AUX_ISENSE)};
+Bus vac = Bus(VAC_EN,VAC_ISENSE);
 
 void setup() {
   Serial.begin(9600);
@@ -135,13 +136,10 @@ void setup() {
 
 void loop()
 {
-  delay(200);
+  delay(100);
   //read
   packet = RoveComm.read();
   //Serial.println(packet.data_id);
-
-  
-
 
   //Motor bus switches
   switch(packet.data_id)
@@ -156,11 +154,13 @@ void loop()
         {
           //enable motor
           digitalWrite(busses_Motor[i].EN_PIN,HIGH);
+          busses_Motor[i].enabled = true;
         }
         else
         {
           //disable motor
           digitalWrite(busses_Motor[i].EN_PIN,LOW);
+          busses_Motor[i].enabled = false;
         }
       }
       break;
@@ -175,11 +175,13 @@ void loop()
         {
           //enable bus
           digitalWrite(busses_12V[i].EN_PIN,HIGH);
+          busses_12V[i].enabled = false;
         }
         else
         {
           //disable bus
           digitalWrite(busses_12V[i].EN_PIN,LOW);
+          busses_12V[i].enabled = false;
         }
       }
       break;
@@ -194,11 +196,13 @@ void loop()
         {
           //enable bus
           digitalWrite(busses_30V[i].EN_PIN,HIGH);
+          busses_30V[i].enabled = true;
         }
         else
         {
           //disable bus
           digitalWrite(busses_30V[i].EN_PIN,LOW);
+          busses_30V[i].enabled = false;
         }
       }
       break;
@@ -211,11 +215,13 @@ void loop()
       {
         //enable bus
         digitalWrite(vac.EN_PIN,HIGH);
+        vac.enabled = true;
       }
       else
       {
         //disable bus
         digitalWrite(vac.EN_PIN,LOW);
+        vac.enabled = false;
       }
       break;
     }
@@ -225,22 +231,35 @@ void loop()
     }
   }
 
+  
 
 
-  //Motor current output
-  float curr_Motor[6] = {0,0,0,0,0,0};
+  //Motor current output & bus status telemetry
+  //motor currents & related variables
+  float curr_motor[6] = {0,0,0,0,0,0};
   float temp;
   float real;
+  //Bus status telemetry
+  uint8_t en_motor = 0;
   for(int i = 0; i < 6; i++)
   {
+    //current sensing and calculations
     temp = analogRead(busses_Motor[i].ISENSE_PIN);
     real = map(temp,ADCMin,ADCMax,ISENSEMin,ISENSEMax);
     real = (real*CURR_SCALER)/1000;
-    curr_Motor[i] = real;
+    curr_motor[i] = real;
+    //motor status telemetry checks
+    if(busses_Motor[i].enabled)
+    {
+      en_motor |= 1<<i;
+    }
   }
-  RoveComm.write(RC_POWERBOARD_MOTOR_BUS_CURRENT_DATAID, RC_POWERBOARD_MOTOR_BUS_CURRENT_DATACOUNT, curr_Motor);
+  RoveComm.write(RC_POWERBOARD_MOTOR_BUS_CURRENT_DATAID, RC_POWERBOARD_MOTOR_BUS_CURRENT_DATACOUNT, curr_motor);
+  RoveComm.write(RC_POWERBOARD_MOTOR_BUSENABLED_DATAID, RC_POWERBOARD_MOTOR_BUSENABLED_DATACOUNT, en_motor);
+
 
   /*
+  //NEEDS WORK
   //12V current output
   float curr_12V[2] = {0,0};
   for(int i = 0; i < 2; i++)
@@ -249,49 +268,67 @@ void loop()
     real = map(temp,ADCMin,ADCMax,ISENSEMin,ISENSEMax);
     real = (real*CURR_SCALER)/1000;
     curr_12V[i] = real;
+    //12V status telemetry checks
+    if(busses_Motor[i].enabled)
+    {
+      en_12V |= 1<<i;
+    }
   }
   RoveComm.write(RC_POWERBOARD_12V_BUS_CURRENT_DATAID, RC_POWERBOARD_12V_BUS_CURRENT_DATACOUNT, curr_12V);
   */
 
   //30V current output
   float curr_30V[3] = {0,0,0};
+  uint8_t en_30V = 0;
   for(int i = 0; i < 3; i++)
   {
+    //current sensing and calculations
     temp = analogRead(busses_30V[i].ISENSE_PIN);
     real = map(temp,ADCMin,ADCMax,ISENSEMin,ISENSEMax);
     real = (real*CURR_SCALER)/1000;
     curr_30V[i] = real;
+    //30V status telemetry checks
+    if(busses_30V[i].enabled)
+    {
+      en_30V |= 1<<i;
+    }
   }
   RoveComm.write(RC_POWERBOARD_30V_BUS_CURRENT_DATAID, RC_POWERBOARD_30V_BUS_CURRENT_DATACOUNT, curr_30V);
+  RoveComm.write(RC_POWERBOARD_30V_BUSENABLED_DATAID, RC_POWERBOARD_30V_BUSENABLED_DATACOUNT, en_30V);
 
   //Vac current output
   float curr_vac = analogRead(vac.ISENSE_PIN);
+  uint8_t en_vac = (vac.enabled ? 1 : 0);
   curr_vac = map(curr_vac,ADCMin,ADCMax,ISENSEMin,ISENSEMax);
   curr_vac = (curr_vac*CURR_SCALER)/1000;
   RoveComm.write(RC_POWERBOARD_VACUUM_CURRENT_DATAID, RC_POWERBOARD_VACUUM_CURRENT_DATACOUNT, curr_vac);
+  RoveComm.write(RC_POWERBOARD_VACUUM_ENABLED_DATAID, RC_POWERBOARD_VACUUM_ENABLED_DATACOUNT, en_vac);
+
 
   //Overcurrent Protection - motors
   uint8_t error_motor = 0;
   for(int i = 0; i < 6; i++)
   {
-    if(curr_Motor[i] >= OCP_MOTOR)
+    if(curr_motor[i] >= OCP_MOTOR)
     {
       //disable bus
       digitalWrite(busses_Motor[i].EN_PIN,LOW);
+      busses_Motor[i].enabled = false;
       //save error
       error_motor |= 1<<i;
     }
   }
   /*ACTUATION AND LOGIC CURRENT SENSE DISABLED UNTIL REV 2
   uint8_t error_12V = 0;
-  for(int i = 0; i < 6; i++)
+  for(int i = 0; i < 3; i++)
   {
-    if(curr_Motor[i] >= OCP_MOTOR)
+    if(curr_motor[i] >= OCP_MOTOR)
     {
       //disable bus
-      digitalWrite(busses_Motor[i].EN_PIN,LOW);
+      digitalWrite(busses_12V[i].EN_PIN,LOW);
+      busses_12V[i].enabled = false;
       //save error
-      error_motor |= 1<<i;
+      error_12V |= 1<<i;
     }
   }
   */
@@ -302,6 +339,7 @@ void loop()
     {
       //disable bus
       digitalWrite(busses_30V[i].EN_PIN,LOW);
+      busses_30V[i].enabled = false;
       //save error
       error_30V |= 1<<i;
     }
@@ -311,51 +349,40 @@ void loop()
   {
     //disable bus
     digitalWrite(vac.EN_PIN,LOW);
+    vac.enabled = false;
     //save error
     error_vac = true;
   }
 
-  /*
-  if(error_motor /*|| error_12V || error_30V || error_vac)
+  
+  if(error_motor /*|| error_12V*/ || error_30V || error_vac)
   {
-    Serial.println("Shit's fucked");
-    //NEED ERROR LED ACTIVATION
-    RoveComm.write(RC_POWERBOARD_MOTOR_BUS_OVERCURRENT_DATAID, RC_POWERBOARD_MOTOR_BUS_OVERCURRENT_DATACOUNT, error_motor);
-    //wait, then reenable
-    Serial.println("Made it past the write");
-    delay(RESET_TIME);
-    //reset errored motors
-    for(int i = 0; i < 6; i++)
+    //NEED ERROR LED ACTIVATION ONCE THE LED WORKS
+    if(error_motor)
     {
-      //checks for motor busses with errors and turns them on again
-      if(error_motor & 1<<i)
+      RoveComm.write(RC_POWERBOARD_MOTOR_BUS_OVERCURRENT_DATAID, RC_POWERBOARD_MOTOR_BUS_OVERCURRENT_DATACOUNT, error_motor);
+    }
+    /*
+    if(error_12V)
+    {
+      RoveComm.write(RC_POWERBOARD_12V_BUS_OVERCURRENT_DATAID, RC_POWERBOARD_12V_BUS_OVERCURRENT_DATACOUNT, error_12V);
+    }
+    */
+    if(error_30V)
+    {
+      RoveComm.write(RC_POWERBOARD_30V_BUS_OVERCURRENT_DATAID, RC_POWERBOARD_30V_BUS_OVERCURRENT_DATACOUNT, error_30V);
+      //check if the error is on Rockets
+      if(error_30V & 1<<1)
       {
-        //enable motor
-        digitalWrite(busses_Motor[i].EN_PIN,HIGH);
+        //wait, then reenable
+        delay(RESET_TIME);
+        digitalWrite(busses_30V[1].EN_PIN,HIGH);
+        busses_30V[1].enabled = true;
       }
     }
-    /*12V current sense is big dead for now
-    //Actuation and Logic reset
-    for(int i = 0; i < 2; i++)
+    if(error_vac)
     {
-      //checks for 12V busses with errors and turns them on again
-      if(error_12V & 1<<i)
-      {
-        //enable motor
-        digitalWrite(busses_12V[i].EN_PIN,HIGH);
-      }
-    }
-    
-    //
-    for(int i = 0; i < 3; i++)
-    {
-      //checks for motor busses with errors and turns them on again
-      if(error_motor & 1<<i)
-      {
-        //enable motor
-        digitalWrite(busses_Motor[i].EN_PIN,HIGH);
-      }
+      RoveComm.write(RC_POWERBOARD_VACUUM_OVERCURRENT_DATAID, RC_POWERBOARD_VACUUM_OVERCURRENT_DATACOUNT, error_motor);
     }
   }
-    */
 }
