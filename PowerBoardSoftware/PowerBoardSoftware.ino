@@ -132,6 +132,34 @@ void setup() {
   RoveComm.begin(RC_POWERBOARD_FOURTHOCTET, RC_ROVECOMM_ETHERNET_POWERBOARD_PORT);
   delay(100);
   Serial.println("Started");
+
+  //turning on all 30V busses
+  for(int i = 0; i < 3; i++)
+  {
+    digitalWrite(busses_30V[i].EN_PIN,HIGH);
+    busses_30V[i].enabled = true;
+  }
+
+  //turning on all 12V busses
+  for(int i = 0; i < 3; i++)
+  {
+    digitalWrite(busses_12V[i].EN_PIN,HIGH);
+    busses_12V[i].enabled = true;
+  }
+
+  pinMode(PD_7, OUTPUT);
+  digitalWrite(PD_7, HIGH);
+  
+  delay(3000);
+
+  //turning on all motor busses
+  for(int i = 0; i < 6; i++)
+  {
+    digitalWrite(busses_Motor[i].EN_PIN,HIGH);
+    busses_Motor[i].enabled = true;
+  }
+
+  
 }
 
 void loop()
@@ -169,17 +197,20 @@ void loop()
     {      
       //expects data to be an array with a single uint8
       //checks each bit. Bit 0 is Actuation, bit 1 is Logic, bit 2 is VOUT.
+      Serial.println("Enable/Disable 12V");
       for(int i = 0; i < 3; i++)
       {
         if(packet.data[0] & 1<<i) 
         {
           //enable bus
           digitalWrite(busses_12V[i].EN_PIN,HIGH);
-          busses_12V[i].enabled = false;
+          busses_12V[i].enabled = true;
         }
         else
         {
           //disable bus
+          Serial.println("Disabling Bus:");
+          Serial.println(i);
           digitalWrite(busses_12V[i].EN_PIN,LOW);
           busses_12V[i].enabled = false;
         }
