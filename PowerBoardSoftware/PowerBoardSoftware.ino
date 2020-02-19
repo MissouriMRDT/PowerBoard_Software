@@ -10,6 +10,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+#include "Energia.h"
 
 //RoveComm
 #include <RoveComm.h>
@@ -17,6 +18,7 @@
 RoveCommEthernet RoveComm;
 rovecomm_packet packet;
 
+const uint8_t  ROVECOMM_TELEM_RATE         = 1000;
 const uint16_t NO_ROVECOMM_MESSAGE          = 0;
 
 //Current readings
@@ -126,6 +128,9 @@ Bus busses_Motor[6] = {Bus(M1_EN,M1_ISENSE),Bus(M2_EN,M2_ISENSE),Bus(M3_EN,M3_IS
 Bus busses_12V[3] = {Bus(ACT_EN,ACT_ISENSE),Bus(LOG_EN,LOG_ISENSE),Bus(VOUT_EN)};
 Bus busses_30V[3] = {Bus(TWV_EN,TWV_ISENSE),Bus(RKT_EN,RKT_ISENSE),Bus(AUX_EN,AUX_ISENSE)};
 Bus vac = Bus(VAC_EN,VAC_ISENSE);
+//the last time in millis() when telemetry was sent
+unsigned long lastTelemTime = 0;
+
 
 void setup() {
   Serial.begin(9600);
@@ -147,6 +152,7 @@ void setup() {
     busses_12V[i].enabled = true;
   }
 
+  //turning on the ACT bus as well
   pinMode(PD_7, OUTPUT);
   digitalWrite(PD_7, HIGH);
   
@@ -158,13 +164,11 @@ void setup() {
     digitalWrite(busses_Motor[i].EN_PIN,HIGH);
     busses_Motor[i].enabled = true;
   }
-
-  
+  delay(100);
 }
 
 void loop()
 {
-  delay(100);
   //read
   packet = RoveComm.read();
   //Serial.println(packet.data_id);
@@ -285,8 +289,6 @@ void loop()
       en_motor |= 1<<i;
     }
   }
-  RoveComm.write(RC_POWERBOARD_MOTOR_BUS_CURRENT_DATAID, RC_POWERBOARD_MOTOR_BUS_CURRENT_DATACOUNT, curr_motor);
-  RoveComm.write(RC_POWERBOARD_MOTOR_BUSENABLED_DATAID, RC_POWERBOARD_MOTOR_BUSENABLED_DATACOUNT, en_motor);
 
 
   /*
@@ -324,16 +326,13 @@ void loop()
       en_30V |= 1<<i;
     }
   }
-  RoveComm.write(RC_POWERBOARD_30V_BUS_CURRENT_DATAID, RC_POWERBOARD_30V_BUS_CURRENT_DATACOUNT, curr_30V);
-  RoveComm.write(RC_POWERBOARD_30V_BUSENABLED_DATAID, RC_POWERBOARD_30V_BUSENABLED_DATACOUNT, en_30V);
+
 
   //Vac current output
   float curr_vac = analogRead(vac.ISENSE_PIN);
   uint8_t en_vac = (vac.enabled ? 1 : 0);
   curr_vac = map(curr_vac,ADCMin,ADCMax,ISENSEMin,ISENSEMax);
   curr_vac = (curr_vac*CURR_SCALER)/1000;
-  RoveComm.write(RC_POWERBOARD_VACUUM_CURRENT_DATAID, RC_POWERBOARD_VACUUM_CURRENT_DATACOUNT, curr_vac);
-  RoveComm.write(RC_POWERBOARD_VACUUM_ENABLED_DATAID, RC_POWERBOARD_VACUUM_ENABLED_DATACOUNT, en_vac);
 
 
   //Overcurrent Protection - motors
@@ -415,5 +414,17 @@ void loop()
     {
       RoveComm.write(RC_POWERBOARD_VACUUM_OVERCURRENT_DATAID, RC_POWERBOARD_VACUUM_OVERCURRENT_DATACOUNT, error_motor);
     }
+  }
+
+  //send the telemetry at the specified rate
+  if((millis() - lastTelemTime) >= ROVECOMM_TELEM_RATE)
+  {
+    //write the telemetry as a batch
+    Serial.println("Sending telemetry");
+    RoveComm.write(RC_POWERBOARD_MOTOR_BUS_CURRENT_DATAID, RC_POWERBOARD_MOTOR_BUS_CURRENT_DATACOUNT, curr_motor);
+    RoveComm.write(RC_POWERBOARD_MOTOR_BUSENABLED_DATAID, RC_POWERBOARD_MOTOR_BUSENABLED_DATACOUNT, en_motor);
+    RoveComm.write(RC_POWERBOARD_VACUUM_CURRENT_DATAID, RC_POWERBOARD_VACUUM_CURRENT_DATACOUNT, curr_vac);
+    RoveComm.write(RC_POWERBOARD_VACUUM_ENABLED_DATAID, RC_POWERBOARD_VACUUM_ENABLED_DATACOUNT, en_vac);
+    lastTelemTime = millis();
   }
 }
