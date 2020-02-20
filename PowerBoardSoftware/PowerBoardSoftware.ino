@@ -18,7 +18,7 @@
 RoveCommEthernet RoveComm;
 rovecomm_packet packet;
 
-const uint8_t  ROVECOMM_TELEM_RATE         = 1000;
+const uint16_t ROVECOMM_TELEM_RATE         = 1000;
 const uint16_t NO_ROVECOMM_MESSAGE          = 0;
 
 //Current readings
@@ -94,7 +94,7 @@ const uint16_t ISENSEMax = 40000;
 const float CURR_SCALER = 1.15;
 
 //Overcurrent constants (amps)
-const uint8_t OCP_MOTOR = 18;
+const uint8_t OCP_MOTOR = 180; //temp fix due to inaccurate current readings on Motor busses
 const uint8_t OCP_12V = 18;
 const uint8_t OCP_30V = 18;
 const uint8_t OCP_RKT = 4;
@@ -164,7 +164,7 @@ void setup() {
     digitalWrite(busses_Motor[i].EN_PIN,HIGH);
     busses_Motor[i].enabled = true;
   }
-  delay(100);
+  delay(500);
 }
 
 void loop()
