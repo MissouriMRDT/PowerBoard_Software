@@ -20,13 +20,13 @@ void setPins()
     pinMode(currentSense[i], OUTPUT);
   }
 
-  for (int i = 0 ; i < 10 ; i++)
+  for (int i = 0 ; i < 11 ; i++)
   {
     pinMode(busses[i], INPUT);
     pinMode(P_CurrentSense[i], OUTPUT);
   }
 
-  for (int i = 0 ; i < 9 ; i++)
+  for (int i = 0 ; i < 10 ; i++)
   {
     pinMode(P_busses[i], OUTPUT);
   }
@@ -35,8 +35,9 @@ void setPins()
 void setPinStates()
 {
   // ONLY THESE FOR NOW BECAUSE THEY ARE THE ONLY FUNCTIONING ONES :)
-  for (int i = 3 ; i < 9 ; i++)
+  for (int i = 3 ; i < 10 ; i++)
   {
     digitalWrite(busses[i], LOW);
   }
+  
 }
