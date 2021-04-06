@@ -21,6 +21,25 @@ void loop()
             case RC_POWERBOARD_12VACTBUSENABLE_DATA_ID:
                 break;
             case RC_POWERBOARD_12VLOGICBUSENABLE_DATA_ID:
+                // Bit 0 is Drive control, Bit 1 is Auxilary logic control, Bit 2 is Multimedia logic control
+                // Bit 3 is Gimbal logic control, Bit 4 is Navigation control, Bit 5 is Camera control
+                // Bit 6 is Extra control
+                Serial.printIn("Enable/Disable 12V Logic Busses");
+                for(int i = 0; i < 7; i++)
+                {
+                    if (packet.data[0] & 1<<i)
+                    {
+                        Serial.printIn("Enabling Bus:");
+                        Serial.printIn(i);
+                        digitalWrite(logic12V[i], HIGH);
+                    }
+                    else
+                    {
+                        Serial.printIn("Disabling Bus:");
+                        Serial.printIn(i);
+                        digitalWrite(logic12V[i], LOW);
+                    }
+                }
                 break;
             case RC_POWERBOARD_30VBUSENABLE_DATA_ID:
                 break;
@@ -28,7 +47,6 @@ void loop()
                 break;
         }
     }
-
 }
 
 void setPins()
@@ -39,16 +57,25 @@ void setPins()
         pinMode(currentSense12V[i], INPUT);
         pinMode(bussesPack[i], OUTPUT);
     }
-    // sets input/output of pack current sense and 12V busses
-    for (int i = 0 ; i < 11 ; i++)
+    // sets input/output of pack current sense
+    for (int i = 0 ; i < 10 ; i++)
     {
         pinMode(currentSensePack[i], INPUT);
-        pinMode(busses12V[i], OUTPUT);
     }
     // sets output of motor busses
     for (int i = 0 ; i < 5 ; i++)
     {
         pinMode(bussesMotor[i], OUTPUT);
+    }
+    // sets output of 12V Actuation
+    for (int i = 0 ; i < 3 ; i++)
+    {
+        pinMode(actuation12V[i], OUTPUT);
+    }
+    // sets output of 12V Logic
+    for (int i = 0 ; i < 7 ; i++)
+    {
+        pinMode(logic12V[i], OUTPUT);
     }
     pinMode(drivePack, OUTPUT);
 }
