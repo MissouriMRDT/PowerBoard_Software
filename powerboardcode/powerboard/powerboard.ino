@@ -24,19 +24,19 @@ void loop()
                 // Bit 0 is Drive control, Bit 1 is Auxilary logic control, Bit 2 is Multimedia logic control
                 // Bit 3 is Gimbal logic control, Bit 4 is Navigation control, Bit 5 is Camera control
                 // Bit 6 is Extra control
-                Serial.printIn("Enable/Disable 12V Logic Busses");
+                Serial.println("Enable/Disable 12V Logic Busses");
                 for(int i = 0; i < 7; i++)
                 {
                     if (packet.data[0] & 1<<i)
                     {
-                        Serial.printIn("Enabling Bus:");
-                        Serial.printIn(i);
+                        Serial.println("Enabling Bus:");
+                        Serial.println(i);
                         digitalWrite(logic12V[i], HIGH);
                     }
                     else
                     {
-                        Serial.printIn("Disabling Bus:");
-                        Serial.printIn(i);
+                        Serial.println("Disabling Bus:");
+                        Serial.println(i);
                         digitalWrite(logic12V[i], LOW);
                     }
                 }
@@ -83,14 +83,14 @@ void setPins()
 void setPinStates()
 {
     // turn on 12 volt busses
-    for (int i = 0 ; i < 11 ; i++)
+    for (int i = 0 ; i < 7 ; i++)
     {
-        digitalWrite(busses12V[i], HIGH);
+        digitalWrite(logic12V[i], HIGH);
     }
     // turns off motor busses
-    for (int i = 0 ; i < 5 ; i++)
+    for (int i = 0 ; i < 3 ; i++)
     {
-        digitalWrite(bussesMotor[i], LOW);
+        digitalWrite(actuation12V[i], LOW);
     }
     // turns on Pack busses
     for (int i = 0 ; i < 4 ; i++)
