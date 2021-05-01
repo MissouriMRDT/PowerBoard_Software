@@ -53,7 +53,7 @@ uint8_t drivePack = P_DRIVE_CTL;
 uint8_t currentSensePack[10] = { P_MOTOR1_SENSE, P_MOTOR2_SENSE, P_MOTOR3_SENSE, P_MOTOR4_SENSE, P_SPARE_SENSE, P_ROCKET_SENSE, P_TWELVE_SENSE, P_VACUUM_SENSE, P_DRIVE_SENSE, P_AUX_SENSE};
 uint8_t bussesPackStart[3] = { P_ROCKET_CTL, P_TWELVE_CTL, P_AUX_CTL};
 uint8_t bussesPack[4] = { P_TWELVE_CTL, P_ROCKET_CTL, P_AUX_CTL, P_DRIVE_CTL};
-uint8_t vacuumCtrl = P_VACUUM_CTL;
+uint8_t vacuumCtrl[1] = {P_VACUUM_CTL};
 uint8_t bussesMotor[5] = {P_MOTOR1_CTL, P_MOTOR2_CTL, P_MOTOR3_CTL, P_MOTOR4_CTL, P_SPARE_CTL};
 
 RoveCommEthernet RoveComm;

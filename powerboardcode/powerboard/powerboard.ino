@@ -90,17 +90,17 @@ void loop()
                 break;
             case RC_POWERBOARD_VACUUMENABLE_DATA_ID:
                 Serial.println("Enable/Disable Vacuum Busses");
-                if (packet.data == 1)
+                if (packet.data[0] == 1)
                 {
                     Serial.println("Enabling Bus:");
-                    Serial.println(i);
-                    digitalWrite(logic12V[i], HIGH);
+                    Serial.println(0);
+                    digitalWrite(vacuumCtrl[0], HIGH);
                 }
                 else
                 {
                     Serial.println("Disabling Bus:");
-                    Serial.println(i);
-                    digitalWrite(logic12V[i], LOW);
+                    Serial.println(0);
+                    digitalWrite(vacuumCtrl[0], LOW);
                 }
                 break;
         }
@@ -157,7 +157,7 @@ void setPinStates()
     }
     //turns off pack drive board bus
     digitalWrite(drivePack, LOW);
-    digitalWrite(vacuumCtrl, LOW);
+    digitalWrite(vacuumCtrl[0], LOW);
     delay(MOTOR_DELAY);
     // turns on motor busses after a delay
     for (int i = 0 ; i < 5 ; i++)
