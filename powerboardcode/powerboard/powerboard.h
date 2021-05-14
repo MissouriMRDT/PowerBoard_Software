@@ -29,7 +29,7 @@
 #define P_TWELVE_SENSE       PD_1
 #define P_VACUUM_SENSE       PE_1
 #define P_DRIVE_SENSE        PE_5
-#define P_AUX_SENSE          PE_2
+#define P_AUX_SENSE          PE_3
 
 //PACK BUSSES
 #define P_MOTOR1_CTL         PQ_0
@@ -41,7 +41,7 @@
 #define P_TWELVE_CTL         PH_3
 #define P_VACUUM_CTL         PE_0
 #define P_DRIVE_CTL          PC_6
-#define P_AUX_CTL            PE_3
+#define P_AUX_CTL            PE_2
 
 #define MOTOR_DELAY          5000
 #define DRIVE_DELAY          5000
