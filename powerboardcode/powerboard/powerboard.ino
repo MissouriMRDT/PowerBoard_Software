@@ -136,6 +136,7 @@ void setPins()
         pinMode(logic12V[i], OUTPUT);
     }
     pinMode(drivePack, OUTPUT);
+    pinMode(vacuumCtrl[0], OUTPUT)
 }
 
 void setPinStates()
