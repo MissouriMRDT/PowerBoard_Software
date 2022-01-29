@@ -18,7 +18,7 @@ void loop()
         {
             case RC_POWERBOARD_MOTORBUSENABLE_DATA_ID:
                 Serial.println("Enable/Disable Motor Busses");
-                for(int i = 0; i < 8; i++) //way i<7
+                for(int i = 0; i < 7; i++) //way i<7
                 {
                     if (packet.data[0] & 1<<i)
                     {
@@ -36,7 +36,7 @@ void loop()
                 break;
             case RC_POWERBOARD_12VACTBUSENABLE_DATA_ID:
                 Serial.println("Enable/Disable 12V Actuation Busses");
-                for(int i = 0; i < 3; i++)
+                for(int i = 0; i < 5; i++)
                 {
                     if (packet.data[0] & 1<<i)
                     {
@@ -54,7 +54,7 @@ void loop()
                 break;
             case RC_POWERBOARD_12VLOGICBUSENABLE_DATA_ID:
                 Serial.println("Enable/Disable 12V Logic Busses");
-                for(int i = 0; i < 7; i++)
+                for(int i = 0; i < 8; i++)
                 {
                     if (packet.data[0] & 1<<i)
                     {
@@ -86,21 +86,6 @@ void loop()
                         Serial.println(i);
                         digitalWrite(bussesPack[i], LOW);
                     }
-                }
-                break;
-            case RC_POWERBOARD_VACUUMENABLE_DATA_ID:
-                Serial.println("Enable/Disable Vacuum Busses");
-                if (packet.data[0] == 1)
-                {
-                    Serial.println("Enabling Bus:");
-                    Serial.println(0);
-                    digitalWrite(vacuumCtrl[0], HIGH);
-                }
-                else
-                {
-                    Serial.println("Disabling Bus:");
-                    Serial.println(0);
-                    digitalWrite(vacuumCtrl[0], LOW);
                 }
                 break;
         }
