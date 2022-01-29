@@ -2,49 +2,56 @@
 #include "Energia.h"
 #include "RoveComm.h"
 //12V Current Sensing
-#define AUX_MOUNT_SENSE     PK_3
-#define MULTIMEDIA_SENSE    PK_2
-#define LOW_CURRENT_SENSE   PK_1
-#define GIMBAL_SENSE        PK_0
+#define MULTIMEDIA_SENSE        PD4
+#define NAV_SENSE               PD0
+#define GIMBAL_ACT_SENSE        PD1
+#define DRIVE_SENSE             PK3
+#define SCISENSOR_ACT_SENSE     PD2
+#define NETSWITCH_SENSE         PB5
+#define CAM1_SENSE              PB4
+#define CAM2_SENSE              PK0
+#define BBB_SENSE               PD7
+#define AUX_LOG_SENSE           PK2
 
 //12V CTL
-#define MULTIMEDIA_LOG_CTL  PK_5
-#define MULTIMEDIA_ACT_CTL  PM_0
-#define AUX_LOG_CTL         PM_1
-#define AUX_ACT_CTL         PM_2
-#define GIMBAL_LOG_CTL      PH_0
-#define GIMBAL_ACT_CTL      PH_1
-#define NAV_BOARD_CTL       PK_7
-#define CAM_CTL             PP_3
-#define EXTRA_CTL           PQ_1
-#define DRIVE_CTL           PM_6
+#define MULTIMEDIA_CTL          PL1
+#define NAV_CTL                 PN4
+#define GIMBAL_ACT_CTL          PA4
+#define GIMBAL_LOG_CTL          PG0
+#define DRIVE_CTL               PL2
+#define SCISENSOR_ACT_CTL       PL3
+#define SCISENSOR_LOG_CTL       PF3
+#define NETSWITCH_CTL           PL0
+#define CAM1_CTL                PF1
+#define CAM2_CTL                PF2
+#define BBB_CTL                 PN5
+#define AUX_LOG_CTL             PB2
+#define SPARE_CTL               PL5
 
 //PACK CURRENT
-#define P_MOTOR1_SENSE       PD_5
-#define P_MOTOR2_SENSE       PD_4
-#define P_MOTOR3_SENSE       PD_2
-#define P_MOTOR4_SENSE       PD_3
-#define P_SPARE_SENSE        PE_4
-#define P_ROCKET_SENSE       PD_0
-#define P_TWELVE_SENSE       PD_1
-#define P_VACUUM_SENSE       PE_1
-#define P_DRIVE_SENSE        PE_5
-#define P_AUX_SENSE          PE_3
+#define P_MOTOR1_SENSE          PE4
+#define P_MOTOR2_SENSE          PE5
+#define P_MOTOR3_SENSE          PD3  
+#define P_MOTOR4_SENSE          PE0
+#define P_MOTOR5_SENSE          PE1
+#define P_MOTOR6_SENSE          PE2
+#define P_MOTOR7_SENSE          PE3
+#define P_POE_SENSE             PD5
+#define P_AUX_SENSE             PK1
 
 //PACK BUSSES
-#define P_MOTOR1_CTL         PQ_0
-#define P_MOTOR2_CTL         PP_1
-#define P_MOTOR3_CTL         PP_0
-#define P_MOTOR4_CTL         PC_7
-#define P_SPARE_CTL          PC_4
-#define P_ROCKET_CTL         PN_2
-#define P_TWELVE_CTL         PH_3
-#define P_VACUUM_CTL         PE_0
-#define P_DRIVE_CTL          PC_6
-#define P_AUX_CTL            PE_2
+#define P_MOTOR1_CTL            PC4       
+#define P_MOTOR2_CTL            PC5
+#define P_MOTOR3_CTL            PC6
+#define P_MOTOR4_CTL            PC7
+#define P_MOTOR5_CTL            PP0
+#define P_MOTOR6_CTL            PP1
+#define P_MOTOR7_CTL            PQ0
+#define P_POE_CTL               PP4
+#define P_AUX_CTL               PL4
 
-#define MOTOR_DELAY          5000
-#define DRIVE_DELAY          5000
+#define MOTOR_DELAY             5000
+#define DRIVE_DELAY             5000
 
 uint8_t currentSense12V[4] = { AUX_MOUNT_SENSE, MULTIMEDIA_SENSE, GIMBAL_SENSE, LOW_CURRENT_SENSE};
 uint8_t actuation12V[3] = { GIMBAL_ACT_CTL, MULTIMEDIA_ACT_CTL, AUX_ACT_CTL};
@@ -59,4 +66,3 @@ uint8_t bussesMotor[5] = {P_MOTOR1_CTL, P_MOTOR2_CTL, P_MOTOR3_CTL, P_MOTOR4_CTL
 RoveCommEthernet RoveComm;
 rovecomm_packet packet; 
 EthernetServer TCPServer(RC_ROVECOMM_POWERBOARD_PORT);
-
