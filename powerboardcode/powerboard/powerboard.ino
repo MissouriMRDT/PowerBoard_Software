@@ -18,7 +18,7 @@ void loop()
         {
             case RC_POWERBOARD_MOTORBUSENABLE_DATA_ID:
                 Serial.println("Enable/Disable Motor Busses");
-                for(int i = 0; i < 5; i++)
+                for(int i = 0; i < 8; i++) //way i<7
                 {
                     if (packet.data[0] & 1<<i)
                     {
