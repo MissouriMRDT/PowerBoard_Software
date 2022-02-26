@@ -34,7 +34,7 @@ void loop()
                     }
                 }
                 break;
-            case RC_POWERBOARD_12VACTBUSENABLE_DATA_ID:
+            case RC_POWERBOARD_TWELVEVACTBUSENABLE_DATA_ID:
                 Serial.println("Enable/Disable 12V Actuation Busses");
                 for(int i = 0; i < 5; i++)
                 {
@@ -52,7 +52,7 @@ void loop()
                     }
                 }
                 break;
-            case RC_POWERBOARD_12VLOGICBUSENABLE_DATA_ID:
+            case RC_POWERBOARD_TWELVEVLOGICBUSENABLE_DATA_ID:
                 Serial.println("Enable/Disable 12V Logic Busses");
                 for(int i = 0; i < 8; i++)
                 {
@@ -70,9 +70,9 @@ void loop()
                     }
                 }
                 break;
-            case RC_POWERBOARD_30VBUSENABLE_DATA_ID:
+            case RC_POWERBOARD_THIRTYVBUSENABLE_DATA_ID:
                 Serial.println("Enable/Disable 30V Busses");
-                for(int i = 0; i < 4; i++)
+                for(int i = 0; i < 2; i++)
                 {
                     if (packet.data[0] & 1<<i)
                     {
@@ -94,67 +94,60 @@ void loop()
 
 void setPins()
 {
-    // sets input/output of pack busses and 12V current sense
-    for (int i = 0 ; i < 4 ; i++)
+    // sets POE and Aux(Spare) to OUTPUT
+    for (int i = 0 ; i < 2 ; i++)
     {
-        pinMode(currentSense12V[i], INPUT);
+        //pinMode(currentSense12V[i], INPUT);
         pinMode(bussesPack[i], OUTPUT);
     }
     // sets input/output of pack current sense
-    for (int i = 0 ; i < 10 ; i++)
+    /*for (int i = 0 ; i < 10 ; i++)
     {
         pinMode(currentSensePack[i], INPUT);
     }
-    // sets output of motor busses
-    for (int i = 0 ; i < 5 ; i++)
+    */
+    // sets motor busses to OUTPUT
+    for (int i = 0 ; i < 7 ; i++)
     {
         pinMode(bussesMotor[i], OUTPUT);
     }
     // sets output of 12V Actuation
-    for (int i = 0 ; i < 3 ; i++)
+    for (int i = 0 ; i < 5 ; i++)
     {
         pinMode(actuation12V[i], OUTPUT);
     }
     // sets output of 12V Logic
-    for (int i = 0 ; i < 7 ; i++)
+    for (int i = 0 ; i < 8 ; i++)
     {
         pinMode(logic12V[i], OUTPUT);
     }
-    pinMode(drivePack, OUTPUT);
-    pinMode(vacuumCtrl[0], OUTPUT);
 }
 
 void setPinStates()
 {
     // turn on 12 volt busses
-    for (int i = 0 ; i < 7 ; i++)
+    for (int i = 0 ; i < 8 ; i++)
     {
         digitalWrite(logic12V[i], HIGH);
     }
-    // turn on 12 volt busses
-    for (int i = 0 ; i < 3 ; i++)
+    // turn on 12 volt actuation busses
+    for (int i = 0 ; i < 5 ; i++)
     {
         digitalWrite(actuation12V[i], HIGH);
     }
     // turns on Pack busses
-    for (int i = 0 ; i < 3 ; i++)
+    for (int i = 0 ; i < 2 ; i++)
     {
-        digitalWrite(bussesPackStart[i], HIGH);
+        digitalWrite(bussesPack[i], HIGH);
     }
-    //turns off pack drive board bus
-    digitalWrite(drivePack, LOW);
-    digitalWrite(vacuumCtrl[0], LOW);
     delay(MOTOR_DELAY);
     // turns on motor busses after a delay
-    for (int i = 0 ; i < 5 ; i++)
+    for (int i = 0 ; i < 7 ; i++)
     {
         digitalWrite(bussesMotor[i], HIGH);
     }
-    delay(DRIVE_DELAY);
-    // turns on pack drive bus
-    digitalWrite(drivePack, HIGH);
 }
-
+/*
 void read_CurrentSense()
 {
     int motor1_sense = analogRead(P_MOTOR1_SENSE);
@@ -214,3 +207,4 @@ void read_CurrentSense()
     Serial.println("Aux Log sense: ");
     Serial.println(Aux_Log_sense);
 }
+*/
