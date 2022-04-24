@@ -1,5 +1,4 @@
-
-#include "Energia.h"
+#pragma once
 #include "RoveComm.h"
 //12V Current Sensing
 /*
@@ -16,19 +15,19 @@
 */
 
 //12V CTL
-#define MULTIMEDIA_CTL          PL_1
-#define NAV_CTL                 PN_4
-#define GIMBAL_ACT_CTL          PA_4
-#define GIMBAL_LOG_CTL          PG_0
-#define DRIVE_CTL               PL_2
-#define SCISENSOR_ACT_CTL       PL_3
-#define SCISENSOR_LOG_CTL       PF_3
-#define NETSWITCH_CTL           PL_0
-#define CAM1_CTL                PF_1
-#define CAM2_CTL                PF_2
-#define BBB_CTL                 PN_5
-#define AUX_LOG_CTL             PB_2
-#define SPARE_CTL               PL_5
+#define MULTIMEDIA_CTL          2
+#define NAV_CTL                 1
+#define GIMBAL_ACT_CTL          14
+#define GIMBAL_LOG_CTL          3
+#define DRIVE_CTL               4
+#define SCISENSOR_ACT_CTL       16
+#define SCISENSOR_LOG_CTL       17
+#define NETSWITCH_CTL           18
+#define CAM1_CTL                6
+#define CAM2_CTL                5
+#define BBB_CTL                 7
+#define AUX_LOG_CTL             8
+#define SPARE_CTL               37
 
 /*
 //PACK CURRENT
@@ -44,15 +43,15 @@
 */
 
 //PACK BUSSES
-#define P_MOTOR1_CTL            PC_4       
-#define P_MOTOR2_CTL            PC_5
-#define P_MOTOR3_CTL            PC_6
-#define P_MOTOR4_CTL            PC_7
-#define P_MOTOR5_CTL            PP_0
-#define P_MOTOR6_CTL            PP_1
-#define P_MOTOR7_CTL            PQ_0
-#define P_POE_CTL               PP_4
-#define P_AUX_CTL               PL_4
+#define P_MOTOR1_CTL            33       
+#define P_MOTOR2_CTL            32
+#define P_MOTOR3_CTL            34
+#define P_MOTOR4_CTL            31
+#define P_MOTOR5_CTL            35
+#define P_MOTOR6_CTL            30
+#define P_MOTOR7_CTL            36
+#define P_POE_CTL               29
+#define P_AUX_CTL               8
 
 #define MOTOR_DELAY             5000
 #define DRIVE_DELAY             5000

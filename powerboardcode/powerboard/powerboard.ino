@@ -5,7 +5,7 @@ void setup()
     setPins();
     setPinStates();
     Serial.begin(9600);
-    RoveComm.begin(RC_POWERBOARD_FOURTHOCTET, &TCPServer);
+    RoveComm.begin(RC_POWERBOARD_FOURTHOCTET, &TCPServer, RC_ROVECOMM_POWERBOARD_MAC);
     delay(100);
 }
 
