@@ -90,6 +90,7 @@ void setPins()
 {
     // sets Spare to OUTPUT
     pinMode(PACK_SPARE_CTL, OUTPUT);
+    pinMode(POE_CTL, OUTPUT);
 
     // sets motor busses to OUTPUT
     for (int i = 0 ; i < NUM_MOTORS ; i++)
@@ -109,6 +110,8 @@ void setPins()
 
 void setPinStates()
 {
+    digitalWrite(POE_CTL, HIGH);
+    digitalWrite(PACK_SPARE_CTL, HIGH);
     // turns on 12 volt busses
     for (int i = 0 ; i < NUM_12V_PORTS ; i++)
     {
@@ -116,7 +119,7 @@ void setPinStates()
     }
 
     // turns on Aux bus
-    digitalWrite(AUX_CTL, HIGH);
+    digitalWrite(AUX_CTL, LOW);
 
     // turns on motor busses after a delay
     for (int i = 0 ; i < NUM_MOTORS ; i++)
