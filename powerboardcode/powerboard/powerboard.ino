@@ -2,6 +2,7 @@
 void setup() 
 {
     Serial.begin(115200);
+    Telemetry.begin(telemetry, 150000);
     setPins();
     setPinStates();
     Serial.begin(115200);
@@ -80,6 +81,9 @@ void loop()
                 break;
         }
     }
+
+    measureCurrent();
+    overCurrent();
 }
 
 void setPins()
@@ -120,4 +124,81 @@ void setPinStates()
         delay(MOTOR_DELAY);
         digitalWrite(motorBusses[i], HIGH);
     }
+}
+
+float senseCurrent(const uint8_t sensePin)
+{
+    float meas_current = analogRead(sensePin);
+    float current = map(meas_current, CURRENT_ADC_MIN, CURRENT_ADC_MAX, CURRENT_mA_MIN, CURRENT_mA_MAX);
+    return current;
+}
+
+void measureCurrent()
+{
+    for (uint8_t i = 0; i < 7; i++)
+    {
+        MOTORBUSCURRENTS[i] = senseCurrent(MOTORBUSPINS[i]);
+
+        if (MOTORBUSCURRENTS[i] > OVERCURRENT_PACK)
+        {
+            motorOverCurrent |= (1 << i);
+        }
+        else
+        {
+            motorOverCurrent &= !(1 << i);
+        }
+    }
+    
+    AUX_CURRENT = senseCurrent(AUX_SENSE);
+    if (AUX_CURRENT > OVERCURRENT_12V)
+    {
+        twelveActOverCurrent = 1;
+    }
+    else
+    {
+        twelveActOverCurrent = 0;
+    }
+
+    for (uint8_t i = 0; i < 8; i++)
+    {
+        TWELVELOGICBUSCURRENTS[i] = senseCurrent(TWELVELOGICBUSPINS[i]);
+
+        if (TWELVELOGICBUSCURRENTS[i] > OVERCURRENT_12V)
+        {
+            twelveLogicOverCurrent |= (1 << i);
+        }
+        else
+        {
+            twelveLogicOverCurrent &= !(1 << i);
+        }
+    }
+    return;
+}
+
+void overCurrent()
+{
+    if (motorOverCurrent)
+    {
+        RoveComm.write(RC_POWERBOARD_MOTORBUSOVERCURRENT_DATA_ID, RC_POWERBOARD_MOTORBUSOVERCURRENT_DATA_COUNT, motorOverCurrent);
+    }
+    if (twelveActOverCurrent)
+    {
+        RoveComm.write(RC_POWERBOARD_TWELVEVACTBUSOVERCURRENT_DATA_ID, RC_POWERBOARD_TWELVEVACTBUSOVERCURRENT_DATA_COUNT, twelveActOverCurrent);
+    }
+    if (twelveLogicOverCurrent)
+    {
+        RoveComm.write(RC_POWERBOARD_TWELVEVLOGICBUSOVERCURRENT_DATA_ID, RC_POWERBOARD_TWELVEVLOGICBUSOVERCURRENT_DATA_COUNT, twelveLogicOverCurrent);
+    }
+    return;
+}
+
+void telemetry()
+{
+    RoveComm.write(RC_POWERBOARD_MOTORBUSCURRENT_DATA_ID, RC_POWERBOARD_MOTORBUSCURRENT_DATA_COUNT, MOTORBUSCURRENTS);
+    delay(100);
+    RoveComm.write(RC_POWERBOARD_TWELVEVACTBUSCURRENT_DATA_ID, RC_POWERBOARD_TWELVEVACTBUSCURRENT_DATA_COUNT, AUX_CURRENT);
+    delay(100);
+    RoveComm.write(RC_POWERBOARD_TWELVEVLOGICBUSCURRENT_DATA_ID, RC_POWERBOARD_TWELVEVLOGICBUSCURRENT_DATA_COUNT, TWELVELOGICBUSCURRENTS);
+    delay(100);
+    Telemetry.begin(telemetry, 150000);
 }

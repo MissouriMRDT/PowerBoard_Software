@@ -6,19 +6,26 @@
 #define NUM_12V_PORTS           8   // Everything except Aux cuz Manifest
 #define NUM_MOTORS              7       
 
+IntervalTimer Telemetry;
+
 //12V Current Sensing
-/*
-#define MULTIMEDIA_SENSE        PD4
-#define NAV_SENSE               PD0
-#define GIMBAL_ACT_SENSE        PD1
-#define DRIVE_SENSE             PK3
-#define SCISENSOR_ACT_SENSE     PD2
-#define NETSWITCH_SENSE         PB5
-#define CAM1_SENSE              PB4
-#define CAM2_SENSE              PK0
-#define BBB_SENSE               PD7
-#define AUX_LOG_SENSE           PK2
-*/
+
+#define MULTIMEDIA_SENSE        A11
+#define NAV_SENSE               A12
+#define GIMBAL_ACT_SENSE        A10
+#define DRIVE_SENSE             A0
+#define CAM1_SENSE              A2
+#define CAM2_SENSE              A1
+#define BBB_SENSE               A3
+#define AUX_SENSE               A4
+#define SPARE_12V_SENSE         A13
+
+#define OVERCURRENT_PACK        19500 //mA
+#define OVERCURRENT_12V         4800 //mA
+#define CURRENT_ADC_MIN         0
+#define CURRENT_ADC_MAX         0
+#define CURRENT_mA_MIN          0
+#define CURRENT_mA_MAX          0
 
 //12V CTL
 #define SPARE_CTL               0
@@ -31,18 +38,47 @@
 #define BBB_CTL                 7
 #define AUX_CTL                 8
 
-/*
+
 //PACK CURRENT
-#define P_MOTOR1_SENSE          PE4
-#define P_MOTOR2_SENSE          PE5
-#define P_MOTOR3_SENSE          PD3  
-#define P_MOTOR4_SENSE          PE0
-#define P_MOTOR5_SENSE          PE1
-#define P_MOTOR6_SENSE          PE2
-#define P_MOTOR7_SENSE          PE3
-#define P_POE_SENSE             PD5
-#define P_AUX_SENSE             PK1
-*/
+#define P_MOTOR1_SENSE          A14
+#define P_MOTOR2_SENSE          A15
+#define P_MOTOR3_SENSE          A16  
+#define P_MOTOR4_SENSE          A17
+#define P_MOTOR5_SENSE          A5
+#define P_MOTOR6_SENSE          A6
+#define P_MOTOR7_SENSE          A7
+#define P_POE_SENSE             A8
+
+// Current sensing variables
+
+float MOTORBUSPINS[7] = {P_MOTOR1_SENSE, P_MOTOR2_SENSE, P_MOTOR3_SENSE, P_MOTOR4_SENSE, P_MOTOR5_SENSE, P_MOTOR6_SENSE, P_MOTOR7_SENSE};
+float TWELVELOGICBUSPINS[8] = {GIMBAL_ACT_SENSE, DRIVE_SENSE, MULTIMEDIA_SENSE, NAV_SENSE, CAM1_SENSE, CAM2_SENSE, BBB_SENSE, SPARE_12V_SENSE};
+
+float P_MOTOR1_CURRENT = 0;
+float P_MOTOR2_CURRENT = 0;
+float P_MOTOR3_CURRENT = 0;
+float P_MOTOR4_CURRENT = 0;
+float P_MOTOR5_CURRENT = 0;
+float P_MOTOR6_CURRENT = 0;
+float P_MOTOR7_CURRENT = 0;
+
+float AUX_CURRENT = 0;
+
+float GIMBAL_ACT_CURRENT = 0;
+float DRIVE_CURRENT = 0;
+float MULTIMEDIA_CURRENT = 0;
+float NAV_CURRENT = 0;
+float CAM1_CURRENT = 0;
+float CAM2_CURRENT = 0;
+float BBB_CURRENT = 0;
+float SPARE_12V_CURRENT = 0;
+
+float MOTORBUSCURRENTS[7] = {P_MOTOR1_CURRENT, P_MOTOR2_CURRENT, P_MOTOR3_CURRENT, P_MOTOR4_CURRENT, P_MOTOR5_CURRENT, P_MOTOR6_CURRENT, P_MOTOR7_CURRENT};
+float TWELVELOGICBUSCURRENTS[8] = {GIMBAL_ACT_CURRENT, DRIVE_CURRENT, MULTIMEDIA_CURRENT, NAV_CURRENT, CAM1_CURRENT, CAM2_CURRENT, BBB_CURRENT, SPARE_12V_CURRENT};
+
+uint8_t motorOverCurrent = 0;
+uint8_t twelveActOverCurrent = 0;
+uint8_t twelveLogicOverCurrent = 0;
 
 //PACK BUSSES
 #define POE_CTL                 29
