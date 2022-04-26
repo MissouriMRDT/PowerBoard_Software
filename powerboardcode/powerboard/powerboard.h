@@ -92,7 +92,7 @@ uint8_t twelveLogicOverCurrent = 0;
 #define MOTOR6_CTL              30
 #define MOTORS_CTL              36
 
-#define MOTOR_DELAY             750
+#define MOTOR_DELAY             500
 
 //uint8_t currentSense12V[] = {MULTIMEDIA_SENSE, NAV_SENSE, GIMBAL_ACT_SENSE, DRIVE_SENSE, SCISENSOR_ACT_SENSE, NETSWITCH_SENSE, CAM1_SENSE, CAM2_SENSE, BBB_SENSE, AUX_LOG_SENSE};
 uint8_t twelveVoltBusses[NUM_12V_PORTS] = {GIMBAL_CTL, DRIVE_CTL, MULTIMEDIA_CTL, NAV_CTL, CAM1_CTL, CAM2_CTL, BBB_CTL, SPARE_CTL};

@@ -2,11 +2,10 @@
 void setup() 
 {
     Serial.begin(115200);
-    Telemetry.begin(telemetry, 1500000);
     setPins();
     setPinStates();
-    Serial.begin(115200);
     RoveComm.begin(RC_POWERBOARD_FOURTHOCTET, &TCPServer, RC_ROVECOMM_POWERBOARD_MAC);
+    Telemetry.begin(telemetry, 1500000);
 }
 
 void loop() 
@@ -88,16 +87,15 @@ void loop()
 
 void setPins()
 {
-    // sets Spare to OUTPUT
-    pinMode(PACK_SPARE_CTL, OUTPUT);
-    pinMode(POE_CTL, OUTPUT);
-
     // sets motor busses to OUTPUT
     for (int i = 0 ; i < NUM_MOTORS ; i++)
     {
         pinMode(motorBusses[i], OUTPUT);
+        digitalWrite(motorBusses[i], LOW);
     }
 
+    pinMode(PACK_SPARE_CTL, OUTPUT);
+    pinMode(POE_CTL, OUTPUT);
     // sets Aux to OUTPUT
     pinMode(AUX_CTL, OUTPUT);
 
@@ -110,8 +108,6 @@ void setPins()
 
 void setPinStates()
 {
-    digitalWrite(POE_CTL, HIGH);
-    digitalWrite(PACK_SPARE_CTL, HIGH);
     // turns on 12 volt busses
     for (int i = 0 ; i < NUM_12V_PORTS ; i++)
     {
@@ -127,6 +123,9 @@ void setPinStates()
         delay(MOTOR_DELAY);
         digitalWrite(motorBusses[i], HIGH);
     }
+    digitalWrite(PACK_SPARE_CTL, HIGH);
+    digitalWrite(POE_CTL, HIGH);
+
 }
 
 float senseCurrent(const uint8_t sensePin)
@@ -212,5 +211,4 @@ void telemetry()
     delay(100);
     RoveComm.write(RC_POWERBOARD_TWELVEVLOGICBUSCURRENT_DATA_ID, RC_POWERBOARD_TWELVEVLOGICBUSCURRENT_DATA_COUNT, TWELVELOGICBUSCURRENTS);
     delay(100);
-    Telemetry.begin(telemetry, 1500000);
 }
