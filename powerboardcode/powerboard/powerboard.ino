@@ -2,7 +2,7 @@
 void setup() 
 {
     Serial.begin(115200);
-    Telemetry.begin(telemetry, 150000);
+    Telemetry.begin(telemetry, 1500000);
     setPins();
     setPinStates();
     Serial.begin(115200);
@@ -140,11 +140,14 @@ void measureCurrent()
 {
     for (uint8_t i = 0; i < 7; i++)
     {
-        MOTORBUSCURRENTS[i] = senseCurrent(MOTORBUSPINS[i]);
+        MOTORBUSCURRENTS[i] = senseCurrent(MOTORBUSSENSEPINS[i]);
 
         if (MOTORBUSCURRENTS[i] > OVERCURRENT_PACK)
         {
             motorOverCurrent |= (1 << i);
+            digitalWrite(motorBusses[i], LOW);
+            delay(1000);
+            digitalWrite(motorBusses[i], HIGH);
         }
         else
         {
@@ -156,6 +159,9 @@ void measureCurrent()
     if (AUX_CURRENT > OVERCURRENT_12V)
     {
         twelveActOverCurrent = 1;
+        digitalWrite(AUX_CTL, LOW);
+        delay(1000);
+        digitalWrite(AUX_CTL, HIGH);
     }
     else
     {
@@ -169,6 +175,9 @@ void measureCurrent()
         if (TWELVELOGICBUSCURRENTS[i] > OVERCURRENT_12V)
         {
             twelveLogicOverCurrent |= (1 << i);
+            digitalWrite(twelveVoltBusses[i], LOW);
+            delay(1000);
+            digitalWrite(twelveVoltBusses[i], HIGH);
         }
         else
         {
@@ -203,5 +212,5 @@ void telemetry()
     delay(100);
     RoveComm.write(RC_POWERBOARD_TWELVEVLOGICBUSCURRENT_DATA_ID, RC_POWERBOARD_TWELVEVLOGICBUSCURRENT_DATA_COUNT, TWELVELOGICBUSCURRENTS);
     delay(100);
-    Telemetry.begin(telemetry, 150000);
+    Telemetry.begin(telemetry, 1500000);
 }
