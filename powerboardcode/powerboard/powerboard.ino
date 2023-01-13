@@ -1,11 +1,11 @@
 #include "powerboard.h"
 void setup() 
-{
+{    
     Serial.begin(115200);
     setPins();
     setPinStates();
     RoveComm.begin(RC_POWERBOARD_FOURTHOCTET, &TCPServer, RC_ROVECOMM_POWERBOARD_MAC);
-    Telemetry.begin(telemetry, 1500000);
+    // Telemetry.begin(telemetry, 1500000);
 }
 
 void loop() 
@@ -24,17 +24,17 @@ void loop()
                     {
                         Serial.println("Enabling Bus:");
                         Serial.println(i);
-                        digitalWrite(motorBusses[i], HIGH);
+                        digitalWrite(motorPins[i], HIGH);
                     }
                     else
                     {
                         Serial.println("Disabling Bus:");
                         Serial.println(i);
-                        digitalWrite(motorBusses[i], LOW);
+                        digitalWrite(motorPins[i], LOW);
                     }
                 }
                 break;
-            case RC_POWERBOARD_TWELVEVACTBUSENABLE_DATA_ID:
+            case RC_POWERBOARD_HIGHBUSENABLE_DATA_ID:
                 Serial.println("Enable/Disable Aux Bus");
                 if (data[0] & 1)
                 {
@@ -46,87 +46,85 @@ void loop()
                     Serial.println("Disabling Aux");
                     digitalWrite(AUX_CTL, LOW);
                 }
+                if (data[0] & 1<<1)
+                {
+                    Serial.println("Enabling High Current Spare");
+                    digitalWrite(HIGH_CURRENT_SPARE_CTL, HIGH);
+                }
+                else
+                {
+                    Serial.println("Disabling High Current Spare");
+                    digitalWrite(HIGH_CURRENT_SPARE_CTL, LOW);
+                }
                 break;
-            case RC_POWERBOARD_TWELVEVLOGICBUSENABLE_DATA_ID:
+            case RC_POWERBOARD_LOWBUSENABLE_DATA_ID:
                 Serial.println("Enable/Disable 12V Busses");
-                for(int i = 0; i < NUM_12V_PORTS; i++)
+                for(int i = 0; i < NUM_LOW_CURRENT; i++)
                 {
                     if (data[0] & 1<<i)
                     {
                         Serial.println("Enabling Bus:");
                         Serial.println(i);
-                        digitalWrite(twelveVoltBusses[i], HIGH);
+                        digitalWrite(lowCurrentPins[i], HIGH);
                     }
                     else
                     {
                         Serial.println("Disabling Bus:");
                         Serial.println(i);
-                        digitalWrite(twelveVoltBusses[i], LOW);
+                        digitalWrite(lowCurrentPins[i], LOW);
                     }
-                }
-                break;
-            case RC_POWERBOARD_THIRTYVBUSENABLE_DATA_ID:
-                Serial.println("Enable/Disable 30V Spare");
-                if (data[0] & 1)
-                {
-                    Serial.println("Enabling Spare");
-                    digitalWrite(PACK_SPARE_CTL, HIGH);
-                }
-                else
-                {
-                    Serial.println("Disabling Spare");
-                    digitalWrite(PACK_SPARE_CTL, LOW);
                 }
                 break;
         }
     }
-
-    measureCurrent();
-    overCurrent();
+    // measureCurrent();
+    // overCurrent();
 }
 
 void setPins()
 {
+    // sets low current busses to OUTPUT
+    for (int i = 0 ; i < NUM_LOW_CURRENT ; i++)
+    {
+        pinMode(lowCurrentPins[i], OUTPUT);
+    }
+
     // sets motor busses to OUTPUT
     for (int i = 0 ; i < NUM_MOTORS ; i++)
     {
-        pinMode(motorBusses[i], OUTPUT);
-        digitalWrite(motorBusses[i], LOW);
+        pinMode(motorPins[i], OUTPUT);
     }
 
-    pinMode(PACK_SPARE_CTL, OUTPUT);
-    pinMode(POE_CTL, OUTPUT);
-    // sets Aux to OUTPUT
+    // sets other high current busses to OUTPUT
     pinMode(AUX_CTL, OUTPUT);
-
-    // sets 12V busses to OUTPUT
-    for (int i = 0 ; i < NUM_12V_PORTS ; i++)
-    {
-        pinMode(twelveVoltBusses[i], OUTPUT);
-    }
+    pinMode(HIGH_CURRENT_SPARE_CTL, OUTPUT);
 }
 
 void setPinStates()
 {
-    // turns on 12 volt busses
-    for (int i = 0 ; i < NUM_12V_PORTS ; i++)
+    // turns on low current busses
+    for (int i = 0 ; i < NUM_LOW_CURRENT ; i++)
     {
-        digitalWrite(twelveVoltBusses[i], HIGH);
+        digitalWrite(lowCurrentPins[i], HIGH);
     }
 
-    // turns on Aux bus
-    digitalWrite(AUX_CTL, LOW);
+    // turns on high current busses (other than motors)
+    digitalWrite(AUX_CTL, HIGH);
+    digitalWrite(HIGH_CURRENT_SPARE_CTL, HIGH);
 
     // turns on motor busses after a delay
     for (int i = 0 ; i < NUM_MOTORS ; i++)
     {
-        delay(MOTOR_DELAY);
-        digitalWrite(motorBusses[i], HIGH);
+        digitalWrite(motorPins[i], HIGH);
+        if (i != (NUM_MOTORS - 1))
+        {
+            delay(MOTOR_DELAY);
+        }
     }
-    digitalWrite(PACK_SPARE_CTL, HIGH);
-    digitalWrite(POE_CTL, HIGH);
 
 }
+
+/*
 
 float senseCurrent(const uint8_t sensePin)
 {
@@ -134,6 +132,8 @@ float senseCurrent(const uint8_t sensePin)
     float current = map(meas_current, CURRENT_ADC_MIN, CURRENT_ADC_MAX, CURRENT_mA_MIN, CURRENT_mA_MAX);
     return current;
 }
+
+
 
 void measureCurrent()
 {
@@ -212,3 +212,5 @@ void telemetry()
     RoveComm.write(RC_POWERBOARD_TWELVEVLOGICBUSCURRENT_DATA_ID, RC_POWERBOARD_TWELVEVLOGICBUSCURRENT_DATA_COUNT, TWELVELOGICBUSCURRENTS);
     delay(100);
 }
+
+*/
