@@ -97,4 +97,27 @@ EthernetServer TCPServer(RC_ROVECOMM_POWERBOARD_PORT);
 void setPins();
 void setPinStates();
 
+/*structs
+
+struct Bus      
+{
+    uint8_t i_max;          //max allowable current  
+    uint8_t imeas_pin;      //current pin on teensy
+    uint8_t imeas_val;      //current measure value
+
+    void set_Values(const uint8_t & I_max, uint8_t &Iimeas_pin, uint8_t & Imeas_val);
+}
+
+struct toggle_Bus : Bus    //for all busses except NET and POE
+{
+    bool toggle_status;    //toggle bus on/off
+    uint8_t ctl_pin;       //control pin on teensy
+
+    void set_Values(const uint8_t & Ctl_pin, const uint8_t & I_max, uint8_t & Imeas_pin, uint8_t & Imeas_val, bool & Toggle_status);
+}
+
+void bus_Setup(Bus Bus[]);
+
+*/
+
 #endif

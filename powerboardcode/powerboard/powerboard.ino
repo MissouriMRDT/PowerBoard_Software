@@ -126,6 +126,48 @@ void setPinStates()
 
 /*
 
+void Bus::set_Values(const uint8_t & I_max, uint8_t &Imeas_pin, uint8_t & Imeas_val)
+{
+    i_max = I_max;
+    imeas_pin = Imeas_pin;
+    imeas_val = Imeas_val;
+}
+
+void toggle_Bus::set_Values(uint8_t & Ctl_pin, const uint8_t & I_max, uint8_t & Imeas_pin, uint8_t & Imeas_val, bool & Toggle_status)
+{
+    ctl_pin = Ctl_pin;
+    i_max = I_max;
+    imeas_pin = Imeas_pin;
+    imeas_val = Imeas_val;
+    toggle_status = Toggle_status;
+}
+
+void bus_Setup(Bus Bus[])
+{
+    Bus[0].set_Values(MOTOR_1_CTL);                 //motor 1
+    Bus[1].set_Values(MOTOR_2_CTL);                 //motor 2
+    Bus[2].set_Values(MOTOR_3_CTL);                 //motor 3
+    Bus[3].set_Values(MOTOR_4_CTL);                 //motor 4
+    Bus[4].set_Values(MOTOR_5_CTL);                 //motor 5
+    Bus[5].set_Values(MOTOR_6_CTL);                 //motor 6
+    Bus[6].set_Values(MOTOR_SPARE_CTL);             //motor spare
+    Bus[7].set_Values(AUX_CTL);                     //aux
+    Bus[8].set_Values(HIGH_CURRENT_SPARE_CTL);      //spare 20A
+    Bus[9].set_Values(CAM_CTL);                     //cam
+    Bus[10].set_Values(MULTIMEDIA_CTL);             //multimedia
+    Bus[11].set_Values(GIMBAL_CTL);                 //gimbal
+    Bus[12].set_Values(LOW_CURRENT_SPARE_CTL);      //spare 1A
+    Bus[13].set_Values(BBB_CTL);                    //black box
+    Bus[14].set_Values(NAV_CTL);                    //nav
+    Bus[15].set_Values(DRIVE_CTL);                  //drive
+    Bus[16].set_Values();                           //network switch
+    Bus[17].set_Values();                           //POE
+}
+
+*/
+
+/*
+
 float senseCurrent(const uint8_t sensePin)
 {
     float meas_current = analogRead(sensePin);
