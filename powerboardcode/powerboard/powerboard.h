@@ -90,7 +90,7 @@ uint8_t motorPins[NUM_MOTORS] = {MOTOR_1_CTL, MOTOR_2_CTL, MOTOR_3_CTL, MOTOR_4_
 RoveCommEthernet RoveComm;
 rovecomm_packet packet; 
 uint8_t* data;
-EthernetServer TCPServer(RC_ROVECOMM_POWERBOARD_PORT);
+EthernetServer TCPServer(RC_ROVECOMM_ETHERNET_TCP_PORT);
 
 // function declarations
 
