@@ -2,17 +2,18 @@
 void setup() 
 {    
     Serial.begin(115200);
+    busSetup();
     setPins();
     setPinStates();
-    RoveComm.begin(RC_POWERBOARD_FOURTHOCTET, &TCPServer, RC_ROVECOMM_POWERBOARD_MAC);
-    Telemetry.begin(telemetry, 1500000);
+    RoveComm.begin(RC_POWERBOARD_FIRSTOCTET, RC_POWERBOARD_SECONDOCTET, RC_POWERBOARD_THIRDOCTET, RC_POWERBOARD_FOURTHOCTET, &TCPServer);
+    //Telemetry.begin(telemetry, 1500000);
 }
 
 void loop() 
 {
     packet = RoveComm.read();
     data = (uint8_t*)packet.data;
-    if(packet.data_id != 0)
+    if(packet.data_id != 6)
     {
         switch(packet.data_id)
         {
@@ -24,13 +25,13 @@ void loop()
                     {
                         Serial.println("Enabling Bus:");
                         Serial.println(i);
-                        digitalWrite(motorPins[i], HIGH);
+                        digitalWrite(Port[i].ctl_pin, HIGH);
                     }
                     else
                     {
                         Serial.println("Disabling Bus:");
                         Serial.println(i);
-                        digitalWrite(motorPins[i], LOW);
+                        digitalWrite(Port[i].ctl_pin, LOW);
                     }
                 }
                 break;
@@ -42,13 +43,13 @@ void loop()
 					{
 						Serial.println("Enabling Bus:");
 						Serial.println(i);
-						digitalWrite(highCurrentPins[i], HIGH);
+						digitalWrite(Port[i + NUM_MOTORS].ctl_pin, HIGH);
 					}
 					else
 					{
 						Serial.println("Disabling Bus:");
 						Serial.println(i);
-						digitalWrite(highCurrentPins[i], LOW);
+						digitalWrite(Port[i + NUM_MOTORS].ctl_pin, LOW);
 					}
 				}
                 break;
@@ -60,188 +61,140 @@ void loop()
                     {
                         Serial.println("Enabling Bus:");
                         Serial.println(i);
-                        digitalWrite(lowCurrentPins[i], HIGH);
+                        digitalWrite(Port[i + NUM_MOTORS + NUM_HIGH_CURRENT].ctl_pin, HIGH);
                     }
                     else
                     {
                         Serial.println("Disabling Bus:");
                         Serial.println(i);
-                        digitalWrite(lowCurrentPins[i], LOW);
+                        digitalWrite(Port[i + NUM_MOTORS + NUM_HIGH_CURRENT].ctl_pin, LOW);
                     }
                 }
                 break;
         }
     }
     measureCurrent();
+    dataPack();
     overCurrent();
+    telemetry();
 }
 
 void setPins()
 {
-    // sets motor busses to OUTPUT
-    for (int i = 0; i < NUM_MOTORS; i++)
+    for (int i = 0; i < NUM_BUS; i++)
     {
-        pinMode(motorPins[i], OUTPUT);
-    }
-
-    // sets other high current busses to OUTPUT
-	for (int i = 0; i < NUM_HIGH_CURRENT; i++)
-	{
-		pinMode(highCurrentPins[i], OUTPUT);
-	}
-
-    // sets low current busses to OUTPUT
-    for (int i = 0; i < NUM_LOW_CURRENT; i++)
-    {
-        pinMode(lowCurrentPins[i], OUTPUT);
+        pinMode(Port[i].ctl_pin, OUTPUT);
     }
 }
 
 void setPinStates()
 {
-    // turns on low current busses
-    for (int i = 0; i < NUM_LOW_CURRENT; i++)
+    // Turns on ports except motors
+    for (int i = NUM_MOTORS; i < NUM_BUS; i++)
     {
-        digitalWrite(lowCurrentPins[i], HIGH);
+        digitalWrite(Port[i].ctl_pin, HIGH);
     }
 
-    // turns on high current busses (other than motors)
-	for (int i = 0; i < NUM_HIGH_CURRENT; i++)
-	{
-		digitalWrite(lowCurrentPins[i], High);
-	}
-
-    // turns on motor busses after a delay
-    for (int i = 0 ; i < NUM_MOTORS ; i++)
+    // Turns on motor ports with a delay
+    for (int i = 0; i < NUM_MOTORS; i++)
     {
-        digitalWrite(motorPins[i], HIGH);
-        if (i != (NUM_MOTORS - 1))
-        {
-            delay(MOTOR_DELAY);
-        }
+        digitalWrite(Port[i].ctl_pin, HIGH);
+        delay(MOTOR_DELAY);
     }
 }
 
-/*
-void Bus::set_Values(const uint8_t & I_max, uint8_t &Imeas_pin, uint8_t & Imeas_val)
-{
-    i_max = I_max;
-    imeas_pin = Imeas_pin;
-    imeas_val = Imeas_val;
-}
-
-void toggle_Bus::set_Values(uint8_t & Ctl_pin, const uint8_t & I_max, uint8_t & Imeas_pin, uint8_t & Imeas_val, bool & Toggle_status)
+void Bus::set_Values(const uint8_t & Ctl_pin, const uint16_t & I_overcurrent, const uint16_t & I_max, const uint8_t & Imeas_pin, float & Imeas_val, bool & Toggle_status, bool & Overcurrent)
 {
     ctl_pin = Ctl_pin;
+    i_overcurrent = I_overcurrent;
     i_max = I_max;
     imeas_pin = Imeas_pin;
     imeas_val = Imeas_val;
     toggle_status = Toggle_status;
+    overcurrent = Overcurrent;
 }
 
-void bus_Setup(Bus Bus[])
+void busSetup()
 {
-    Bus[0].set_Values(MOTOR_1_CTL);                 //motor 1
-    Bus[1].set_Values(MOTOR_2_CTL);                 //motor 2
-    Bus[2].set_Values(MOTOR_3_CTL);                 //motor 3
-    Bus[3].set_Values(MOTOR_4_CTL);                 //motor 4
-    Bus[4].set_Values(MOTOR_5_CTL);                 //motor 5
-    Bus[5].set_Values(MOTOR_6_CTL);                 //motor 6
-    Bus[6].set_Values(MOTOR_SPARE_CTL);             //motor spare
-    Bus[7].set_Values(AUX_CTL);                     //aux
-    Bus[8].set_Values(HIGH_CURRENT_SPARE_CTL);      //spare 20A
-    Bus[9].set_Values(GIMBAL_CTL);                  //gimbal
-    Bus[10].set_Values(DRIVE_CTL);                  //drive
-    Bus[11].set_Values(MULTIMEDIA_CTL);             //multimedia
-    Bus[12].set_Values(NAV_CTL);                    //nav
-    Bus[13].set_Values(CAM_CTL);                    //cam
-    Bus[14].set_Values(BBB_CTL);                    //black box
-    Bus[15].set_Values(LOW_CURRENT_SPARE_CTL);      //spare 1A
-    Bus[16].set_Values();                           //POE
-    Bus[17].set_Values();                           //network switch
-}
-*/
-
-float senseCurrent(const uint8_t sensePin, const bool highPort)
-{
-    float meas_current = analogRead(sensePin);
-	if(highPort)
-	{
-    	float current = map(meas_current, 0, 1023, 0, HIGH_CURRENT_mA_MAX);
-	}
-	else
-	{
-    	float current = map(meas_current, 0, 1023, 0, LOW_CURRENT_mA_MAX);
-	}
-    return current;
+    Port[0].set_Values(MOTOR_1_CTL, OVERCURRENT_HIGH, HIGH_CURRENT_mA_MAX, MOTOR_1_CS, initialCurrent, initialToggle, initialOvercurrent);                          //motor 1
+    Port[1].set_Values(MOTOR_2_CTL, OVERCURRENT_HIGH, HIGH_CURRENT_mA_MAX, MOTOR_2_CS, initialCurrent, initialToggle, initialOvercurrent);                          //motor 2
+    Port[2].set_Values(MOTOR_3_CTL, OVERCURRENT_HIGH, HIGH_CURRENT_mA_MAX, MOTOR_3_CS, initialCurrent, initialToggle, initialOvercurrent);                          //motor 3
+    Port[3].set_Values(MOTOR_4_CTL, OVERCURRENT_HIGH, HIGH_CURRENT_mA_MAX, MOTOR_4_CS, initialCurrent, initialToggle, initialOvercurrent);                          //motor 4
+    Port[4].set_Values(MOTOR_5_CTL, OVERCURRENT_HIGH, HIGH_CURRENT_mA_MAX, MOTOR_5_CS, initialCurrent, initialToggle, initialOvercurrent);                          //motor 5
+    Port[5].set_Values(MOTOR_6_CTL, OVERCURRENT_HIGH, HIGH_CURRENT_mA_MAX, MOTOR_6_CS, initialCurrent, initialToggle, initialOvercurrent);                          //motor 6
+    Port[6].set_Values(MOTOR_SPARE_CTL, OVERCURRENT_HIGH, HIGH_CURRENT_mA_MAX, MOTOR_SPARE_CS, initialCurrent, initialToggle, initialOvercurrent);                  //motor spare
+    Port[7].set_Values(AUX_CTL, OVERCURRENT_HIGH, HIGH_CURRENT_mA_MAX, AUX_CS, initialCurrent, initialToggle, initialOvercurrent);                                  //aux
+    Port[8].set_Values(HIGH_CURRENT_SPARE_CTL, OVERCURRENT_HIGH, HIGH_CURRENT_mA_MAX, HIGH_CURRENT_SPARE_CS, initialCurrent, initialToggle, initialOvercurrent);    //spare 20A
+    Port[9].set_Values(GIMBAL_CTL, OVERCURRENT_LOW, LOW_CURRENT_mA_MAX, GIMBAL_CS, initialCurrent, initialToggle, initialOvercurrent);                              //gimbal
+    Port[10].set_Values(DRIVE_CTL, OVERCURRENT_LOW, LOW_CURRENT_mA_MAX, DRIVE_CS, initialCurrent, initialToggle, initialOvercurrent);                               //drive
+    Port[11].set_Values(MULTIMEDIA_CTL, OVERCURRENT_LOW, LOW_CURRENT_mA_MAX, MULTIMEDIA_CS, initialCurrent, initialToggle, initialOvercurrent);                     //multimedia
+    Port[12].set_Values(NAV_CTL, OVERCURRENT_LOW, LOW_CURRENT_mA_MAX, NAV_CS, initialCurrent, initialToggle, initialOvercurrent);                                   //nav
+    Port[13].set_Values(LOW_CURRENT_SPARE_CTL, OVERCURRENT_LOW, LOW_CURRENT_mA_MAX, LOW_CURRENT_SPARE_CS, initialCurrent, initialToggle, initialOvercurrent);       //spare 5A
+    Port[14].set_Values(CAM_CTL, OVERCURRENT_LOW, LOW_CURRENT_mA_MAX, CAM_CS, initialCurrent, initialToggle, initialOvercurrent);                                   //cam
+    Port[15].set_Values(LOW_VOLTAGE_SPARE_CTL, OVERCURRENT_LOW, LOW_CURRENT_mA_MAX, LOW_VOLTAGE_SPARE_CS, initialCurrent, initialToggle, initialOvercurrent);       //spare 12V
+    Port[16].set_Values(NET_SWITCH_1_CTL, OVERCURRENT_LOW, LOW_CURRENT_mA_MAX, DEFAULT_CS, initialCurrent, initialToggle, initialOvercurrent);                      //net switch 1
+    Port[17].set_Values(NET_SWITCH_2_CTL, OVERCURRENT_LOW, LOW_CURRENT_mA_MAX, DEFAULT_CS, initialCurrent, initialToggle, initialOvercurrent);                      //net switch 2
 }
 
 void measureCurrent()
 {
+    for (uint8_t i = 0; i < NUM_BUS - 2; i++)
+    {
+        uint16_t meas_current = analogRead(Port[i].imeas_pin);
+        float current = map(meas_current, 0, 1023, 0, Port[i].i_max);
+        Port[i].imeas_val = current;
+        if (Port[i].imeas_val > Port[i].i_overcurrent)
+        {
+            Port[i].overcurrent = true;
+            digitalWrite(Port[i].ctl_pin, LOW);
+            delay(1000);
+            digitalWrite(Port[i].ctl_pin, HIGH);
+        }
+        else
+        {
+            Port[i].overcurrent = false;
+        }
+    }
+}
+
+void dataPack()
+{
     for (uint8_t i = 0; i < NUM_MOTORS; i++)
     {
-        motorSenseCurrents[i] = senseCurrent(motorSensePins[i], true);
-
-        if (motorSenseCurrents[i] > OVERCURRENT_HIGH)
+        motorCurrents[i] = Port[i].imeas_val;
+        if (Port[i].overcurrent)
         {
             motorOverCurrent |= (1 << i);
-            digitalWrite(motorPins[i], LOW);
-            delay(1000);
-            digitalWrite(motorPins[i], HIGH);
         }
         else
         {
             motorOverCurrent &= ~(1 << i);
         }
     }
-    
-	for (uint8_t i = 0; i < NUM_HIGH_CURRENT; i++)
-	{
-		highCurrentSenseCurrents[i] = senseCurrent(highCurrentSensePins[i], true);
-
-		if (highCurrentSenseCurrents[i] > OVERCURRENT_HIGH)
-		{
-			highOverCurrent |= (1 << i);
-			digitalWrite(highCurrentSensePins[i], LOW);
-			delay(1000);
-			digitalWrite(highCurrentSensePins[i], HIGH);
-		}
-		else
-		{
-			highOverCurrent &= ~(1 << i);
-		}
-	}
-
+    for (uint8_t i = 0; i < NUM_HIGH_CURRENT; i++)
+    {
+        highCurrents[i] = Port[i + NUM_MOTORS].imeas_val;
+        if (Port[i].overcurrent)
+        {
+            highOverCurrent |= (1 << i);
+        }
+        else
+        {
+            highOverCurrent &= ~(1 << i);
+        }
+    }
     for (uint8_t i = 0; i < NUM_LOW_CURRENT; i++)
     {
-        lowCurrentSenseCurrents[i] = senseCurrent(lowCurrentSensePins[i], false);
-
-        if (lowCurrentSenseCurrents[i] > OVERCURRENT_LOW)
+        lowCurrents[i] = Port[i + NUM_MOTORS + NUM_HIGH_CURRENT].imeas_val;
+        if (Port[i].overcurrent)
         {
             lowOverCurrent |= (1 << i);
-            digitalWrite(lowCurrentSensePins[i], LOW);
-            delay(1000);
-            digitalWrite(lowCurrentSensePins[i], HIGH);
         }
         else
         {
             lowOverCurrent &= ~(1 << i);
         }
     }
-
-	for (uint8_t i = 0; i < 2; i++)
-	{
-		networkCurrentSenseCurrents[i] = senseCurrent(networkCurrentSensePins[i], false);
-
-		if (networkCurrentSenseCurrents[i] > OVERCURRENT_LOW)
-		{
-			networkOverCurrent |= (1 << i);
-		}
-		else
-		{
-			networkOverCurrent &= ~(1 << i);
-		}
-	}
 }
 
 void overCurrent()
@@ -262,10 +215,10 @@ void overCurrent()
 
 void telemetry()
 {
-    RoveComm.write(RC_POWERBOARD_MOTORBUSCURRENT_DATA_ID, RC_POWERBOARD_MOTORBUSCURRENT_DATA_COUNT, motorSenseCurrents);
+    RoveComm.write(RC_POWERBOARD_MOTORBUSCURRENT_DATA_ID, RC_POWERBOARD_MOTORBUSCURRENT_DATA_COUNT, motorCurrents);
     delay(100);
-    RoveComm.write(RC_POWERBOARD_HIGHBUSCURRENT_DATA_ID, RC_POWERBOARD_HIGHBUSCURRENT_DATA_COUNT, highCurrentSenseCurrents);
+    RoveComm.write(RC_POWERBOARD_HIGHBUSCURRENT_DATA_ID, RC_POWERBOARD_HIGHBUSCURRENT_DATA_COUNT, highCurrents);
     delay(100);
-    RoveComm.write(RC_POWERBOARD_LOWBUSCURRENT_DATA_ID, RC_POWERBOARD_LOWBUSCURRENT_DATA_COUNT, lowCurrentSenseCurrents);
+    RoveComm.write(RC_POWERBOARD_LOWBUSCURRENT_DATA_ID, RC_POWERBOARD_LOWBUSCURRENT_DATA_COUNT, lowCurrents);
     delay(100);
 }
