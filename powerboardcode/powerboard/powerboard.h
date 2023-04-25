@@ -117,7 +117,7 @@ uint8_t lowCurrentPins[NUM_LOW_CURRENT] = {GIMBAL_CTL, DRIVE_CTL, MULTIMEDIA_CTL
 RoveCommEthernet RoveComm;
 rovecomm_packet packet; 
 uint8_t* data;
-EthernetServer TCPServer(RC_ROVECOMM_POWERBOARD_PORT);
+EthernetServer TCPServer(RC_ROVECOMM_ETHERNET_TCP_PORT);
 
 // function declarations
 

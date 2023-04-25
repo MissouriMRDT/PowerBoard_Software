@@ -4,8 +4,8 @@ void setup()
     Serial.begin(115200);
     setPins();
     setPinStates();
-    RoveComm.begin(RC_POWERBOARD_FOURTHOCTET, &TCPServer, RC_ROVECOMM_POWERBOARD_MAC);
-    Telemetry.begin(telemetry, 1500000);
+    RoveComm.begin(RC_POWERBOARD_FIRSTOCTET, RC_POWERBOARD_SECONDOCTET, RC_POWERBOARD_THIRDOCTET, RC_POWERBOARD_FOURTHOCTET, &TCPServer);
+    //Telemetry.begin(telemetry, 1500000);
 }
 
 void loop() 
