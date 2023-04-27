@@ -74,6 +74,7 @@ void loop()
     }
     measureCurrent();
     overCurrent();
+    telemetry();
 }
 
 void setPins()
@@ -108,7 +109,7 @@ void setPinStates()
     // turns on high current busses (other than motors)
 	for (int i = 0; i < NUM_HIGH_CURRENT; i++)
 	{
-		digitalWrite(lowCurrentPins[i], High);
+		digitalWrite(highCurrentPins[i], HIGH);
 	}
 
     // turns on motor busses after a delay
@@ -164,7 +165,8 @@ void bus_Setup(Bus Bus[])
 
 float senseCurrent(const uint8_t sensePin, const bool highPort)
 {
-    float meas_current = analogRead(sensePin);
+    uint16_t meas_current = analogRead(sensePin);
+    float current;
 	if(highPort)
 	{
     	float current = map(meas_current, 0, 1023, 0, HIGH_CURRENT_mA_MAX);
@@ -173,6 +175,14 @@ float senseCurrent(const uint8_t sensePin, const bool highPort)
 	{
     	float current = map(meas_current, 0, 1023, 0, LOW_CURRENT_mA_MAX);
 	}
+    if (sensePin == MOTOR_6_CS)
+    {
+        Serial.println();
+        Serial.println("Motor 6:");
+        Serial.println(meas_current);
+        Serial.println(current);
+        Serial.println();
+    }
     return current;
 }
 
@@ -181,7 +191,8 @@ void measureCurrent()
     for (uint8_t i = 0; i < NUM_MOTORS; i++)
     {
         motorSenseCurrents[i] = senseCurrent(motorSensePins[i], true);
-
+        Serial.println(i);
+        Serial.println(motorSenseCurrents[i]);
         if (motorSenseCurrents[i] > OVERCURRENT_HIGH)
         {
             motorOverCurrent |= (1 << i);
