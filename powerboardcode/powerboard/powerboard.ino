@@ -2,16 +2,15 @@
 void setup() 
 {    
     Serial.begin(115200);
-    setSyncProvider(Teensy3Clock.get());
+    setSyncProvider(Teensy3Clock.get()); // Sets time
     busSetup();
     setPins();
     setPinStates();
     RoveComm.begin(RC_POWERBOARD_FIRSTOCTET, RC_POWERBOARD_SECONDOCTET, RC_POWERBOARD_THIRDOCTET, RC_POWERBOARD_FOURTHOCTET, &TCPServer);
     subscribeAll();
-    Telemetry.begin(telemetry, 1500000);
+    Telemetry.begin(telemetry, 1500000); // Call telemetry function every 1.5 seconds
     SD.begin();
-    File blackBox = SD.open("Black Box", FILE_WRITE);
-    blackBox.println();
+    openFile();
 }
 
 void loop() 
@@ -74,6 +73,31 @@ void loop()
                 }
             }
             break;
+        case RC_BMSBOARD_PACKI_MEAS_DATA_ID:
+            printTime();
+            blackBox.print("Pack Current: ");
+            blackBox.println(data[1]);
+            blackBox.println();
+        case RC_BMSBOARD_PACKV_MEAS_DATA_ID:
+            printTime();
+            blackBox.print("Pack Voltage: ");
+            blackBox.println(data[1]);
+            blackBox.println();
+        case RC_BMSBOARD_CELLV_MEAS_DATA_ID:
+            printTime();
+            blackBox.print("Cell Voltages: ");
+            for (int i = 0; i < RC_BMSBOARD_CELLV_MEAS_DATA_COUNT; i++)
+            {
+                blackBox.print(data[i]);
+                blackBox.print(" ");
+            }
+            blackBox.println();
+            blackBox.println();
+        case RC_BMSBOARD_TEMP_MEAS_DATA_ID:
+            printTime();
+            blackBox.print("Pack Temperature: ");
+            blackBox.println(data[1]);
+            blackBox.println();
     }
     measureCurrent();
     dataPack();
@@ -145,6 +169,17 @@ void subscribeAll()
     }
 }
 
+void openFile()
+{
+    // Creates SD card file with date in title
+    time_t t = now();
+    tmElements_t tm;
+    breakTime(t, tm);
+    char buffer[15];
+    sprintf(buffer, "Black Box %02d/%02d", tm.Month, tm.Day);
+    File blackBox = SD.open(buffer, FILE_WRITE);
+}
+
 void measureCurrent()
 {
     for (uint8_t i = 0; i < NUM_BUS - 2; i++)
@@ -208,11 +243,12 @@ void dataPack()
 
 void printTime()
 {
+    // Writes current time to SD card
     time_t t = now();
     tmElements_t tm;
     breakTime(t, tm);
-    char buffer[14];
-    sprintf(buffer, "%02d:%02d:%02d %02d/%02d", tm.Hour, tm.Minute, tm.Second, tm.Month, tm.Day);
+    char buffer[8];
+    sprintf(buffer, "%02d:%02d:%02d", tm.Hour, tm.Minute, tm.Second);
     blackBox.println(buffer);
 }
 
@@ -241,6 +277,7 @@ void telemetry()
     RoveComm.write(RC_POWERBOARD_LOWBUSCURRENT_DATA_ID, RC_POWERBOARD_LOWBUSCURRENT_DATA_COUNT, lowCurrents);
     delay(100);
 
+    // Writes telemetry data to SD card
     printTime();
     blackBox.print("Motor Currents: ");
     for (uint8_t i = 0; i < NUM_MOTORS; i++)
