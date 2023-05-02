@@ -1,17 +1,25 @@
 #ifndef POWERBOARD_H
 #define POWERBOARD_H
 #include "RoveComm.h"
+#include <SD.h>
+#include <TimeLib.h>
 
-// Numbers of Toggleable Ports
+IntervalTimer Telemetry;
+RoveCommEthernet RoveComm;
+rovecomm_packet packet; 
+uint8_t* data;
+EthernetServer TCPServer(RC_ROVECOMM_ETHERNET_TCP_PORT);
+File blackBox;
+
+// Number of Toggleable Ports
 #define NUM_MOTORS              7   // Motors plus spare   
 #define NUM_HIGH_CURRENT        2   // Aux, Spare (20A)
 #define NUM_LOW_CURRENT         5   // Gimbal, Drive, Multi, Nav, Spare (5A)
 #define NUM_12V                 4   // Cam, Net Switch 1, Net Switch 2, Spare (12V)
 #define NUM_BUS                 18  // Total number of ports
+#define NUM_BOARDS              9  // Total number of boards on rover, not including powerboard
 
-// IntervalTimer Telemetry;
-
-// Current Sensing
+// Current Sensing Limits
 
 #define OVERCURRENT_HIGH        19500 //mA
 #define OVERCURRENT_LOW         4875 //mA
@@ -51,33 +59,29 @@
 
 // High Current CS
 
-#define MOTOR_1_CS              A4
-#define MOTOR_2_CS              A5
-#define MOTOR_3_CS              A6
-#define MOTOR_4_CS              A7
-#define MOTOR_5_CS              A8
-#define MOTOR_6_CS              A9
-#define MOTOR_SPARE_CS          A17
+#define MOTOR_1_CS              18
+#define MOTOR_2_CS              19
+#define MOTOR_3_CS              20
+#define MOTOR_4_CS              21
+#define MOTOR_5_CS              22
+#define MOTOR_6_CS              23
+#define MOTOR_SPARE_CS          41
 
-#define AUX_CS                  A3
-#define HIGH_CURRENT_SPARE_CS   A0
+#define AUX_CS                  17
+#define HIGH_CURRENT_SPARE_CS   14
 
 // Low Current CS
 
-#define GIMBAL_CS               A11
-#define DRIVE_CS                A10
-#define MULTIMEDIA_CS           A12
-#define NAV_CS                  A13
-#define LOW_CURRENT_SPARE_CS    A16
+#define GIMBAL_CS               25
+#define DRIVE_CS                24
+#define MULTIMEDIA_CS           26
+#define NAV_CS                  27
+#define LOW_CURRENT_SPARE_CS    40
 
 // 12V CS
-#define CAM_CS                  A1
-#define LOW_VOLTAGE_SPARE_CS    A2
-#define DEFAULT_CS              A15
-
-float initialCurrent = 0;
-bool initialToggle = false;
-bool initialOvercurrent = false;
+#define CAM_CS                  15
+#define LOW_VOLTAGE_SPARE_CS    16
+#define DEFAULT_CS              39
 
 // Current arrays
 float motorCurrents[NUM_MOTORS] = {};
@@ -90,18 +94,15 @@ uint8_t highOverCurrent = 0;
 uint8_t lowOverCurrent = 0;
 uint8_t lowVoltOverCurrent = 0;
 
-RoveCommEthernet RoveComm;
-rovecomm_packet packet; 
-uint8_t* data;
-EthernetServer TCPServer(RC_ROVECOMM_ETHERNET_TCP_PORT);
-
 // function declarations
 
 void busSetup();
 void setPins();
 void setPinStates();
+void subscribeAll();
 void measureCurrent();
 void dataPack();
+void printTime();
 void overCurrent();
 void telemetry();
 
@@ -117,9 +118,23 @@ struct Bus
     bool toggle_status;     //toggle bus on/off
     bool overcurrent;       //overcurrent status
 
-    void set_Values(const uint8_t & Ctl_pin, const uint16_t & I_overcurrent, const uint16_t & I_max, const uint8_t & Imeas_pin, float & Imeas_val, bool & Toggle_status, bool & Overcurrent);
+    void set_Values(const uint8_t & Ctl_pin, const uint16_t & I_overcurrent, const uint16_t & I_max, const uint8_t Imeas_pin, float Imeas_val, bool Toggle_status, bool Overcurrent);
 };
 
 struct Bus Port[NUM_BUS];
+
+//board ips
+uint8_t ips[NUM_BOARDS][4] = 
+{
+    {RC_DRIVEBOARD_FIRSTOCTET, RC_DRIVEBOARD_SECONDOCTET, RC_DRIVEBOARD_THIRDOCTET, RC_DRIVEBOARD_FOURTHOCTET},
+    {RC_BMSBOARD_FIRSTOCTET, RC_BMSBOARD_SECONDOCTET, RC_BMSBOARD_THIRDOCTET, RC_BMSBOARD_FOURTHOCTET},
+    {RC_NAVBOARD_FIRSTOCTET, RC_NAVBOARD_SECONDOCTET, RC_NAVBOARD_THIRDOCTET, RC_NAVBOARD_FOURTHOCTET},
+    {RC_ARMBOARD_FIRSTOCTET, RC_ARMBOARD_SECONDOCTET, RC_ARMBOARD_THIRDOCTET, RC_ARMBOARD_FOURTHOCTET},
+    {RC_SCIENCEACTUATIONBOARD_FIRSTOCTET, RC_SCIENCEACTUATIONBOARD_SECONDOCTET, RC_SCIENCEACTUATIONBOARD_THIRDOCTET, RC_SCIENCEACTUATIONBOARD_FOURTHOCTET},
+    {RC_SCIENCESENSORSBOARD_FIRSTOCTET, RC_SCIENCESENSORSBOARD_SECONDOCTET, RC_SCIENCESENSORSBOARD_THIRDOCTET, RC_SCIENCESENSORSBOARD_FOURTHOCTET},
+    {RC_AUTONOMYBOARD_FIRSTOCTET, RC_AUTONOMYBOARD_SECONDOCTET, RC_AUTONOMYBOARD_THIRDOCTET, RC_AUTONOMYBOARD_FOURTHOCTET},
+    {RC_CAMERA1BOARD_FIRSTOCTET, RC_CAMERA1BOARD_SECONDOCTET, RC_CAMERA1BOARD_THIRDOCTET, RC_CAMERA1BOARD_FOURTHOCTET},
+    {RC_HEATERBOARD_FIRSTOCTET, RC_HEATERBOARD_SECONDOCTET, RC_HEATERBOARD_THIRDOCTET, RC_HEATERBOARD_FOURTHOCTET},
+};
 
 #endif
