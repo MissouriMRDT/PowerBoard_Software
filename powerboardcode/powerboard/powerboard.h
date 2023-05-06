@@ -4,12 +4,12 @@
 #include <SD.h>
 #include <TimeLib.h>
 
-IntervalTimer Telemetry;
+//IntervalTimer Telemetry;
 RoveCommEthernet RoveComm;
 rovecomm_packet packet; 
 uint8_t* data;
 EthernetServer TCPServer(RC_ROVECOMM_ETHERNET_TCP_PORT);
-File blackBox;
+//File blackBox;
 
 // Number of Toggleable Ports
 #define NUM_MOTORS              7   // Motors plus spare   
@@ -17,7 +17,7 @@ File blackBox;
 #define NUM_LOW_CURRENT         5   // Gimbal, Drive, Multi, Nav, Spare (5A)
 #define NUM_12V                 4   // Cam, Net Switch 1, Net Switch 2, Spare (12V)
 #define NUM_BUS                 18  // Total number of ports
-#define NUM_BOARDS              1   // Total number of boards on rover, not including powerboard, blackbox, and boards without telemetry
+#define NUM_BOARDS              1   // Total number of boards on rover to receive telemetry from, not including powerboard
 
 // Current Sensing Limits
 
