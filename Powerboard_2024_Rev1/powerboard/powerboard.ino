@@ -7,6 +7,11 @@ void setup() {
   Serial.begin(9600);
   Serial.println("PowerBoard Setup");
 
+
+  for (uint8_t i = 0; i < NUM_TOGGLEABLE; i++) {
+    bus[i].init();
+  }
+
   busSetup();
 
   RoveComm.begin(RC_POWERBOARD_FIRSTOCTET, RC_POWERBOARD_SECONDOCTET, RC_POWERBOARD_THIRDOCTET, RC_POWERBOARD_FOURTHOCTET, &TCPServer);
@@ -16,25 +21,59 @@ void setup() {
 void loop() {
   // put your main code here, to run repeatedly:
 
-}
-
-void busSetup(){
-  bus[0] = bus(M1_CTL, M1_CS, OVERCURRENT_HIGH);
-  bus[1] = bus(M2_CTL, M2_CS, OVERCURRENT_HIGH);
-  bus[2] = bus(M3_CTL, M3_CS, OVERCURRENT_HIGH);
-  bus[3] = bus(M4_CTL, M4_CS, OVERCURRENT_HIGH);
-  bus[4] = bus(M5_CTL, M5_CS, OVERCURRENT_HIGH);
-  bus[5] = bus(M6_CTL, M6_CS, OVERCURRENT_HIGH);
-  bus[6] = bus(MS_CTL, MS_CS, OVERCURRENT_HIGH);
-  bus[7] = bus(AUX_CTL, AUX_CS, OVERCURRENT_HIGH);
-  bus[8] = bus(HC_SPARE_CTL, HC_SPARE_CS, OVERCURRENT_HIGH);
-  bus[9] = bus(ROUTERPI_CTL, ROUTERPI_CS, OVERCURRENT_LOW);
-  bus[10] = bus(DIFFGPS_CTL, DIFFGPS_CS, OVERCURRENT_LOW);
-  bus[11] = bus(CORE_CTL, CORE_CS, OVERCURRENT_LOW);
-  bus[12] = bus(LC_SPARE_CTL, LC_SPARE_CS, OVERCURRENT_LOW);
-  bus[13] = bus(CAM_CTL, CAM_CS, OVERCURRENT_LOW);
-
-  for(int i = 0; i < NUM_BUS; i++){
-    pinMode(bus[i].ctl_pin, OUTPUT);
+  // Enable
+  packet = RoveComm.read();
+  uint16_t data = *((uint16_t*) packet.data);
+  for (uint8_t i = 0; i < NUM_TOGGLEABLE; i++) {
+    if(data & (1<<i)) {
+      bus[i].enable();
+    };
   }
+
+  // Disable
+  packet = RoveComm.read();
+  uint16_t data = *((uint16_t*) packet.data);
+  for (uint8_t i = 0; i < NUM_TOGGLEABLE; i++) {
+    if(data & (1<<i)) {
+      bus[i].disable();
+    };
+  }
+
+  // Set
+  packet = RoveComm.read();
+  uint16_t data = *((uint16_t*) packet.data);
+  for (uint8_t i = 0; i < NUM_TOGGLEABLE; i++) {
+    if(data & (1<<i)) {
+      bus[i].enable();
+    } else {
+      bus[i].disable();
+    };
+  }
+
+  void telemetry() {
+  for (unit8_t i = 0; i < NUM_TOGGLEABLE; i++) {
+    if(bus[i].enable()) {
+      busStatus &= (1<<i);
+    };
+  }
+  RoveComm.write(RC_POWERBOARD_BUSSTATUS_DATA_ID, RC_POWERBOARD_BUSSTATUS_DATA_COUNT, busStatus);
+
+  for (unit8_t i = 0; i < NUM_BUSSES; i++) {
+    if(bus[i].overcurrent()) {
+      currents[i] = bus[i].readCurrent();
+    };
+  }
+  RoveComm.write(RC_POWERBOARD_BUSCURRENT_DATA_ID, RC_POWERBOARD_BUSCURRENT_DATA_COUNT, currents);
+  for (unit8_t i = 0; i < NUM_BUSSES; i++) {
+    if(bus[i].overcurrent()) {
+      overcurrent &= (1<<i);
+    };
+  }
+  RoveComm.write(RC_POWERBOARD_BUSOVERCURRENT_DATA_ID, RC_POWERBOARD_BUSOVERCURRENT_DATA_COUNT, overcurrent);
+  };
+  
+  
+  
 }
+
+

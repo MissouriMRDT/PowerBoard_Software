@@ -1,9 +1,13 @@
 #include "bus.h"
 #include <Arduino.h>
 
-// Constructor
+// Constructors
 Bus::Bus(uint8_t ctl_pin, uint8_t cs_pin, float max_current_draw)
-    : ctl_pin(ctl_pin), cs_pin(cs_pin), max_current_draw(max_current_draw), enabled(false) {
+    : ctl_pin(ctl_pin), cs_pin(cs_pin), max_current_draw(max_current_draw), enabled(false), toggleable(true) {
+}
+
+Bus::Bus(unit8_t cs_pin, float max_current_draw)
+    : cs_pin(cs_pin), max_current_draw(max_current_draw), toggleable(false) {
 }
 
 // Enable the bus
@@ -30,4 +34,13 @@ float Bus::readCurrent() {
 bool Bus::overcurrent() {
     float current = readCurrent();
     return current > max_current_draw;
+}
+
+bool Bus::enabled() {
+    return enabled
+}
+void Bus::init() {
+    if (togglable) {
+        pinMode(ctl_pin, OUTPUT)
+    }
 }
