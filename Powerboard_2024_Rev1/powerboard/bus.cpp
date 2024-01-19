@@ -12,14 +12,19 @@ Bus::Bus(unit8_t cs_pin, float max_current_draw)
 
 // Enable the bus
 void Bus::enable() {
-    digitalWrite(ctl_pin, HIGH);
-    enabled = true;
+    if (toggleable) {
+        digitalWrite(ctl_pin, HIGH);
+        enabled = true;
+    }
+    
 }
 
 // Disable the bus
 void Bus::disable() {
-    digitalWrite(ctl_pin, LOW);
-    enabled = false;
+    if (toggleable) {
+        digitalWrite(ctl_pin, LOW);
+        enabled = false;
+    }
 }
 
 // Read current from the bus in amps
@@ -37,10 +42,10 @@ bool Bus::overcurrent() {
 }
 
 bool Bus::enabled() {
-    return enabled
+    return enabled;
 }
 void Bus::init() {
     if (togglable) {
         pinMode(ctl_pin, OUTPUT)
-    }
+    };
 }

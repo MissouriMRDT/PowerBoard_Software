@@ -7,7 +7,7 @@
 #include <RoveComm.h>
 
 #define TELEMETRY_UPDATE        100000
-IntervalTimer telemetry;
+IntervalTimer Telemetry;
 
 EthernetServer TCPServer(RC_ROVECOMM_ETHERNET_TCP_PORT);
 RoveCommEthernet RoveComm;
