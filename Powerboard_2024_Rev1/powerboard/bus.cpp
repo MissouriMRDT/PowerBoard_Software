@@ -16,7 +16,6 @@ void Bus::enable() {
         digitalWrite(ctl_pin, HIGH);
         enabled = true;
     }
-    
 }
 
 // Disable the bus
@@ -31,7 +30,7 @@ void Bus::disable() {
 float Bus::readCurrent() {
     int rawValue = analogRead(cs_pin);
     // Conversion from analog value to amps (assuming linear conversion)
-    float current = static_cast<float>(rawValue) / 1023.0 * 5.0; // Assuming 5V reference
+    float current = rawValue * 5.0 / 1023.0; // Assuming 5V reference
     return current;
 }
 
@@ -45,7 +44,7 @@ bool Bus::enabled() {
     return enabled;
 }
 void Bus::init() {
-    if (togglable) {
-        pinMode(ctl_pin, OUTPUT)
-    };
+    if (toggleable) {
+        pinMode(ctl_pin, OUTPUT);
+    }
 }

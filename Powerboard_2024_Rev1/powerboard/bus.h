@@ -1,6 +1,5 @@
 #ifndef bus_h
 #define bus_h
-#include "RoveComm.h"
 
 class Bus {
 public:
@@ -22,7 +21,7 @@ private:
     uint8_t cs_pin;
     float max_current_draw;
     bool enabled;
-    bool togglable;
+    bool toggleable;
 };
 
 #endif
