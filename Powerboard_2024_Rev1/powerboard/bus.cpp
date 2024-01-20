@@ -7,7 +7,7 @@ Bus::Bus(uint8_t ctl_pin, uint8_t cs_pin, float max_current_draw)
 }
 
 Bus::Bus(unit8_t cs_pin, float max_current_draw)
-    : cs_pin(cs_pin), max_current_draw(max_current_draw), toggleable(false) {
+    : cs_pin(cs_pin), max_current_draw(max_current_draw), enabled(true), toggleable(false) {
 }
 
 // Enable the bus
