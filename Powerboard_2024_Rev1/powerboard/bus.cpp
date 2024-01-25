@@ -2,33 +2,34 @@
 #include <Arduino.h>
 
 // Constructors
+
 Bus::Bus(uint8_t ctl_pin, uint8_t cs_pin, float max_current_draw)
-    : ctl_pin(ctl_pin), cs_pin(cs_pin), max_current_draw(max_current_draw), enabled(false), toggleable(true) {
+    : m_ctl_pin(ctl_pin), m_cs_pin(cs_pin), m_max_current_draw(max_current_draw), m_enabled(false), m_toggleable(true) {
 }
 
-Bus::Bus(unit8_t cs_pin, float max_current_draw)
-    : cs_pin(cs_pin), max_current_draw(max_current_draw), enabled(true), toggleable(false) {
+Bus::Bus(uint8_t cs_pin, float max_current_draw)
+    : m_cs_pin(cs_pin), m_max_current_draw(max_current_draw), m_enabled(true), m_toggleable(false) {
 }
 
 // Enable the bus
 void Bus::enable() {
-    if (toggleable) {
-        digitalWrite(ctl_pin, HIGH);
-        enabled = true;
+    if (m_toggleable) {
+        digitalWrite(m_ctl_pin, HIGH);
+        m_enabled = true;
     }
 }
 
 // Disable the bus
 void Bus::disable() {
-    if (toggleable) {
-        digitalWrite(ctl_pin, LOW);
-        enabled = false;
+    if (m_toggleable) {
+        digitalWrite(m_ctl_pin, LOW);
+        m_enabled = false;
     }
 }
 
 // Read current from the bus in amps
 float Bus::readCurrent() {
-    int rawValue = analogRead(cs_pin);
+    int rawValue = analogRead(m_cs_pin);
     // Conversion from analog value to amps (assuming linear conversion)
     float current = rawValue * 5.0 / 1023.0; // Assuming 5V reference
     return current;
@@ -37,14 +38,14 @@ float Bus::readCurrent() {
 // Check for overcurrent
 bool Bus::overcurrent() {
     float current = readCurrent();
-    return current > max_current_draw;
+    return current > m_max_current_draw;
 }
 
 bool Bus::enabled() {
-    return enabled;
+    return m_enabled;
 }
 void Bus::init() {
-    if (toggleable) {
-        pinMode(ctl_pin, OUTPUT);
+    if (m_toggleable) {
+        pinMode(m_ctl_pin, OUTPUT);
     }
 }

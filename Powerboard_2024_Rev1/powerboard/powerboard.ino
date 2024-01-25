@@ -65,14 +65,14 @@ void loop() {
 
 void telemetry() {
   busStatus = 0;
-  for (unit8_t i = 0; i < NUM_TOGGLEABLE; i++) {
+  for (uint8_t i = 0; i < NUM_TOGGLEABLE; i++) {
     if(bus[i].enabled()) {
       busStatus &= (1<<i);
     }
   }
   RoveComm.write(RC_POWERBOARD_BUSSTATUS_DATA_ID, RC_POWERBOARD_BUSSTATUS_DATA_COUNT, busStatus);
   
-  for (unit8_t i = 0; i < NUM_BUSSES; i++) {
+  for (uint8_t i = 0; i < NUM_BUSSES; i++) {
     if(bus[i].overcurrent()) {
       currents[i] = bus[i].readCurrent();
     }
@@ -80,7 +80,7 @@ void telemetry() {
   RoveComm.write(RC_POWERBOARD_BUSCURRENT_DATA_ID, RC_POWERBOARD_BUSCURRENT_DATA_COUNT, currents);
 
   overcurrent = 0;
-  for (unit8_t i = 0; i < NUM_BUSSES; i++) {
+  for (uint8_t i = 0; i < NUM_BUSSES; i++) {
     if(bus[i].overcurrent()) {
       overcurrent &= (1<<i);
     }
