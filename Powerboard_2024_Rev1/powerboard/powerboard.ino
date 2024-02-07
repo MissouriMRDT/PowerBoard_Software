@@ -7,6 +7,8 @@ void setup() {
 
   for (uint8_t i = 0; i < NUM_TOGGLEABLE; i++) {
     bus[i].init();
+    bus[i].enable();
+    delay(20);
   }
 
   Serial.println("Initializing RoveComm...");

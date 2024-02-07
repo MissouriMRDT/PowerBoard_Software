@@ -31,7 +31,7 @@ void Bus::disable() {
 float Bus::readCurrent() {
     int rawValue = analogRead(m_cs_pin);
     // Conversion from analog value to amps (assuming linear conversion)
-    float current = rawValue * 5.0 / 1023.0; // Assuming 5V reference
+    float current = rawValue; // TODO: conversion
     return current;
 }
 
