@@ -21,8 +21,8 @@ rovecomm_packet packet;
 #define NUM_BUSSES                 (NUM_TOGGLEABLE + NUM_NONTOGGLEABLE)
 
 // Current Sensing Limits
-#define HIGH_CURRENT_MAX     22000 //mA
-#define LOW_CURRENT_MAX      5500  //mA
+#define HIGH_CURRENT_MAX     20 // Amps
+#define LOW_CURRENT_MAX      5  // Amps
 
 // Arrays
 float currents[NUM_BUSSES];

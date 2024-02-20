@@ -30,9 +30,8 @@ void Bus::disable() {
 // Read current from the bus in amps
 float Bus::readCurrent() {
     int rawValue = analogRead(m_cs_pin);
-    // Conversion from analog value to amps (assuming linear conversion)
-    float current = rawValue; // TODO: conversion
-    return current;
+    // Linear conversion from 512-1023 to 0-20 amps
+    return (rawValue - 512)/511.0 * 20.0;
 }
 
 // Check for overcurrent
