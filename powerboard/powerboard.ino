@@ -75,9 +75,7 @@ void telemetry() {
   RoveComm.write(RC_POWERBOARD_BUSSTATUS_DATA_ID, RC_POWERBOARD_BUSSTATUS_DATA_COUNT, busStatus);
   
   for (uint8_t i = 0; i < NUM_BUSSES; i++) {
-    if(bus[i].overcurrent()) {
-      currents[i] = bus[i].readCurrent();
-    }
+    currents[i] = bus[i].readCurrent();
   }
   RoveComm.write(RC_POWERBOARD_BUSCURRENT_DATA_ID, RC_POWERBOARD_BUSCURRENT_DATA_COUNT, currents);
 
